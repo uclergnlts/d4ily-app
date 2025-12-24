@@ -1,10 +1,11 @@
-import { db } from '@/lib/db';
-import { tweetsRaw, newsRaw, dailyDigests } from '@/lib/db/schema';
-import { fetchUserTweets } from '@/lib/twitter';
-import { TWITTER_USERS, RSS_FEEDS } from '@/lib/config/sources';
-import { fetchRssFeed } from '@/lib/rss';
-import { generateDailyDigest } from '@/lib/ai';
-import { fetchGoogleImage } from '@/lib/image-search';
+import { db } from "@/lib/db";
+import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { fetchTweetsFromApify } from "@/lib/twitter";
+import { fetchNewsFromRSS } from "@/lib/news";
+import { generateDailyDigest, generateWeeklyDigest } from "@/lib/ai";
+import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-data";
+import { searchUnsplashImage } from "@/lib/image-search";
 import { TweetProcessor } from '@/lib/processor';
 import { sql } from 'drizzle-orm';
 
@@ -193,12 +194,11 @@ export async function runGenerateDigest() {
 // --- Weekly Digest Generation Logic ---
 export async function runGenerateWeeklyDigest() {
     try {
-        const { weekId, year, weekNumber, startDate, endDate } = require('@/lib/digest-data').getCurrentWeekInfo();
+        const { weekId, year, weekNumber, startDate, endDate } = getCurrentWeekInfo();
 
         console.log(`Generating weekly digest for ${weekId} (${startDate} to ${endDate})`);
 
         // Get daily digests from this week
-        const { getDailyDigestsByDateRange } = require('@/lib/digest-data');
         const dailyDigests = await getDailyDigestsByDateRange(startDate, endDate);
 
         if (dailyDigests.length === 0) {
@@ -208,15 +208,13 @@ export async function runGenerateWeeklyDigest() {
         console.log(`Found ${dailyDigests.length} daily digests for the week.`);
 
         // Generate weekly digest using AI
-        const { generateWeeklyDigest } = require('@/lib/ai');
         const weeklyData = await generateWeeklyDigest(weekId, startDate, endDate, dailyDigests);
 
         // Get total counts
-        const tweetsCount = dailyDigests.reduce((sum, d) => sum + (d.tweets_count || 0), 0);
-        const newsCount = dailyDigests.reduce((sum, d) => sum + (d.news_count || 0), 0);
+        const tweetsCount = dailyDigests.reduce((sum: number, d: any) => sum + (d.tweets_count || 0), 0);
+        const newsCount = dailyDigests.reduce((sum: number, d: any) => sum + (d.news_count || 0), 0);
 
         // Save to database
-        const { weeklyDigests } = require('@/lib/db/schema');
         await db.insert(weeklyDigests).values({
             week_id: weekId,
             year,
