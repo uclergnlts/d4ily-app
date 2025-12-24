@@ -102,7 +102,7 @@ export async function runFetchNews() {
                         raw_payload: JSON.stringify(item),
                         lang: "tr",
                     }).onConflictDoUpdate({
-                        target: newsRaw.url,
+                        target: [newsRaw.url],
                         set: {
                             fetched_at: new Date().toISOString(),
                             title: item.title,
@@ -166,7 +166,7 @@ export async function runGenerateDigest() {
             cover_image_url: coverImageUrl,
             date: todayStr,
         }).onConflictDoUpdate({
-            target: dailyDigests.digest_date,
+            target: [dailyDigests.digest_date],
             set: {
                 title: digestData.title,
                 intro: digestData.intro,
