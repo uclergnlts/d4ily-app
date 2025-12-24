@@ -669,7 +669,7 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
     const rawData = await db
       .select()
       .from(tweetsRaw)
-      .orderBy(desc(tweetsRaw.published_at))
+      .orderBy(desc(tweetsRaw.fetched_at))
       .limit(limit)
 
     // Map raw data to Tweet interface
