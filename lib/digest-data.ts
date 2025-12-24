@@ -726,7 +726,7 @@ export async function getTrendingHashtags(hours = 24, limit = 10): Promise<{ tag
     const rawData = await db
       .select()
       .from(tweetsRaw)
-      .where(sql`fetched_at >= datetime('now', '-${hours} hours')`)
+      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-${sql.raw(hours.toString())} hours')`)
       .limit(500);
 
     // Extract all hashtags
