@@ -102,3 +102,25 @@ export const subscribers = sqliteTable("subscribers", {
     created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
     unsubscribed_at: text("unsubscribed_at"),
 });
+
+export const weeklyDigests = sqliteTable("weekly_digests", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    week_id: text("week_id").notNull().unique(), // e.g., "2024-W52"
+    year: integer("year").notNull(),
+    week_number: integer("week_number").notNull(),
+    start_date: text("start_date").notNull(), // Monday
+    end_date: text("end_date").notNull(), // Sunday
+    title: text("title").notNull(),
+    intro: text("intro"),
+    content: text("content").notNull(),
+    highlights: text("highlights", { mode: "json" }), // Top highlights by category
+    trends: text("trends", { mode: "json" }),
+    digests_count: integer("digests_count").default(0),
+    tweets_count: integer("tweets_count").default(0),
+    news_count: integer("news_count").default(0),
+    model_name: text("model_name"),
+    status: text("status").default("generated").notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    cover_image_url: text("cover_image_url"),
+});

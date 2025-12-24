@@ -1,0 +1,15 @@
+name: Generate Weekly Digest
+on:
+  schedule:
+    # Her pazartesi 08:00 UTC'de çalışır (Türkiye saati 11:00)
+    - cron: '0 8 * * 1'
+  workflow_dispatch: # Manuel tetikleme için
+
+jobs:
+  weekly-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Weekly Digest
+        run: |
+          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron/generate-weekly-digest" \
+            -H "Content-Type: application/json"

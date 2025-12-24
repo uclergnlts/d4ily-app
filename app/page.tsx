@@ -15,10 +15,11 @@ import {
   Mic,
   PlayCircle,
 } from "lucide-react"
-import { getLatestDigestDate, getArchiveDigests, getTrendingTopics } from "@/lib/digest-data"
+import { getLatestDigestDate, getArchiveDigests, getTrendingTopics, getLatestWeeklyDigest } from "@/lib/digest-data"
 import { NewsletterForm } from "@/components/newsletter-form"
 import { getLatestPodcastEpisode } from "@/lib/podcast"
 import { TrendingHashtags } from "@/components/trending-hashtags"
+import { MessageSquare, Calendar } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "D4ily - Türkiye Günlük Haber Özeti | 5 Dakikada Gündem",
@@ -40,6 +41,7 @@ export default async function HomePage() {
   const recentDigests = await getArchiveDigests()
   const trendingTopics = await getTrendingTopics(7)
   const latestPodcast = await getLatestPodcastEpisode()
+  const latestWeekly = await getLatestWeeklyDigest()
 
   const recentSix = recentDigests.slice(0, 6)
   const totalDigests = recentDigests.length
@@ -352,6 +354,70 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* --- WEEKLY DIGEST PREVIEW --- */}
+        {latestWeekly && (
+          <section className="py-12 md:py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 w-full">
+            <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+              <div className="text-center mb-10 md:mb-12">
+                <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
+                  <Calendar className="h-4 w-4 text-purple-600" />
+                  <span className="text-sm font-medium text-purple-600">Haftalık Analiz</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold font-serif mb-3">Bu Haftanın Özeti</h2>
+                <p className="text-muted-foreground">Son 7 günün kapsamlı analizi</p>
+              </div>
+
+              <Link href={`/hafta/${latestWeekly.week_id}`} className="block group">
+                <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-12 transition-all hover:shadow-2xl hover:-translate-y-2">
+                  <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl group-hover:bg-purple-500/30 transition-all" />
+
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-600 text-xs font-bold uppercase tracking-wide">
+                        Yeni Yayınlandı
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Hafta {latestWeekly.week_number}, {latestWeekly.year}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl md:text-3xl font-bold font-serif mb-4 group-hover:text-primary transition-colors">
+                      {latestWeekly.title}
+                    </h3>
+
+                    <p className="text-lg text-muted-foreground mb-6 line-clamp-3">
+                      {latestWeekly.intro}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>{latestWeekly.digests_count} Günlük Özet</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                        <span>{latestWeekly.tweets_count} Tweet</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 inline-flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
+                      Haftalık Özeti Oku
+                      <ArrowRight className="h-5 w-5" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <div className="mt-6 text-center">
+                <Link href="/haftalik-ozet" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Tüm Haftalık Özetleri Gör
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* --- TRENDING TOPICS (PILL DESIGN) --- */}
         <section className="py-12 md:py-16 border-y border-border/40 bg-accent/20 w-full">

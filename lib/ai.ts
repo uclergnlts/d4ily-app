@@ -112,3 +112,95 @@ export async function generateDailyDigest(
         throw error;
     }
 }
+
+export interface WeeklyDigestData {
+    title: string;
+    intro: string;
+    content: string; // Markdown content
+    highlights: { category: string; items: string[] }[];
+    trends: string[];
+}
+
+export async function generateWeeklyDigest(
+    weekId: string,
+    startDate: string,
+    endDate: string,
+    dailyDigests: any[]
+): Promise<WeeklyDigestData> {
+    if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+
+    // Prepare context from daily digests
+    const digestsText = dailyDigests.map((d, idx) =>
+        `### Day ${idx + 1}: ${d.digest_date} - ${d.title}\n${d.content}\n`
+    ).join("\n\n");
+
+    const prompt = `
+    You are the Chief Editor for "D4ily", Turkey's premium newsletter. 
+    
+    TASK:
+    Create a comprehensive WEEKLY DIGEST in TURKISH that summarizes the most important events from the past week.
+    
+    WEEK PERIOD: ${startDate} to ${endDate} (Week ${weekId})
+    
+    INPUT DATA (Daily Digests from this week):
+    
+    ${digestsText.substring(0, 35000)}
+    
+    REQUIREMENTS:
+    
+    1. **Title**: A powerful headline capturing the essence of the week (e.g., "Hafta Ekonomi ve Siyasetle Geçti")
+    
+    2. **Intro**: 3-4 sentences summarizing the week's mood and biggest story
+    
+    3. **Content** (Markdown, 2000-3500 characters):
+       Structure with these H2 sections:
+       
+       ## 📊 Haftanın Genel Görünümü
+       - 1-2 paragraphs setting the context of the week
+       
+       ## 🔴 En Önemli Gelişmeler (By Category)
+       ### Ekonomi
+       - Top 2-3 economic events with details
+       
+       ### Siyaset
+       - Top 2-3 political events with details
+       
+       ### Spor
+       - Top 2-3 sports events with details
+       
+       ### Diğer
+       - Any other major news (technology, health, international)
+       
+       ## 💡 Haftanın Çıkarımları
+       - What does all this mean? 2-3 paragraphs of analysis
+       
+       ## 👀 Gelecek Hafta Nelere Dikkat?
+       - 3-5 things to watch next week
+    
+    4. **Highlights**: Extract top 3-4 items per category
+       Format: [{ category: "Ekonomi", items: ["...", "..."] }, ...]
+    
+    5. **Trends**: Top 7-10 keywords/topics from the week
+    
+    OUTPUT FORMAT (JSON):
+    {
+      "title": "...",
+      "intro": "...",
+      "content": "markdown string...",
+      "highlights": [{ "category": "...", "items": ["..."] }],
+      "trends": ["...", "..."]
+    }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        const data = JSON.parse(text) as WeeklyDigestData;
+        return data;
+    } catch (error) {
+        console.error("Error generating weekly digest with Gemini:", error);
+        throw error;
+    }
+}

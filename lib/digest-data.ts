@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
-import { dailyDigests, tweetsRaw } from "@/lib/db/schema"
-import { desc, eq, like, sql } from "drizzle-orm"
+import { dailyDigests, tweetsRaw, weeklyDigests } from "@/lib/db/schema"
+import { desc, eq, like, sql, gte, lte, and } from "drizzle-orm"
 
 export interface Digest {
   id: number
@@ -17,6 +17,26 @@ export interface Digest {
   created_at?: string
   updated_at?: string
   category?: string
+}
+
+export interface WeeklyDigest {
+  id: number
+  week_id: string
+  year: number
+  week_number: number
+  start_date: string
+  end_date: string
+  title: string
+  intro: string
+  content: string
+  highlights?: { category: string; items: string[] }[]
+  trends?: string[]
+  digests_count: number
+  tweets_count: number
+  news_count: number
+  created_at?: string
+  updated_at?: string
+  cover_image_url?: string
 }
 
 export interface Tweet {
@@ -741,6 +761,105 @@ export async function getTrendingHashtags(hours = 24, limit = 10): Promise<{ tag
     return sorted;
   } catch (e) {
     console.error('Error fetching trending hashtags:', e);
+    return [];
+  }
+}
+
+// --- WEEKLY DIGEST FUNCTIONS ---
+
+/** Get current week info */
+export function getCurrentWeekInfo(): { weekId: string; year: number; weekNumber: number; startDate: string; endDate: string } {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+
+  // Get Monday of current week
+  const dayOfWeek = now.getDay();
+  const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Monday
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+
+  // Get Sunday 
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const weekId = `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+
+  return {
+    weekId,
+    year: now.getFullYear(),
+    weekNumber,
+    startDate: monday.toISOString().split('T')[0],
+    endDate: sunday.toISOString().split('T')[0],
+  };
+}
+
+export async function getLatestWeeklyDigest(): Promise<WeeklyDigest | null> {
+  try {
+    const data = await db
+      .select()
+      .from(weeklyDigests)
+      .orderBy(desc(weeklyDigests.created_at))
+      .limit(1);
+
+    if (!data || data.length === 0) return null;
+
+    return data[0] as unknown as WeeklyDigest;
+  } catch (e) {
+    console.error("Error fetching latest weekly digest:", e);
+    return null;
+  }
+}
+
+export async function getWeeklyDigestByWeekId(weekId: string): Promise<WeeklyDigest | null> {
+  try {
+    const data = await db
+      .select()
+      .from(weeklyDigests)
+      .where(eq(weeklyDigests.week_id, weekId))
+      .limit(1);
+
+    if (!data || data.length === 0) return null;
+    return data[0] as unknown as WeeklyDigest;
+  } catch (e) {
+    console.error(`Error fetching weekly digest ${weekId}:`, e);
+    return null;
+  }
+}
+
+export async function getWeeklyDigestsArchive(limit = 12): Promise<WeeklyDigest[]> {
+  try {
+    const data = await db
+      .select()
+      .from(weeklyDigests)
+      .orderBy(desc(weeklyDigests.year), desc(weeklyDigests.week_number))
+      .limit(limit);
+
+    return (data || []) as unknown as WeeklyDigest[];
+  } catch (e) {
+    console.error("Error fetching weekly digests archive:", e);
+    return [];
+  }
+}
+
+export async function getDailyDigestsByDateRange(startDate: string, endDate: string): Promise<Digest[]> {
+  try {
+    const data = await db
+      .select()
+      .from(dailyDigests)
+      .where(
+        and(
+          gte(dailyDigests.digest_date, startDate),
+          lte(dailyDigests.digest_date, endDate)
+        )
+      )
+      .orderBy(dailyDigests.digest_date);
+
+    return (data || []) as unknown as Digest[];
+  } catch (e) {
+    console.error(`Error fetching digests from ${startDate} to ${endDate}:`, e);
     return [];
   }
 }

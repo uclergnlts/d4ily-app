@@ -189,3 +189,74 @@ export async function runGenerateDigest() {
         throw new Error(error.message);
     }
 }
+
+// --- Weekly Digest Generation Logic ---
+export async function runGenerateWeeklyDigest() {
+    try {
+        const { weekId, year, weekNumber, startDate, endDate } = require('@/lib/digest-data').getCurrentWeekInfo();
+
+        console.log(`Generating weekly digest for ${weekId} (${startDate} to ${endDate})`);
+
+        // Get daily digests from this week
+        const { getDailyDigestsByDateRange } = require('@/lib/digest-data');
+        const dailyDigests = await getDailyDigestsByDateRange(startDate, endDate);
+
+        if (dailyDigests.length === 0) {
+            return { message: "No daily digests available for this week.", skipped: true };
+        }
+
+        console.log(`Found ${dailyDigests.length} daily digests for the week.`);
+
+        // Generate weekly digest using AI
+        const { generateWeeklyDigest } = require('@/lib/ai');
+        const weeklyData = await generateWeeklyDigest(weekId, startDate, endDate, dailyDigests);
+
+        // Get total counts
+        const tweetsCount = dailyDigests.reduce((sum, d) => sum + (d.tweets_count || 0), 0);
+        const newsCount = dailyDigests.reduce((sum, d) => sum + (d.news_count || 0), 0);
+
+        // Save to database
+        const { weeklyDigests } = require('@/lib/db/schema');
+        await db.insert(weeklyDigests).values({
+            week_id: weekId,
+            year,
+            week_number: weekNumber,
+            start_date: startDate,
+            end_date: endDate,
+            title: weeklyData.title,
+            intro: weeklyData.intro,
+            content: weeklyData.content,
+            highlights: weeklyData.highlights,
+            trends: weeklyData.trends,
+            digests_count: dailyDigests.length,
+            tweets_count: tweetsCount,
+            news_count: newsCount,
+            model_name: "gemini-flash-latest",
+            status: "generated",
+        }).onConflictDoUpdate({
+            target: [weeklyDigests.week_id],
+            set: {
+                title: weeklyData.title,
+                intro: weeklyData.intro,
+                content: weeklyData.content,
+                highlights: weeklyData.highlights,
+                trends: weeklyData.trends,
+                digests_count: dailyDigests.length,
+                tweets_count: tweetsCount,
+                news_count: newsCount,
+                updated_at: new Date().toISOString(),
+                model_name: "gemini-flash-latest (updated)"
+            }
+        });
+
+        return {
+            success: true,
+            weekId,
+            weeklyDigest: weeklyData
+        };
+
+    } catch (error: any) {
+        console.error("Weekly digest generation failed:", error);
+        throw new Error(error.message);
+    }
+}
