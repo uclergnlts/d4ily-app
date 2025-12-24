@@ -23,6 +23,7 @@ export const dailyDigests = sqliteTable("daily_digests", {
     audio_status: text("audio_status").default("pending"),
     audio_voice: text("audio_voice"),
     date: text("date").default(sql`CURRENT_DATE`).notNull(),
+    category: text("category").default("gundem"), // economy, politics, sports, gundem
     word_count: integer("word_count").default(0).notNull(),
     published: integer("published", { mode: "boolean" }).default(false).notNull(),
     cover_image_url: text("cover_image_url"),

@@ -16,6 +16,7 @@ export interface Digest {
   spotify_url?: string
   created_at?: string
   updated_at?: string
+  category?: string
 }
 
 export interface Tweet {
@@ -181,6 +182,27 @@ export async function getArchiveDigests(): Promise<Digest[]> {
     }))
   } catch (e) {
     return getMockDigests()
+  }
+}
+
+export async function getDigestsByCategory(category: string, limit = 30): Promise<Digest[]> {
+  try {
+    const data = await db
+      .select()
+      .from(dailyDigests)
+      .where(eq(dailyDigests.category, category))
+      .orderBy(desc(dailyDigests.digest_date))
+      .limit(limit)
+
+    if (!data || data.length === 0) return []
+
+    return (data as unknown as Digest[]).map((d) => ({
+      ...d,
+      audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
+      cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
+    }))
+  } catch (e) {
+    return []
   }
 }
 

@@ -2,6 +2,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { getArchiveDigests } from "@/lib/digest-data"
 import ArchiveClient from "@/components/archive-client"
+import Link from "next/link"
 
 export const revalidate = 3600
 
@@ -74,6 +75,13 @@ export default async function ArsivPage() {
           </div>
           <h1 className="mb-2 font-serif text-3xl font-bold text-gray-900 sm:text-4xl">{pageData.archiveTitle}</h1>
           <p className="text-sm text-gray-600 sm:text-base">{pageData.archiveDescription}</p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Link href="/kategori/gundem" className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:border-accent hover:text-accent transition-colors">Gündem</Link>
+            <Link href="/kategori/siyaset" className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:border-accent hover:text-accent transition-colors">Siyaset</Link>
+            <Link href="/kategori/ekonomi" className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:border-accent hover:text-accent transition-colors">Ekonomi</Link>
+            <Link href="/kategori/spor" className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:border-accent hover:text-accent transition-colors">Spor</Link>
+          </div>
         </header>
 
         <ArchiveClient items={archiveItems} />

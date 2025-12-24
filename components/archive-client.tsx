@@ -36,9 +36,9 @@ interface ArchiveItem {
   coverImage?: string | null
 }
 
-export default function ArchiveClient({ items }: { items: ArchiveItem[] }) {
+export default function ArchiveClient({ items, initialCategory = "all" }: { items: ArchiveItem[], initialCategory?: string }) {
   const [currentPage, setCurrentPage] = useState(1)
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [selectedDate, setSelectedDate] = useState("")
   const [sortOrder, setSortOrder] = useState("newest")
 
