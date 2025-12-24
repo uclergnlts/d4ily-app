@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 
-import { Newspaper, Home, Archive, Menu, X, BarChart3, Zap } from "lucide-react"
+import { Newspaper, Home, Archive, Menu, X, BarChart3, Zap, Calendar } from "lucide-react"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 
@@ -68,6 +68,13 @@ export default function Navigation() {
             <BarChart3 className="h-4 w-4" />
             İstatistikler
           </Link>
+          <Link
+            href="/haftalik-ozet"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-purple-600 hover:bg-purple-500/10 hover:text-purple-700 transition-colors"
+          >
+            <Calendar className="h-4 w-4" />
+            Haftalık Özet
+          </Link>
         </div>
 
         <button
@@ -122,6 +129,14 @@ export default function Navigation() {
           >
             <BarChart3 className="h-4 w-4" />
             İstatistikler
+          </Link>
+          <Link
+            href="/haftalik-ozet"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-purple-600 hover:bg-purple-500/10"
+          >
+            <Calendar className="h-4 w-4" />
+            Haftalık Özet
           </Link>
         </div>
       )}

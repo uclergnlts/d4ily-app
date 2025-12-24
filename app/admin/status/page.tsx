@@ -206,6 +206,15 @@ export default function AdminStatusPage() {
                             {actionLoading === 'Haber Çek' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                             Haber Kaynaklarını Tara
                         </button>
+
+                        <button
+                            onClick={() => handleTrigger('Haftalık Özet', '/api/cron/generate-weekly-digest')}
+                            disabled={!!actionLoading}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-all font-medium"
+                        >
+                            {actionLoading === 'Haftalık Özet' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                            Haftalık Özeti Oluştur
+                        </button>
                     </div>
                 </div>
 
