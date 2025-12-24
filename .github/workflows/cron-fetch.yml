@@ -1,0 +1,22 @@
+name: Fetch Tweets & News
+on:
+  schedule:
+    # Her 4 saatte bir çalışır (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # Manuel tetikleme için
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Tweets
+        run: |
+          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron/fetch-tweets" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+      
+      - name: Fetch News
+        run: |
+          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron/fetch-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"

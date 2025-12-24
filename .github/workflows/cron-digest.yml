@@ -1,0 +1,16 @@
+name: Generate Daily Digest
+on:
+  schedule:
+    # Her gün 06:00 UTC'de çalışır (Türkiye saati 09:00)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Manuel tetikleme için
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Digest
+        run: |
+          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron/generate-digest" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
