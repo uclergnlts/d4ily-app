@@ -669,6 +669,7 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
     const rawData = await db
       .select()
       .from(tweetsRaw)
+      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
       .orderBy(desc(tweetsRaw.fetched_at))
       .limit(limit)
 
