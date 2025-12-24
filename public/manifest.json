@@ -1,0 +1,32 @@
+{
+  "name": "D4ily - Türkiye Günlük Haber Özeti",
+  "short_name": "D4ily",
+  "description": "Türkiye gündemini her gün yapay zeka ile analiz edip özetliyoruz. 5 dakikada tüm önemli gelişmeler.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "news",
+    "magazines"
+  ],
+  "lang": "tr-TR",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

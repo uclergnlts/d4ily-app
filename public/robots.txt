@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow admin/api routes
+Disallow: /api/
+Disallow: /_next/
+
+# Sitemaps
+Sitemap: https://d4ily.com/sitemap.xml

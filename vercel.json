@@ -1,0 +1,16 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/fetch-tweets",
+            "schedule": "0 */4 * * *"
+        },
+        {
+            "path": "/api/cron/fetch-news",
+            "schedule": "0 */4 * * *"
+        },
+        {
+            "path": "/api/cron/generate-digest",
+            "schedule": "0 6 * * *"
+        }
+    ]
+}

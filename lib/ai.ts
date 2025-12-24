@@ -1,0 +1,114 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+    console.warn("GEMINI_API_KEY is not defined in environment variables.");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey || "");
+
+const model = genAI.getGenerativeModel({
+    model: "gemini-flash-latest",
+    generationConfig: {
+        responseMimeType: "application/json",
+    }
+});
+
+export interface DigestData {
+    title: string;
+    intro: string;
+    content: string; // Markdown/HTML content
+    trends: string[];
+    watchlist: string[];
+    quote?: string;
+}
+
+export async function generateDailyDigest(
+    date: string,
+    tweets: any[],
+    news: any[]
+): Promise<DigestData> {
+    if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+
+    // Prepare context
+    const tweetsText = tweets.map(t =>
+        `- @${t.author_username}: ${t.raw_payload.text || t.raw_payload.full_text || "No text"} (Likes: ${t.like_count})`
+    ).join("\n");
+
+    const newsText = news.map(n =>
+        `- ${n.title} (${n.source_name}): ${n.summary_raw?.substring(0, 200)}...`
+    ).join("\n");
+
+    const prompt = `
+    You are the Chief Editor for "D4ily", Turkey's premium daily newsletter.
+    
+    DATE: ${date}
+    
+    TASK:
+    Analyze the provided Tweets and News to create a comprehensive, long-form daily digest in TURKISH.
+    Your goal is to inform the user completely about what happened yesterday and what to expect today.
+    The tone should be professional, objective, insightful, and engaging. Avoid superficial summaries; provide context.
+    
+    INPUT DATA:
+    
+    --- TWEETS (Social Media Pulse & Reactions) ---
+    ${tweetsText.substring(0, 25000)} 
+    
+    --- NEWS (Mainstream Headlines) ---
+    ${newsText.substring(0, 15000)}
+    
+    REQUIREMENTS & STRUCTURE (Strictly Follow This):
+
+    *** CRITICAL LENGTH CONSTRAINT ***
+    The total length of the 'content' field MUST be between 1500 and 2500 characters.
+    - If your draft is too short (<1500), expand on the "Detaylı Gündem Analizi" with more context, quotes, and background info.
+    - If your draft is too long (>2500), condense slightly but keep the core insights.
+    
+    1. **Title**: A catchy, powerful headline summarizing the biggest story.
+    2. **Intro**: 2-3 sentences setting the mood of the day.
+    
+    3. **Content (Markdown Body)**:
+       MUST include the following sections with H2 (##) headers:
+       
+       ## 📋 Dünün Öne Çıkan Gelişmeleri
+       - Provide a bulleted list of 5-7 distinct important events from yesterday.
+       - Each bullet should be 1-2 sentences. 
+       - Cover different topics (Politics, Economy, Sports, World).
+       
+       ## 🔍 Detaylı Gündem Analizi
+       - This is the main body. Select the top 2-3 most discussed topics and analyze them in depth.
+       - WRITE AT LEAST 3-4 PARAGRAPHS per topic. Do not be brief.
+       - **Crucial**: Cite specific tweets or news sources provided in the input. Example: "X kullanıcısı @username'in belirttiği gibi..." or "NTV'nin haberine göre...".
+       - Explain WHY this matters and what the background is.
+       
+       ## 📅 Bugün Takip Edilmesi Gereken Başlıklar
+       - A section dedicated to what is expected to happen today or strictly followed.
+       - List 3-5 items to watch out for (meetings, decisions, matches, etc.).
+       
+    4. **Trends**: Extract 5-7 viral hashtags/keywords.
+    
+    5. **Watchlist**: (For metadata) Return the same items from "Bugün Takip Edilmesi Gereken Başlıklar" as a generic array.
+    
+    OUTPUT FORMAT (JSON):
+    {
+      "title": "...",
+      "intro": "...",
+      "content": "markdown string...",
+      "trends": ["...", "..."],
+      "watchlist": ["...", "..."]
+    }
+  `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        // Parse JSON
+        const data = JSON.parse(text) as DigestData;
+        return data;
+    } catch (error) {
+        console.error("Error generating digest with Gemini:", error);
+        throw error;
+    }
+}

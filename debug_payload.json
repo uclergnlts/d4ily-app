@@ -1,0 +1,168 @@
+{
+  "type": "tweet",
+  "id": "2003737003809018166",
+  "url": "https://x.com/eczozgurozel/status/2003737003809018166",
+  "twitterUrl": "https://twitter.com/eczozgurozel/status/2003737003809018166",
+  "text": "Cumhuriyet Halk Partisi sokaktadır.\nÇarşı pazardan kopuk, sıcak salonlarda belirlenen asgari ücret, geçim ücreti değildir!\n\nTezgâhta fiyatı gören, kasada hesabı tutmayan millet bu ücretle geçinilemeyeceğini çok iyi biliyor.\n\nAsgari ücretten rahatsız olan tüm emekçileri bu akşam saat 19.30’da Kağıthane Merkez Meydanı’nda gerçekleştireceğimiz 77’nci eylemimize davet ediyorum.",
+  "source": "Twitter for iPhone",
+  "retweetCount": 775,
+  "replyCount": 317,
+  "likeCount": 4442,
+  "quoteCount": 20,
+  "viewCount": 61470,
+  "createdAt": "Wed Dec 24 07:58:23 +0000 2025",
+  "lang": "tr",
+  "bookmarkCount": 14,
+  "isReply": false,
+  "inReplyToId": null,
+  "conversationId": "2003737003809018166",
+  "displayTextRange": [
+    0,
+    279
+  ],
+  "inReplyToUserId": null,
+  "inReplyToUsername": null,
+  "author": {
+    "type": "user",
+    "userName": "eczozgurozel",
+    "url": "https://x.com/eczozgurozel",
+    "twitterUrl": "https://twitter.com/eczozgurozel",
+    "id": "229515050",
+    "name": "Özgür Özel",
+    "isVerified": false,
+    "isBlueVerified": true,
+    "verifiedType": "Government",
+    "profilePicture": "https://pbs.twimg.com/profile_images/1875130919620612096/265R66N9_normal.jpg",
+    "coverPicture": "https://pbs.twimg.com/profile_banners/229515050/1748375014",
+    "description": "",
+    "location": "Türkiye / Ankara - Manisa",
+    "followers": 3761065,
+    "following": 1157,
+    "status": "",
+    "canDm": false,
+    "canMediaTag": true,
+    "createdAt": "Wed Dec 22 16:09:23 +0000 2010",
+    "entities": {
+      "description": {
+        "urls": []
+      },
+      "url": {}
+    },
+    "fastFollowersCount": 0,
+    "favouritesCount": 1559,
+    "hasCustomTimelines": true,
+    "isTranslator": false,
+    "mediaCount": 14495,
+    "statusesCount": 36903,
+    "withheldInCountries": [],
+    "affiliatesHighlightedLabel": {},
+    "possiblySensitive": false,
+    "pinnedTweetIds": [],
+    "profile_bio": {
+      "description": "Cumhuriyet Halk Partisi Genel Başkanı",
+      "entities": {
+        "description": {},
+        "url": {
+          "urls": [
+            {
+              "display_url": "ozgurozel.org",
+              "expanded_url": "http://www.ozgurozel.org/",
+              "indices": [
+                0,
+                23
+              ],
+              "url": "https://t.co/CQwfLIUqp8"
+            }
+          ]
+        }
+      }
+    },
+    "isAutomated": false,
+    "automatedBy": null
+  },
+  "extendedEntities": {
+    "media": [
+      {
+        "additional_media_info": {
+          "monetizable": false
+        },
+        "allow_download_status": {
+          "allow_download": true
+        },
+        "display_url": "pic.twitter.com/f3WjJwnsto",
+        "expanded_url": "https://twitter.com/eczozgurozel/status/2003737003809018166/video/1",
+        "ext_media_availability": {
+          "status": "Available"
+        },
+        "id_str": "2003736747780509697",
+        "indices": [
+          280,
+          303
+        ],
+        "media_key": "13_2003736747780509697",
+        "media_results": {
+          "id": "QXBpTWVkaWFSZXN1bHRzOgwABAoAARvOs/Sy2pABAAA=",
+          "result": {
+            "__typename": "ApiMedia",
+            "id": "QXBpTWVkaWE6DAAECgABG86z9LLakAEAAA==",
+            "media_key": "13_2003736747780509697"
+          }
+        },
+        "media_url_https": "https://pbs.twimg.com/amplify_video_thumb/2003736747780509697/img/bxgChx4U_KyXvjLa.jpg",
+        "original_info": {
+          "focus_rects": [],
+          "height": 1350,
+          "width": 1080
+        },
+        "sizes": {
+          "large": {
+            "h": 1350,
+            "w": 1080
+          }
+        },
+        "type": "video",
+        "url": "https://t.co/f3WjJwnsto",
+        "video_info": {
+          "aspect_ratio": [
+            4,
+            5
+          ],
+          "duration_millis": 45320,
+          "variants": [
+            {
+              "content_type": "application/x-mpegURL",
+              "url": "https://video.twimg.com/amplify_video/2003736747780509697/pl/HcprIFFWrsyoqsaF.m3u8?tag=21&v=f7d"
+            },
+            {
+              "bitrate": 632000,
+              "content_type": "video/mp4",
+              "url": "https://video.twimg.com/amplify_video/2003736747780509697/vid/avc1/320x400/n_fgD_IeA6MLCRC8.mp4?tag=21"
+            },
+            {
+              "bitrate": 950000,
+              "content_type": "video/mp4",
+              "url": "https://video.twimg.com/amplify_video/2003736747780509697/vid/avc1/480x600/tRMhkyKr5jyH6QN1.mp4?tag=21"
+            },
+            {
+              "bitrate": 2176000,
+              "content_type": "video/mp4",
+              "url": "https://video.twimg.com/amplify_video/2003736747780509697/vid/avc1/720x900/BC_mFjy4k3nVb_9U.mp4?tag=21"
+            },
+            {
+              "bitrate": 10368000,
+              "content_type": "video/mp4",
+              "url": "https://video.twimg.com/amplify_video/2003736747780509697/vid/avc1/1080x1350/0UUX8ysn-U0r-kYm.mp4?tag=21"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "card": null,
+  "place": {},
+  "entities": {},
+  "quoted_tweet": null,
+  "retweeted_tweet": null,
+  "isLimitedReply": false,
+  "article": null
+}
