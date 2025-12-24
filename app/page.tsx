@@ -14,6 +14,7 @@ import {
   Headphones,
   Mic,
   PlayCircle,
+  FileText,
 } from "lucide-react"
 import { getLatestDigestDate, getArchiveDigests, getTrendingTopics, getLatestWeeklyDigest } from "@/lib/digest-data"
 import { NewsletterForm } from "@/components/newsletter-form"
