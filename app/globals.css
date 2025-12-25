@@ -1,6 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.hover\:pause:hover {
+  animation-play-state: paused;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -120,6 +138,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-serif);
@@ -127,6 +146,7 @@
     line-height: 1.75;
     letter-spacing: -0.01em;
   }
+
   h1,
   h2,
   h3,
@@ -138,20 +158,24 @@
     letter-spacing: -0.02em;
     line-height: 1.25;
   }
+
   h1 {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
   }
+
   h2 {
     font-size: 1.875rem;
     margin-top: 3rem;
     margin-bottom: 1.25rem;
   }
+
   h3 {
     font-size: 1.5rem;
     margin-top: 2.5rem;
     margin-bottom: 1rem;
   }
+
   p {
     margin-bottom: 1.25rem;
   }
@@ -161,6 +185,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -171,6 +196,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -182,6 +208,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -189,10 +216,12 @@
 }
 
 @keyframes gradient {
+
   0%,
   100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -203,6 +232,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -253,12 +283,15 @@
 .shadow-soft {
   box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.04);
 }
+
 .shadow-soft-lg {
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 8px 24px -4px rgba(0, 0, 0, 0.06);
 }
+
 .shadow-soft-hover {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
+
 .shadow-soft-hover:hover {
   box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.12), 0 12px 32px -4px rgba(0, 0, 0, 0.08);
   transform: translateY(-1px);
@@ -268,6 +301,7 @@
   transition: all 0.2s ease;
   border: 1px solid var(--border);
 }
+
 .card-interactive:hover {
   border-color: oklch(0.8 0 0);
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
@@ -277,6 +311,7 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -289,15 +324,25 @@
 }
 
 @keyframes skeleton-pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
-.skeleton-pulse {
-  animation: skeleton-pulse 2s infinite ease-in-out;
+.bg-noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }

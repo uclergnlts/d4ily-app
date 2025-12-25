@@ -192,7 +192,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-serif antialiased">
+      <body className="font-serif antialiased bg-background">
+        <div className="bg-noise" />
         <ReadingProgress />
         {children}
         <ScrollToTop />

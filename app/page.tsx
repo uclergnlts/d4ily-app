@@ -37,6 +37,8 @@ export const metadata: Metadata = {
   },
 }
 
+import { Ticker } from "@/components/ticker"
+
 export default async function HomePage() {
   const latestDigestDate = await getLatestDigestDate()
   const recentDigests = await getArchiveDigests()
@@ -120,6 +122,7 @@ export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans selection:bg-primary/20 overflow-x-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <Ticker />
       <Navigation />
 
       <main className="flex-1 w-full">
