@@ -9,6 +9,7 @@ import { sql } from 'drizzle-orm';
 import { getActiveTwitterAccounts, getActiveRSSSources } from "@/lib/sources";
 import { fetchRssFeed } from "@/lib/rss";
 import { fetchUserTweets } from "@/lib/twitter";
+import { getMarketData } from "@/lib/services/market";
 
 // --- Tweet Fetching Logic ---
 export async function runFetchTweets() {
@@ -156,7 +157,16 @@ export async function runGenerateDigest() {
         const processedTweets = TweetProcessor.process(recentTweets);
         console.log(`Smart Editor: Reduced ${recentTweets.length} -> ${processedTweets.length} tweets.`);
 
-        const digestData = await generateDailyDigest(todayStr, processedTweets, recentNews);
+        // Fetch market data for context
+        let marketData = null;
+        try {
+            marketData = await getMarketData();
+            console.log("Market data fetched for digest generation.");
+        } catch (e) {
+            console.error("Failed to fetch market data for digest:", e);
+        }
+
+        const digestData = await generateDailyDigest(todayStr, processedTweets, recentNews, marketData);
 
         const coverImageUrl = await fetchGoogleImage(digestData.title);
 

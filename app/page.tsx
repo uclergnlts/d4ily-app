@@ -206,6 +206,24 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* --- DAILY BRIEF: Market & Gazette --- */}
+        <section className="py-8 border-b border-border/40 bg-zinc-50/50 dark:bg-zinc-900/20 w-full">
+          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+              <div className="lg:col-span-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Piyasalar</h3>
+                  <span className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded font-bold">CANLI</span>
+                </div>
+                <MarketWidget />
+              </div>
+              <div className="lg:col-span-1 h-full">
+                <OfficialGazetteCard summary={gazetteSummary} />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* --- FEATURE HIGHLIGHTS (BENTO GRID STYLE) --- */}
         <section className="py-12 md:py-24 bg-secondary/20 border-y border-border/50 w-full">
           <div className="container mx-auto px-4 md:px-6 max-w-7xl">

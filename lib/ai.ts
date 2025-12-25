@@ -7,11 +7,15 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-const model = genAI.getGenerativeModel({
+const jsonModel = genAI.getGenerativeModel({
     model: "gemini-flash-latest",
     generationConfig: {
         responseMimeType: "application/json",
     }
+});
+
+const textModel = genAI.getGenerativeModel({
+    model: "gemini-flash-latest",
 });
 
 export interface DigestData {
@@ -26,7 +30,8 @@ export interface DigestData {
 export async function generateDailyDigest(
     date: string,
     tweets: any[],
-    news: any[]
+    news: any[],
+    marketData?: any // Optional market data
 ): Promise<DigestData> {
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
 
@@ -39,18 +44,28 @@ export async function generateDailyDigest(
         `- ${n.title} (${n.source_name}): ${n.summary_raw?.substring(0, 200)}...`
     ).join("\n");
 
+    const marketText = marketData ? `
+    --- FINANCIAL DATA (For Context) ---
+    USD/TRY: ${marketData.usd?.value} (${marketData.usd?.change}%)
+    EUR/TRY: ${marketData.eur?.value} (${marketData.eur?.change}%)
+    Gold (Gram): ${marketData.gold?.value} (${marketData.gold?.change}%)
+    BIST 100: ${marketData.bist100?.value} (${marketData.bist100?.change}%)
+    ` : "No financial data available.";
+
     const prompt = `
     You are the Chief Editor for "D4ily", Turkey's premium daily newsletter.
     
     DATE: ${date}
     
     TASK:
-    Analyze the provided Tweets and News to create a comprehensive, long-form daily digest in TURKISH.
+    Analyze the provided Tweets, News, and Financial Data to create a comprehensive, long-form daily digest in TURKISH.
     Your goal is to inform the user completely about what happened yesterday and what to expect today.
     The tone should be professional, objective, insightful, and engaging. Avoid superficial summaries; provide context.
     
     INPUT DATA:
     
+    ${marketText}
+
     --- TWEETS (Social Media Pulse & Reactions) ---
     ${tweetsText.substring(0, 25000)} 
     
@@ -102,7 +117,7 @@ export async function generateDailyDigest(
   `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await jsonModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -195,7 +210,7 @@ export async function generateWeeklyDigest(
     `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await jsonModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -210,7 +225,7 @@ export async function generateWeeklyDigest(
 export async function generateWithGemini(prompt: string): Promise<string | null> {
     if (!apiKey) return null;
     try {
-        const result = await model.generateContent(prompt);
+        const result = await textModel.generateContent(prompt);
         const response = await result.response;
         return response.text();
     } catch (error) {

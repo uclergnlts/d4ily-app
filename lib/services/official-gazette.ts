@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { officialGazetteSummaries } from "@/lib/db/schema"
-import { eq } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { generateWithGemini } from "@/lib/ai"
 import * as cheerio from 'cheerio'
 
@@ -53,9 +53,8 @@ export async function getOfficialGazetteSummary(): Promise<GazetteSummary | null
             // For now, let's grab the text of the main listing area.
         })
 
-        // Simpler approach: Get the text of the main content column
-        // Selector might need adjustment
-        const mainText = $('#mevzuat').text().replace(/\s+/g, ' ').trim().slice(0, 10000) // Accessing main mevzuat list
+        // Use .gunluk-akis as it contains the main flow of decisions
+        const mainText = $('.gunluk-akis').text().replace(/\s+/g, ' ').trim().slice(0, 10000)
 
         if (!mainText || mainText.length < 50) return null
 
@@ -78,10 +77,18 @@ export async function getOfficialGazetteSummary(): Promise<GazetteSummary | null
         const summary = await generateWithGemini(prompt) || "Özet oluşturulamadı."
 
         // 4. Save to DB
+        // 4. Save to DB (Upsert)
         await db.insert(officialGazetteSummaries).values({
             date: today,
             summary_markdown: summary,
             gazette_url: url
+        }).onConflictDoUpdate({
+            target: officialGazetteSummaries.date,
+            set: {
+                summary_markdown: summary,
+                gazette_url: url,
+                created_at: sql`CURRENT_TIMESTAMP`
+            }
         })
 
         return {
