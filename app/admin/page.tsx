@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Activity, Database, FileText, Play, RefreshCw, Server, AlertCircle, CheckCircle, Edit, Calendar
+    Activity, Database, FileText, RefreshCw, Server, AlertCircle, CheckCircle, Edit, Calendar
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -11,8 +11,6 @@ export default function AdminDashboardPage() {
     const [stats, setStats] = useState<any>(null);
     const [recentDigests, setRecentDigests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [actionLoading, setActionLoading] = useState<string | null>(null);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [pin, setPin] = useState("");
@@ -62,29 +60,6 @@ export default function AdminDashboardPage() {
             return () => clearInterval(interval);
         }
     }, [isAuthenticated]);
-
-    const handleTrigger = async (action: string, url: string) => {
-        if (!confirm("Bu işlemi tetiklemek istediğinize emin misiniz?")) return;
-
-        setActionLoading(action);
-        setMessage(null);
-
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (res.ok) {
-                setMessage({ type: 'success', text: `İşlem başarıyla başlatıldı: ${action}` });
-                fetchStats(); // Update stats
-            } else {
-                setMessage({ type: 'error', text: `Hata: ${data.error || 'Bilinmeyen hata'}` });
-            }
-        } catch (err: any) {
-            setMessage({ type: 'error', text: `Bağlantı hatası: ${err.message}` });
-        } finally {
-            setActionLoading(null);
-        }
-    };
 
     if (!isAuthenticated) {
         return (
@@ -137,17 +112,6 @@ export default function AdminDashboardPage() {
                 <p className="text-gray-500 text-sm mt-1">Sistem durumu ve operasyonel kontrol merkezi</p>
             </header>
 
-            {/* Message Banner */}
-            {message && (
-                <div className={`p-4 rounded-lg flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
-                    }`}>
-                    {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    {message.text}
-                </div>
-            )}
-
             {/* Status Badge */}
             <div className="flex items-center justify-between">
                 <div className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${stats?.health?.status === 'operational' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -193,45 +157,37 @@ export default function AdminDashboardPage() {
                 </div>
             </div>
 
-            {/* Actions */}
+            {/* Cron Schedule Info */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="font-semibold text-gray-900 mb-4">Manuel İşlemler</h3>
-                <div className="flex flex-wrap gap-4">
-                    <button
-                        onClick={() => handleTrigger('Bülten Oluştur', '/api/cron/generate-digest')}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-all font-medium"
-                    >
-                        {actionLoading === 'Bülten Oluştur' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                        Günlük Özeti Tetikle
-                    </button>
-
-                    <button
-                        onClick={() => handleTrigger('Tweet Çek', '/api/cron/fetch-tweets')}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all font-medium"
-                    >
-                        {actionLoading === 'Tweet Çek' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                        Tweet Güncelle
-                    </button>
-
-                    <button
-                        onClick={() => handleTrigger('Haber Çek', '/api/cron/fetch-news')}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all font-medium"
-                    >
-                        {actionLoading === 'Haber Çek' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                        Haber Tara
-                    </button>
-
-                    <button
-                        onClick={() => handleTrigger('Haftalık Özet', '/api/cron/generate-weekly-digest')}
-                        disabled={!!actionLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-all font-medium"
-                    >
-                        {actionLoading === 'Haftalık Özet' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                        Haftalık Özet Oluştur
-                    </button>
+                <h3 className="font-semibold text-gray-900 mb-4">Otomatik İşlemler (Cron Schedule)</h3>
+                <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                        <RefreshCw className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                            <p className="font-medium text-sm text-blue-900">Tweet & RSS Fetch</p>
+                            <p className="text-xs text-blue-700">Her 4 saatte bir (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
+                        <FileText className="w-5 h-5 text-green-600 mt-0.5" />
+                        <div>
+                            <p className="font-medium text-sm text-green-900">Günlük Özet</p>
+                            <p className="text-xs text-green-700">Her gün 06:00 UTC (Türkiye 09:00)</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
+                        <Calendar className="w-5 h-5 text-purple-600 mt-0.5" />
+                        <div>
+                            <p className="font-medium text-sm text-purple-900">Haftalık Özet</p>
+                            <p className="text-xs text-purple-700">Her pazartesi 08:00 UTC (Türkiye 11:00)</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600">
+                        💡 <strong>Not:</strong> Tüm işlemler GitHub Actions üzerinden otomatik çalışır.
+                        Manuel tetikleme için GitHub repository → Actions → İlgili workflow → "Run workflow" kullanın.
+                    </p>
                 </div>
             </div>
 
@@ -284,8 +240,8 @@ export default function AdminDashboardPage() {
             <div className="p-4 bg-blue-50 text-blue-800 text-sm rounded-lg flex gap-3">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <p>
-                    Bu panel üzerinden sistemi manuel olarak tetikleyebilirsiniz. Normal şartlarda sistem her gece otomatik çalışır.
-                    Manuel tetikleme yaparken lütfen işlemlerin tamamlanmasını bekleyin (30-60 saniye sürebilir).
+                    Sistem otomatik olarak çalışır. Cron schedule yukarıda gösterilmiştir.
+                    İstatistikler real-time olarak yansır.
                 </p>
             </div>
         </div>
