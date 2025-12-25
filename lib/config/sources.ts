@@ -1,131 +1,53 @@
-export const TWITTER_USERS = [
-    "RTErdogan",
-    "dbdevletbahceli",
-    "eczozgurozel",
-    "nevsinmengu",
-    "HakanFidan",
-    "erkbas",
-    "cuneytozdemir",
-    "haskologlu",
-    "sakinan1968",
-    "eafyoncu",
-    "m_cemilkilic",
-    "merdanyanardag",
-    "MTanal",
-    "Selcuk",
-    "E_SemihYalcin",
-    "buyukataman",
-    "celal_adan",
-    "YildizFeti",
-    "candundaradasi",
-    "herkesicinCHP",
-    "kilicdarogluk",
-    "ekrem_imamoglu",
-    "mansuryavas06",
-    "meral_aksener",
-    "alibabacan",
-    "MDervisogluTR",
-    "erbakanfatih",
-    "eceuner12",
-    "etkilihaberyeni",
-    "istbassavcisi",
-    "tkrgazete",
-    "emrahgulsunar",
-    "bosunatiklama",
-    "proftpmedya",
-    "haber",
-    "ismailari_",
-    "ismailsaymaz",
-    "kucukkayaismail",
-    "muratagirel",
-    "baristerkoglu",
-    "barispehlivan",
-    // --- YENİ EKLENENLER (Ekonomi & Finans) ---
-    "mahfiegilmez",  // Mahfi Eğilmez
-    "OzgrDemirtas",  // Özgür Demirtaş
-    "emrealkin1969", // Emre Alkin
-    "iriscibre",     // İris Cibre
-    "mustafasonmez", // Mustafa Sönmez
-    "ugurses",       // Uğur Gürses
-    "senolguldur",   // Şenol Babuşcu
-    "AtillaYesilada7", // Atilla Yeşilada
-    "sozcumurat",      // Murat Muratoğlu
-    "ekonomikanaliz",  // Veysel Ulusoy (ENAG)
-    "RefetGurkaynak",  // Refet Gürkaynak
+// --- Kişisel Hesaplar (Canlı Akışta Görünecek) ---
+export const PERSONAL_ACCOUNTS = [
+    // Siyasetçiler & Liderler
+    "RTErdogan", "dbdevletbahceli", "eczozgurozel", "HakanFidan", "erkbas",
+    "kilicdarogluk", "ekrem_imamoglu", "mansuryavas06", "meral_aksener", "alibabacan",
+    "MDervisogluTR", "erbakanfatih", "umitozdag", "MuharremInce", "Ahmet_Davutoglu",
+    "Temel_Karamollaoglu", "fahrettinaltun", "omerrcelik", "avdenizyucel", "alimahir",
+    "aysegul__dogan", "zorlu77", "birolaydinsp", "avidrissahin", "SerkanRamanli",
+    "suleymansoylu", "drfahrettinkoca", "varank", "cenginyurt52", "serakadigil",
+    "ComezTurhan", "MTanal", "Selcuk", "E_SemihYalcin", "buyukataman", "celal_adan",
+    "YildizFeti", "memetsimsek",
 
-    // --- Araştırmacı Gazetecilik & Hukuk ---
-    "fatihaltayli",    // Fatih Altaylı
-    "timursoykan",     // Timur Soykan
-    "cigdemtoker",     // Çiğdem Toker
-    "alicanuludag",    // Alican Uludağ
-    "sahmetsahmet",    // Ahmet Şık
-    // --- Siyaset (Parti Liderleri & Sözcüler) ---
-    "umitozdag",     // Ümit Özdağ
-    "MuharremInce",  // Muharrem İnce
-    "Ahmet_Davutoglu",
-    "Temel_Karamollaoglu",
-    "fahrettinaltun", // İletişim Başkanı
-    "omerrcelik",     // Ömer Çelik (AK Parti Sözcüsü)
-    "avdenizyucel",   // Deniz Yücel (CHP Sözcüsü)
-    "alimahir",       // Ali Mahir Başarır (CHP Grup Başkanvekili)
-    "aysegul__dogan", // Ayşegül Doğan (DEM Parti Sözcüsü)
-    "zorlu77",        // Kürşad Zorlu
-    "birolaydinsp",   // Birol Aydın (Saadet Sözcüsü)
-    "avidrissahin",   // İdris Şahin (DEVA Sözcüsü)
-    "SerkanRamanli",  // Serkan Ramanlı (HÜDA PAR Sözcüsü)
-    "suleymansoylu",  // Süleyman Soylu
-    "drfahrettinkoca",// Fahrettin Koca
-    "varank",         // Mustafa Varank
-    "cenginyurt52",   // Cemal Enginyurt
-    "serakadigil",    // Sera Kadıgil
-    "ComezTurhan",    // Turhan Çömez
+    // Gazeteciler & Yorumcular
+    "nevsinmengu", "cuneytozdemir", "haskologlu", "sakinan1968", "eafyoncu",
+    "m_cemilkilic", "merdanyanardag", "candundaradasi", "eceuner12", "emrahgulsunar",
+    "ismailari_", "ismailsaymaz", "kucukkayaismail", "muratagirel", "baristerkoglu",
+    "barispehlivan", "ugur_dundar", "fatihportakal", "yilmazozdil", "sedat_peker",
+    "barisyarkadas", "saygi_ozturk", "muratyetkin2", "fehimtastekin", "abdulkadir_selvi",
+    "fatihaltayli", "timursoykan", "cigdemtoker", "alicanuludag", "sahmetsahmet",
 
-    "HDPgenelmerkezi", // DEM Parti (Eski HDP)
-    // --- Spor (Büyük Kulüpler & Yorumcular) ---
-    "Fenerbahce",
-    "GalatasaraySK",
-    "Besiktas",
-    "Trabzonspor",
-    "TFF_Org",
-    "yagosabuncuoglu", // Yağız Sabuncuoğlu
-    "ertemsener",      // Ertem Şener
-    "demarkesports",
-    "sportsdigitale",
-    "tribundergi",
-    // --- Haber & Medya (Alternatif & Ana Akım) ---
-    "pusholder",
-    "Darkwebhaber",
-    "t24comtr",
-    "gazeteduvar",
-    "medyascope",
-    "solcugazete",
-    "dokuz8haber",
-    "bbcturkce",
-    "dw_turkce",
-    "voaturkce",
-    "trthaber",
-    "anadoluajansi",
+    // Ekonomi & Finans
+    "mahfiegilmez", "OzgrDemirtas", "emrealkin1969", "iriscibre", "mustafasonmez",
+    "ugurses", "senolguldur", "AtillaYesilada7", "sozcumurat", "ekonomikanaliz",
+    "RefetGurkaynak",
 
-    // --- Gazeteciler & Yorumcular ---
-    "ugur_dundar",
-    "fatihportakal",
-    "yilmazozdil",
-    "sedat_peker",   // (Eğer hesabı açıksa/aktifse çok etkili) -> Bazen kapalı
-    "memetsimsek",    // Mehmet Şimşek (Resmi hesap)
-    // --- Ankara Kulisi & Siyaset Yazarları ---
-    "barisyarkadas",  // Barış Yarkadaş
-    "saygi_ozturk",   // Saygı Öztürk
-    "muratyetkin2",   // Murat Yetkin
-    "fehimtastekin",  // Fehim Taştekin
-    "abdulkadir_selvi", // Abdülkadir Selvi
-    // --- Hukuk & Adalet ---
-    "metinfeyzioglu",
-    "gonencgurkaynak",
-    // --- Resmi Kurumlar & Devlet ---
-    "TC_Icisleri",
-    "adalet_bakanligi",
-    "AFADBaskanlik"
+    // Spor Yorumcuları
+    "yagosabuncuoglu", "ertemsener",
+
+    // Hukuk & Diğer Kişiler
+    "metinfeyzioglu", "gonencgurkaynak", "istbassavcisi"
 ];
+
+// --- Kurumsal Hesaplar (Sadece Digest İçin - Akışta Gizli) ---
+export const CORPORATE_ACCOUNTS = [
+    // Haber Ajansları & Medya
+    "pusholder", "Darkwebhaber", "t24comtr", "gazeteduvar", "medyascope",
+    "solcugazete", "dokuz8haber", "bbcturkce", "dw_turkce", "voaturkce",
+    "trthaber", "anadoluajansi", "etkilihaberyeni", "tkrgazete", "bosunatiklama",
+    "proftpmedya", "haber",
+
+    // Spor Kulüpleri & Medyası
+    "Fenerbahce", "GalatasaraySK", "Besiktas", "Trabzonspor", "TFF_Org",
+    "demarkesports", "sportsdigitale", "tribundergi",
+
+    // Resmi Kurumlar & Parti Hesapları
+    "TC_Icisleri", "adalet_bakanligi", "AFADBaskanlik", "HDPgenelmerkezi",
+    "herkesicinCHP"
+];
+
+export const TWITTER_USERS = [...PERSONAL_ACCOUNTS, ...CORPORATE_ACCOUNTS];
 
 export const RSS_FEEDS = [
     "https://www.birgun.net/rss/kategori/siyaset-8",

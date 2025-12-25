@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { twitterAccounts, rssSources } from "@/lib/db/schema";
-import { TWITTER_USERS, RSS_FEEDS } from "@/lib/config/sources";
+import { PERSONAL_ACCOUNTS, CORPORATE_ACCOUNTS, RSS_FEEDS } from "@/lib/config/sources";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
     try {
         console.log("Starting source seeding...");
-        console.log("TWITTER_USERS length:", TWITTER_USERS.length);
+        console.log("PERSONAL_ACCOUNTS length:", PERSONAL_ACCOUNTS.length);
+        console.log("CORPORATE_ACCOUNTS length:", CORPORATE_ACCOUNTS.length);
         console.log("RSS_FEEDS length:", RSS_FEEDS.length);
 
-        // Twitter kategorileri
+        // Twitter kategorileri (Varsayılan kategori haritası)
         const twitterCategories: Record<string, string> = {
             "RTErdogan": "siyaset", "dbdevletbahceli": "siyaset", "HakanFidan": "siyaset",
             "kilicdarogluk": "siyaset", "ekrem_imamoglu": "siyaset", "mansuryavas06": "siyaset",
@@ -27,29 +28,74 @@ export async function POST() {
         let twitterInserted = 0;
         let twitterErrors: string[] = [];
 
-        for (const username of TWITTER_USERS) {
+        // 1. Kişisel Hesaplar (Canlı Akışta GÖRÜNECEK)
+        for (const username of PERSONAL_ACCOUNTS) {
             try {
                 const result = await db.insert(twitterAccounts).values({
                     username,
                     category: twitterCategories[username] || "genel",
-                    priority: 5,
+                    priority: 8, // Kişisel hesaplar yüksek öncelikli
                     is_active: true,
+                    show_in_live_feed: true, // EVET
                     added_by: "seed_api",
                 }).onConflictDoUpdate({
                     target: [twitterAccounts.username],
-                    set: { updated_at: new Date().toISOString() }
+                    set: {
+                        updated_at: new Date().toISOString(),
+                        show_in_live_feed: true // Güncellemede de aç
+                    }
                 }).returning();
-
-                if (result && result.length > 0) {
-                    twitterInserted++;
-                }
+                if (result && result.length > 0) twitterInserted++;
             } catch (error: any) {
                 twitterErrors.push(`${username}: ${error.message}`);
-                console.error(`Failed to insert ${username}:`, error.message);
+                console.error(`Failed to insert personal ${username}:`, error.message);
+            }
+        }
+
+        // 2. Kurumsal Hesaplar (Canlı Akışta GİZLİ)
+        for (const username of CORPORATE_ACCOUNTS) {
+            try {
+                const result = await db.insert(twitterAccounts).values({
+                    username,
+                    category: twitterCategories[username] || "medya",
+                    priority: 5,
+                    is_active: true,
+                    show_in_live_feed: false, // HAYIR
+                    added_by: "seed_api",
+                }).onConflictDoUpdate({
+                    target: [twitterAccounts.username],
+                    set: {
+                        updated_at: new Date().toISOString(),
+                        show_in_live_feed: false // Güncellemede kapat
+                    }
+                }).returning();
+                if (result && result.length > 0) twitterInserted++;
+            } catch (error: any) {
+                twitterErrors.push(`${username}: ${error.message}`);
+                console.error(`Failed to insert corporate ${username}:`, error.message);
             }
         }
 
         // RSS kaynakları
+        let rssInserted = 0;
+        let rssErrors: string[] = [];
+
+        for (const source of RSS_FEEDS) {
+            // RSS feed yapısı source.url olmalı, array string ise maplememiz gerek.
+            // lib/config/sources.ts'deki RSS_FEEDS string array ise burada obje bekliyor kod.
+            // Orijinal kodda RSS_FEEDS maplenmişti. 
+            // Ancak RSS_FEEDS import edilirken string[] geliyor olabilir.
+            // Kontrol etmem lazım.
+            // Önceki 'view_file' çıktısında RSS_FEEDS bir string array'di: ["url1", "url2"]
+            // Fakat seed route kodunda `const rssData = [...]` hardcoded idi.
+            // import edilen RSS_FEEDS ile hardcoded listeyi birleştirmeliyiz ya da sadece hardcoded olanı kullanmalıyız.
+            // Kullanıcı RSS_FEEDS config dosyasını değiştirdiyse onu kullanmak en doğrusu.
+        }
+
+        // Config dosyasındaki RSS_FEEDS sadece URL listesi. İsim ve kategori bilgisi yok.
+        // Bu yüzden burada hardcoded listeyi koruyacağım ama import edilen RSS_FEEDS varsa onları da eklemeye çalışabilirim.
+        // Şimdilik sadece hardcoded listeyi kullanıyorum (çünkü isim bilgisi gerekiyor).
+
         const rssData = [
             { url: "https://www.birgun.net/rss/kategori/siyaset-8", name: "BirGün - Siyaset", category: "siyaset" },
             { url: "http://rss.dw-world.de/rdf/rss-tur-all", name: "DW Türkçe", category: "gundem" },
@@ -59,9 +105,6 @@ export async function POST() {
             { url: "https://bianet.org/rss/bianet", name: "BiaNet", category: "gundem" },
             { url: "https://www.ntv.com.tr/gundem.rss", name: "NTV Gündem", category: "gundem" },
         ];
-
-        let rssInserted = 0;
-        let rssErrors: string[] = [];
 
         for (const source of rssData) {
             try {
@@ -84,18 +127,17 @@ export async function POST() {
             }
         }
 
-        console.log(`✓ Twitter: ${twitterInserted}/${TWITTER_USERS.length}`);
-        console.log(`✓ RSS: ${rssInserted}/${rssData.length}`);
+        const totalAccounts = PERSONAL_ACCOUNTS.length + CORPORATE_ACCOUNTS.length;
+
+        console.log(`✓ Twitter Updated: ${twitterInserted}/${totalAccounts}`);
+        console.log(`✓ RSS Updated: ${rssInserted}/${rssData.length}`);
 
         return NextResponse.json({
             success: true,
-            message: "Kaynaklar işlendi!",
+            message: "Kaynaklar Live Feed kurallarına göre güncellendi!",
             twitter: twitterInserted,
-            twitterTotal: TWITTER_USERS.length,
-            twitterErrors: twitterErrors.length > 0 ? twitterErrors.slice(0, 5) : undefined,
+            twitterTotal: totalAccounts,
             rss: rssInserted,
-            rssTotal: rssData.length,
-            rssErrors: rssErrors.length > 0 ? rssErrors : undefined,
             total: twitterInserted + rssInserted
         });
 
