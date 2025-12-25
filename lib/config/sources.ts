@@ -48,6 +48,17 @@ export const TWITTER_USERS = [
     "mustafasonmez", // Mustafa Sönmez
     "ugurses",       // Uğur Gürses
     "senolguldur",   // Şenol Babuşcu
+    "AtillaYesilada7", // Atilla Yeşilada
+    "sozcumurat",      // Murat Muratoğlu
+    "ekonomikanaliz",  // Veysel Ulusoy (ENAG)
+    "RefetGurkaynak",  // Refet Gürkaynak
+
+    // --- Araştırmacı Gazetecilik & Hukuk ---
+    "fatihaltayli",    // Fatih Altaylı
+    "timursoykan",     // Timur Soykan
+    "cigdemtoker",     // Çiğdem Toker
+    "alicanuludag",    // Alican Uludağ
+    "sahmetsahmet",    // Ahmet Şık
     // --- Siyaset (Parti Liderleri & Sözcüler) ---
     "umitozdag",     // Ümit Özdağ
     "MuharremInce",  // Muharrem İnce
