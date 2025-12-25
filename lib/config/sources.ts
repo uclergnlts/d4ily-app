@@ -80,13 +80,7 @@ export const TWITTER_USERS = [
     "voaturkce",
     "trthaber",
     "anadoluajansi",
-    // --- Bilim & Teknoloji & Kültür ---
-    "hakki_alkan",   // ShiftDelete
-    "BarisOzcan",    // Barış Özcan
-    "evrimagaci",    // Evrim Ağacı
-    "Webtekno",
-    "ArgumanTv",     // Argüman
-    "teyitorg",      // Teyit.org
+
     // --- Gazeteciler & Yorumcular ---
     "ugur_dundar",
     "fatihportakal",

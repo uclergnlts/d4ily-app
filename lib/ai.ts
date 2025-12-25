@@ -60,9 +60,12 @@ export async function generateDailyDigest(
     REQUIREMENTS & STRUCTURE (Strictly Follow This):
 
     *** CRITICAL LENGTH CONSTRAINT ***
-    The total length of the 'content' field MUST be between 1500 and 2500 characters.
-    - If your draft is too short (<1500), expand on the "Detaylı Gündem Analizi" with more context, quotes, and background info.
-    - If your draft is too long (>2500), condense slightly but keep the core insights.
+    The 'content' field MUST contain AT LEAST 1250 WORDS (approximately 8000-10000 characters in Turkish).
+    - Count WORDS, not characters
+    - If your draft is under 1250 words, ADD MORE DETAIL, MORE ANALYSIS, MORE CONTEXT
+    - Expand "Detaylı Gündem Analizi" with extensive analysis, quotes, and background information
+    - Include specific examples, data points, and perspectives
+    - Provide historical context and explain implications
     
     1. **Title**: A catchy, powerful headline summarizing the biggest story.
     2. **Intro**: 2-3 sentences setting the mood of the day.

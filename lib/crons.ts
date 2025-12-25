@@ -1,14 +1,14 @@
 import { db } from "@/lib/db";
 import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { fetchTweetsFromApify } from "@/lib/twitter";
-import { fetchNewsFromRSS } from "@/lib/news";
 import { generateDailyDigest, generateWeeklyDigest } from "@/lib/ai";
 import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-data";
-import { searchUnsplashImage } from "@/lib/image-search";
+import { fetchGoogleImage } from "@/lib/image-search";
 import { TweetProcessor } from '@/lib/processor';
 import { sql } from 'drizzle-orm';
 import { getActiveTwitterAccounts, getActiveRSSSources } from "@/lib/sources";
+import { fetchRssFeed } from "@/lib/rss";
+import { fetchUserTweets } from "@/lib/twitter";
 
 // --- Tweet Fetching Logic ---
 export async function runFetchTweets() {
