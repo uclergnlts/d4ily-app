@@ -676,6 +676,14 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
     // Case-insensitive check just in case
     const allowedUsernames = new Set(PERSONAL_ACCOUNTS.map(u => u.toLowerCase()));
 
+    // Fetch raw data (fetched in last 12 hours)
+    const rawData = await db
+      .select()
+      .from(tweetsRaw)
+      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
+      .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
+      .limit(limit * 3) // Fetch more to allow for filtering
+
     let filtered = rawData;
     if (allowedUsernames.size > 0) {
       filtered = rawData.filter(tweet =>
