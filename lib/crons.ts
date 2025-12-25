@@ -257,11 +257,39 @@ export async function runGenerateWeeklyDigest() {
         return {
             success: true,
             weekId,
-            weeklyDigest: weeklyData
-        };
-
-    } catch (error: any) {
-        console.error("Weekly digest generation failed:", error);
-        throw new Error(error.message);
+        } catch (error: any) {
+            console.error("Weekly digest generation failed:", error);
+            throw new Error(error.message);
+        }
     }
-}
+
+// --- Data Cleanup Logic ---
+export async function runCleanupData() {
+        try {
+            console.log("Starting database cleanup...");
+
+            // 1. Delete tweets older than 30 days
+            const tweetsResult = await db.run(sql`
+            DELETE FROM tweets_raw 
+            WHERE fetched_at < datetime('now', '-30 days')
+        `);
+
+            // 2. Delete news older than 30 days
+            const newsResult = await db.run(sql`
+            DELETE FROM news_raw 
+            WHERE fetched_at < datetime('now', '-30 days')
+        `);
+
+            // Note: We DO NOT delete daily_digests or weekly_digests as they are the archive
+
+            console.log("Cleanup completed.");
+            return {
+                success: true,
+                message: "Old data pruned successfully.",
+                timestamp: new Date().toISOString()
+            };
+        } catch (error: any) {
+            console.error("Cleanup failed:", error);
+            throw new Error(error.message);
+        }
+    }

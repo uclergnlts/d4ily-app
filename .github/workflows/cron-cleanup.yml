@@ -1,0 +1,17 @@
+name: Cron Cleanup
+
+on:
+  schedule:
+    # Run every Sunday at 04:00 UTC
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    environment: Production – d4ily-app
+    steps:
+      - name: Trigger Cleanup Endpoint
+        run: |
+          curl -sS --fail -X GET "${{ secrets.VERCEL_URL }}/api/cron/cleanup" \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
