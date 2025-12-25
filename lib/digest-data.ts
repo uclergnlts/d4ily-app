@@ -357,7 +357,7 @@ export async function getTopTweetsByDate(date: string, limit = 5): Promise<Tweet
     const data = await db
       .select()
       .from(tweetsRaw)
-      .orderBy(desc(tweetsRaw.fetched_at))
+      .orderBy(desc(tweetsRaw.published_at))
       .limit(200) // Fetch enough to filter in memory
 
     if (!data || data.length === 0) return []
@@ -670,7 +670,7 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
       .select()
       .from(tweetsRaw)
       .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
-      .orderBy(desc(tweetsRaw.fetched_at))
+      .orderBy(desc(tweetsRaw.published_at))
       .limit(limit)
 
     // Map raw data to Tweet interface
