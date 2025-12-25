@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { username, display_name, category, priority, notes } = body;
+        const { username, display_name, category, priority, notes, show_in_live_feed } = body;
 
         if (!username) {
             return NextResponse.json({ success: false, error: 'Username required' }, { status: 400 });
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
             category: category || "genel",
             priority: priority || 5,
             notes,
+            show_in_live_feed: show_in_live_feed !== undefined ? show_in_live_feed : false,
             is_active: true,
         }).returning();
 
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, username, display_name, category, priority, is_active, notes } = body;
+        const { id, username, display_name, category, priority, is_active, notes, show_in_live_feed } = body;
 
         if (!id) {
             return NextResponse.json({ success: false, error: 'ID required' }, { status: 400 });
@@ -94,6 +95,7 @@ export async function PUT(request: Request) {
         if (priority !== undefined) updateData.priority = priority;
         if (is_active !== undefined) updateData.is_active = is_active;
         if (notes !== undefined) updateData.notes = notes;
+        if (show_in_live_feed !== undefined) updateData.show_in_live_feed = show_in_live_feed;
 
         const result = await db.update(twitterAccounts)
             .set(updateData)

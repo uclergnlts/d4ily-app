@@ -54,7 +54,7 @@ export const TWITTER_USERS = [
     "Ahmet_Davutoglu",
     "Temel_Karamollaoglu",
     "fahrettinaltun", // İletişim Başkanı
-    "rterdogan_ar",  // Arapça hesap (Bazen farklı içerik)
+
     "HDPgenelmerkezi", // DEM Parti (Eski HDP)
     // --- Spor (Büyük Kulüpler & Yorumcular) ---
     "Fenerbahce",

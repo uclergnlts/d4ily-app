@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { twitterAccounts, rssSources } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { TWITTER_USERS, RSS_FEEDS } from "@/lib/config/sources";
 
 /**
@@ -24,6 +24,32 @@ export async function getActiveTwitterAccounts(): Promise<string[]> {
     } catch (error) {
         console.error("Failed to fetch Twitter accounts from database:", error);
         return TWITTER_USERS; // Fallback
+    }
+}
+
+/**
+ * Get Twitter accounts marked for live feed
+ * Returns only personal accounts (not corporate/news)
+ */
+export async function getLiveFeedTwitterAccounts(): Promise<string[]> {
+    try {
+        const accounts = await db.select()
+            .from(twitterAccounts)
+            .where(and(
+                eq(twitterAccounts.is_active, true),
+                eq(twitterAccounts.show_in_live_feed, true)
+            ));
+
+        if (accounts.length > 0) {
+            return accounts.map(a => a.username);
+        }
+
+        console.warn("No live feed accounts found in database");
+        return [];
+
+    } catch (error) {
+        console.error("Failed to fetch live feed accounts:", error);
+        return [];
     }
 }
 

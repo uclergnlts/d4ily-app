@@ -663,18 +663,36 @@ export async function getLatestDigestDate(): Promise<string> {
 export const revalidate = 60
 /**
  * Fetch raw tweets for live feed
+ * Only returns tweets from personal accounts (show_in_live_feed=true)
  */
 export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
   try {
+    // Get live feed accounts
+    const { getLiveFeedTwitterAccounts } = await import('@/lib/sources');
+    const liveFeedAccounts = await getLiveFeedTwitterAccounts();
+
+    // Fetch raw data (fetched in last 12 hours)
     const rawData = await db
       .select()
       .from(tweetsRaw)
       .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
       .orderBy(desc(tweetsRaw.published_at))
-      .limit(limit)
+      .limit(limit * 3) // Fetch more to allow for filtering
+
+    // Filter by live feed accounts
+    // If no live feed accounts are set, show all (fallback) or none depending on preference.
+    // Let's fallback to all if list is empty to avoid empty screen, or respect the emptiness.
+    // User asked "Only personal accounts", so we should respect that.
+
+    let filtered = rawData;
+    if (liveFeedAccounts.length > 0) {
+      filtered = rawData.filter(tweet =>
+        tweet.author_username && liveFeedAccounts.includes(tweet.author_username)
+      );
+    }
 
     // Map raw data to Tweet interface
-    return rawData.map(raw => {
+    return filtered.slice(0, limit).map(raw => {
       // Safely parse JSON payload
       let payload: any = {};
       try {

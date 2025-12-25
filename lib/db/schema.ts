@@ -132,6 +132,7 @@ export const twitterAccounts = sqliteTable("twitter_accounts", {
     category: text("category").default("genel"), // siyaset, ekonomi, spor, medya, etc.
     priority: integer("priority").default(0).notNull(), // 0-10, fetch priority
     is_active: integer("is_active", { mode: "boolean" }).default(true).notNull(),
+    show_in_live_feed: integer("show_in_live_feed", { mode: "boolean" }).default(false).notNull(), // Show in /akis live feed
     notes: text("notes"),
     added_by: text("added_by").default("admin"),
     created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),

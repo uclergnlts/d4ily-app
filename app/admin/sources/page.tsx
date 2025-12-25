@@ -13,6 +13,7 @@ interface TwitterAccount {
     display_name: string | null;
     category: string;
     priority: number;
+    show_in_live_feed?: boolean;
     is_active: boolean;
     notes: string | null;
 }
@@ -301,6 +302,7 @@ export default function SourcesManagementPage() {
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Username</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Kategori</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Öncelik</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Canlı Akış</th>
                                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Durum</th>
                                                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">İşlemler</th>
                                             </tr>
@@ -315,6 +317,13 @@ export default function SourcesManagementPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm">{account.priority}</td>
+                                                    <td className="px-4 py-3 text-sm">
+                                                        {account.show_in_live_feed ? (
+                                                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">Evet</span>
+                                                        ) : (
+                                                            <span className="text-gray-400 text-xs">-</span>
+                                                        )}
+                                                    </td>
                                                     <td className="px-4 py-3">
                                                         <button
                                                             onClick={() => handleToggleActive(account.id, account.is_active, 'twitter')}
@@ -493,6 +502,18 @@ export default function SourcesManagementPage() {
                                             onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
                                             className="w-full px-3 py-2 border rounded-lg"
                                         />
+                                    </div>
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <input
+                                            type="checkbox"
+                                            id="showInLiveFeed"
+                                            checked={formData.show_in_live_feed || false}
+                                            onChange={(e) => setFormData({ ...formData, show_in_live_feed: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-300 text-accent focus:ring-accent"
+                                        />
+                                        <label htmlFor="showInLiveFeed" className="text-sm font-medium text-gray-700">
+                                            Canlı Akışta Göster (/akis)
+                                        </label>
                                     </div>
                                 </>
                             ) : (
