@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { runFetchTweets, runFetchNews, runGenerateDigest } from '@/lib/crons';
+import { checkCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 300; // 5 minutes max duration for Vercel Hobby
 
 export async function GET(request: Request) {
-    const authHeader = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
 
     const now = new Date();
     const hour = now.getUTCHours();

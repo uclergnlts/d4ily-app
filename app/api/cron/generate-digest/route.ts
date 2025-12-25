@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { runGenerateDigest } from "@/lib/crons";
+import { checkCronAuth } from "@/lib/cron-auth";
 
 export const maxDuration = 300; // 5 minutes
 
 export async function GET(request: Request) {
-    // keeping it open or add auth check if preferred, original didn't emphasize it but good practice
-    /* 
-    const authHeader = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return new Response('Unauthorized', { status: 401 });
-    }
-    */
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
 
     try {
         const result = await runGenerateDigest();

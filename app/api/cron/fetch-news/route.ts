@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { runFetchNews } from "@/lib/crons";
+import { checkCronAuth } from "@/lib/cron-auth";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
+
     try {
         const result = await runFetchNews();
         return NextResponse.json(result);

@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { runFetchTweets } from '@/lib/crons';
+import { checkCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 300; // 5 minutes max duration for Vercel/Next.js
 
 export async function GET(request: Request) {
-    const authHeader = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const unauthorized = checkCronAuth(request);
+    if (unauthorized) return unauthorized;
 
     try {
         const result = await runFetchTweets();
