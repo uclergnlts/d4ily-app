@@ -42,16 +42,14 @@ export default async function LiveFeedPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-8">
-                        {/* Masonry Layout Container */}
-                        <div className="columns-1 md:columns-2 gap-6 space-y-6">
+                        {/* Single Column Feed for Strict Chronological Order */}
+                        <div className="flex flex-col gap-6">
                             {tweets.length > 0 ? (
                                 tweets.map((tweet) => (
-                                    <div key={tweet.id + '-' + tweet.created_at} className="break-inside-avoid mb-6">
-                                        <TweetCard tweet={tweet} />
-                                    </div>
+                                    <TweetCard key={tweet.id} tweet={tweet} />
                                 ))
                             ) : (
-                                <div className="col-span-full text-center py-12 text-muted-foreground bg-card rounded-2xl border border-dashed border-border/60">
+                                <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-dashed border-border/60">
                                     <p>Henüz akışa düşen tweet bulunamadı.</p>
                                 </div>
                             )}
