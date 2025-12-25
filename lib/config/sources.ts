@@ -65,6 +65,20 @@ export const TWITTER_USERS = [
     "Ahmet_Davutoglu",
     "Temel_Karamollaoglu",
     "fahrettinaltun", // İletişim Başkanı
+    "omerrcelik",     // Ömer Çelik (AK Parti Sözcüsü)
+    "avdenizyucel",   // Deniz Yücel (CHP Sözcüsü)
+    "alimahir",       // Ali Mahir Başarır (CHP Grup Başkanvekili)
+    "aysegul__dogan", // Ayşegül Doğan (DEM Parti Sözcüsü)
+    "zorlu77",        // Kürşad Zorlu
+    "birolaydinsp",   // Birol Aydın (Saadet Sözcüsü)
+    "avidrissahin",   // İdris Şahin (DEVA Sözcüsü)
+    "SerkanRamanli",  // Serkan Ramanlı (HÜDA PAR Sözcüsü)
+    "suleymansoylu",  // Süleyman Soylu
+    "drfahrettinkoca",// Fahrettin Koca
+    "varank",         // Mustafa Varank
+    "cenginyurt52",   // Cemal Enginyurt
+    "serakadigil",    // Sera Kadıgil
+    "ComezTurhan",    // Turhan Çömez
 
     "HDPgenelmerkezi", // DEM Parti (Eski HDP)
     // --- Spor (Büyük Kulüpler & Yorumcular) ---
