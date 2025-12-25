@@ -2,10 +2,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Database, FileText, Play, RefreshCw, Server, AlertCircle, CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Activity, Database, FileText, Play, RefreshCw, Server, AlertCircle, CheckCircle, Edit, Calendar, Settings } from "lucide-react";
 
 export default function AdminStatusPage() {
+    const router = useRouter();
     const [stats, setStats] = useState<any>(null);
+    const [recentDigests, setRecentDigests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -38,9 +41,22 @@ export default function AdminStatusPage() {
         }
     };
 
+    const fetchRecentDigests = async () => {
+        try {
+            const res = await fetch("/api/admin/recent-digests");
+            const data = await res.json();
+            if (data.success) {
+                setRecentDigests(data.digests || []);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchStats();
+            fetchRecentDigests();
             const interval = setInterval(fetchStats, 30000); // Poll every 30s
             return () => clearInterval(interval);
         }
@@ -123,6 +139,13 @@ export default function AdminStatusPage() {
                         <p className="text-gray-500 text-sm mt-1">Operasyonel Kontrol Merkezi</p>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => router.push('/admin/sources')}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                        >
+                            <Settings className="w-4 h-4" />
+                            Kaynak Yönetimi
+                        </button>
                         <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${stats?.health?.status === 'operational' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                             }`}>
                             <span className={`w-2 h-2 rounded-full ${stats?.health?.status === 'operational' ? 'bg-green-500' : 'bg-red-500'
@@ -215,6 +238,43 @@ export default function AdminStatusPage() {
                             {actionLoading === 'Haftalık Özet' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                             Haftalık Özeti Oluştur
                         </button>
+                    </div>
+                </div>
+
+                {/* Recent Digests */}
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Edit className="w-5 h-5 text-accent" />
+                        Son Özetler
+                    </h3>
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {recentDigests.length === 0 ? (
+                            <p className="text-gray-500 text-sm">Henüz özet yok</p>
+                        ) : (
+                            recentDigests.map((digest: any) => (
+                                <div
+                                    key={digest.id}
+                                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Calendar className="w-4 h-4 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-sm">{digest.title || 'Başlıksız'}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {digest.digest_date} • {digest.category || 'gundem'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => router.push(`/admin/edit/${digest.id}`)}
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90 transition-all"
+                                    >
+                                        <Edit className="w-3 h-3" />
+                                        Düzenle
+                                    </button>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seed Sources</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        button { padding: 15px 30px; font-size: 16px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        button:hover { background: #4f46e5; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <h1>Kaynak Veritabanını Doldur</h1>
+    <p>Bu butona tıklayarak 108 Twitter hesabı ve 7 RSS kaynağını veritabanına ekleyebilirsin.</p>
+    <button onclick="seedSources()">Kaynakları Ekle</button>
+    <div id="result"></div>
+
+    <script>
+        async function seedSources() {
+            const result = document.getElementById('result');
+            result.innerHTML = '⏳ Ekleniyor...';
+            result.className = '';
+
+            try {
+                const response = await fetch('/api/admin/seed-sources', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    result.innerHTML = `✅ Başarılı!<br>Twitter: ${data.twitter} hesap<br>RSS: ${data.rss} kaynak<br>Toplam: ${data.total}`;
+                    result.className = 'success';
+                } else {
+                    result.innerHTML = `❌ Hata: ${data.error}`;
+                    result.className = 'error';
+                }
+            } catch (error) {
+                result.innerHTML = `❌ Bağlantı Hatası: ${error.message}`;
+                result.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>

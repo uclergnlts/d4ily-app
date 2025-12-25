@@ -8,6 +8,13 @@
       "when": 1766494743925,
       "tag": "0000_little_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1766670156325,
+      "tag": "0001_slow_eternals",
+      "breakpoints": true
     }
   ]
 }

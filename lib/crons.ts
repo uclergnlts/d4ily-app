@@ -8,6 +8,7 @@ import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-dat
 import { searchUnsplashImage } from "@/lib/image-search";
 import { TweetProcessor } from '@/lib/processor';
 import { sql } from 'drizzle-orm';
+import { getActiveTwitterAccounts, getActiveRSSSources } from "@/lib/sources";
 
 // --- Tweet Fetching Logic ---
 export async function runFetchTweets() {
@@ -17,11 +18,14 @@ export async function runFetchTweets() {
     let totalInserted = 0;
     const errors: string[] = [];
 
-    // OPTIMIZATION: Process a random subset of users per run to ensure coverage over time
-    const shuffled = [...TWITTER_USERS].sort(() => 0.5 - Math.random());
-    const usersToProcess = shuffled.slice(0, 20);
+    // Get active Twitter accounts from database
+    const activeTwitterUsers = await getActiveTwitterAccounts();
 
-    console.log(`Processing ${usersToProcess.length} users (random selection) out of ${TWITTER_USERS.length} total`);
+    // OPTIMIZATION: Process a random subset of users per run to ensure coverage over time
+    const shuffled = [...activeTwitterUsers].sort(() => 0.5 - Math.random());
+    const usersToProcess = shuffled.slice(0, Math.min(20, activeTwitterUsers.length));
+
+    console.log(`Processing ${usersToProcess.length} users (random selection) out of ${activeTwitterUsers.length} total`);
 
     const BATCH_SIZE = 5;
     for (let i = 0; i < usersToProcess.length; i += BATCH_SIZE) {
@@ -73,7 +77,7 @@ export async function runFetchTweets() {
         success: true,
         message: `Fetched ${totalFetched} tweets, inserted ${totalInserted} new ones.`,
         processed: usersToProcess.length,
-        total_users: TWITTER_USERS.length,
+        total_users: activeTwitterUsers.length,
         errors: errors.length > 0 ? errors : undefined,
         timestamp: new Date().toISOString()
     };
@@ -84,7 +88,10 @@ export async function runFetchNews() {
     try {
         const results = [];
 
-        for (const url of RSS_FEEDS) {
+        // Get active RSS sources from database
+        const activeRSSFeeds = await getActiveRSSSources();
+
+        for (const url of activeRSSFeeds) {
             console.log(`Fetching RSS: ${url}...`);
             const feed = await fetchRssFeed(url);
 

@@ -124,3 +124,30 @@ export const weeklyDigests = sqliteTable("weekly_digests", {
     updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
     cover_image_url: text("cover_image_url"),
 });
+
+export const twitterAccounts = sqliteTable("twitter_accounts", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    username: text("username").notNull().unique(),
+    display_name: text("display_name"),
+    category: text("category").default("genel"), // siyaset, ekonomi, spor, medya, etc.
+    priority: integer("priority").default(0).notNull(), // 0-10, fetch priority
+    is_active: integer("is_active", { mode: "boolean" }).default(true).notNull(),
+    notes: text("notes"),
+    added_by: text("added_by").default("admin"),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const rssSources = sqliteTable("rss_sources", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    url: text("url").notNull().unique(),
+    name: text("name").notNull(),
+    category: text("category").default("gundem"),
+    is_active: integer("is_active", { mode: "boolean" }).default(true).notNull(),
+    fetch_interval: integer("fetch_interval").default(240), // Minutes (4 hours)
+    last_fetched_at: text("last_fetched_at"),
+    notes: text("notes"),
+    added_by: text("added_by").default("admin"),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
