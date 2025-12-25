@@ -5,6 +5,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { MessageSquare, Heart, Repeat2, ExternalLink, RefreshCw } from "lucide-react"
 import { TrendingHashtags } from "@/components/trending-hashtags"
+import { LiveFeedInfoCard } from "@/components/live-feed-info-card"
 import { AutoRefreshClient } from "@/components/auto-refresh-client"
 
 export const revalidate = 60 // Revalidate every minute
@@ -40,6 +41,8 @@ export default async function LiveFeedPage() {
                     </div>
                 </div>
 
+                <LiveFeedInfoCard className="mb-6 lg:hidden" />
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-8">
                         {/* Single Column Feed for Strict Chronological Order */}
@@ -57,19 +60,8 @@ export default async function LiveFeedPage() {
                     </div>
                     <div className="lg:col-span-4">
                         <div className="sticky top-24 space-y-6">
-                            {/* Mini Info Card */}
-                            <div className="rounded-2xl bg-gradient-to-br from-blue-500/5 to-purple-500/5 border border-primary/10 p-6">
-                                <h3 className="font-serif font-bold text-lg mb-2 flex items-center gap-2">
-                                    <span className="relative flex h-3 w-3">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                                    </span>
-                                    Canlı Yayın
-                                </h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    Şu anda takip edilen 60+ kişisel hesaptan (gazeteci, siyasetçi, uzman) gelen veriler anlık olarak akmaktadır.
-                                </p>
-                            </div>
+                            {/* Mini Info Card - Desktop Only */}
+                            <LiveFeedInfoCard className="hidden lg:block" />
 
                             <TrendingHashtags />
                         </div>

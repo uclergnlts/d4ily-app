@@ -152,3 +152,11 @@ export const rssSources = sqliteTable("rss_sources", {
     created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
     updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
+
+export const officialGazetteSummaries = sqliteTable("official_gazette_summaries", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    date: text("date").notNull().unique(), // YYYY-MM-DD
+    summary_markdown: text("summary_markdown").notNull(),
+    gazette_url: text("gazette_url").notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});

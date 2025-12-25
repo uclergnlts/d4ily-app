@@ -206,3 +206,15 @@ export async function generateWeeklyDigest(
         throw error;
     }
 }
+
+export async function generateWithGemini(prompt: string): Promise<string | null> {
+    if (!apiKey) return null;
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("Error generating generic content with Gemini:", error);
+        return null; // Or throw depending on preference. Returning null is safer for non-critical features.
+    }
+}

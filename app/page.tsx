@@ -39,15 +39,23 @@ export const metadata: Metadata = {
 
 import { Ticker } from "@/components/ticker"
 
+import { MarketWidget } from "@/components/market-widget"
+import { OfficialGazetteCard } from "@/components/official-gazette-card"
+import { getOfficialGazetteSummary } from "@/lib/services/official-gazette"
+
 export default async function HomePage() {
   const latestDigestDate = await getLatestDigestDate()
   const recentDigests = await getArchiveDigests()
   const trendingTopics = await getTrendingTopics(7)
   const latestPodcast = await getLatestPodcastEpisode()
   const latestWeekly = await getLatestWeeklyDigest()
+  const gazetteSummary = await getOfficialGazetteSummary()
 
   const recentSix = recentDigests.slice(0, 6)
   const totalDigests = recentDigests.length
+
+  // ... rest of the code ...
+
 
   const faqJsonLd = {
     "@context": "https://schema.org",
