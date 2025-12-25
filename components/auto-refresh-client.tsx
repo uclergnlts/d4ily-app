@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,8 +12,9 @@ export function AutoRefreshClient() {
         const interval = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
+                    // Refresh the page data
                     router.refresh();
-                    return 60;
+                    return 60; // Reset timer
                 }
                 return prev - 1;
             });
@@ -23,10 +23,25 @@ export function AutoRefreshClient() {
         return () => clearInterval(interval);
     }, [router]);
 
+    // Manual refresh button
+    const handleManualRefresh = () => {
+        setTimeLeft(60);
+        router.refresh();
+    };
+
     return (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-1.5 rounded-full transition-all duration-500">
-            <RefreshCw className={`h-3 w-3 ${timeLeft < 5 ? 'animate-spin' : ''}`} />
-            <span>{timeLeft}sn içinde yenilenecek</span>
+        <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 px-3 py-1.5 rounded-full transition-all duration-500">
+                <RefreshCw className={`h-3 w-3 ${timeLeft < 5 ? 'animate-spin' : ''}`} />
+                <span>{timeLeft}sn içinde yenilenecek</span>
+            </div>
+            <button
+                onClick={handleManualRefresh}
+                className="p-2 rounded-full hover:bg-secondary/80 transition-colors"
+                title="Şimdi Yenile"
+            >
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            </button>
         </div>
     );
 }
