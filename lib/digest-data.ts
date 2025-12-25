@@ -676,7 +676,6 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
       .select()
       .from(tweetsRaw)
       .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
-      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
       .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
       .limit(limit * 3) // Fetch more to allow for filtering
 
