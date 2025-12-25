@@ -668,26 +668,18 @@ export const revalidate = 60
 export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
   try {
     // Get live feed accounts
-    const { getLiveFeedTwitterAccounts } = await import('@/lib/sources');
-    const liveFeedAccounts = await getLiveFeedTwitterAccounts();
+    // We use the hardcoded PERSONAL_ACCOUNTS list from config to ensure strict filtering
+    // regardless of database state (which might have sync/caching issues).
+    const { PERSONAL_ACCOUNTS } = await import('@/lib/config/sources');
 
-    // Fetch raw data (fetched in last 12 hours)
-    const rawData = await db
-      .select()
-      .from(tweetsRaw)
-      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
-      .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
-      .limit(limit * 3) // Fetch more to allow for filtering
-
-    // Filter by live feed accounts
-    // If no live feed accounts are set, show all (fallback) or none depending on preference.
-    // Let's fallback to all if list is empty to avoid empty screen, or respect the emptiness.
-    // User asked "Only personal accounts", so we should respect that.
+    // Filter by live feed accounts (Strict Personal Accounts Only)
+    // Case-insensitive check just in case
+    const allowedUsernames = new Set(PERSONAL_ACCOUNTS.map(u => u.toLowerCase()));
 
     let filtered = rawData;
-    if (liveFeedAccounts.length > 0) {
+    if (allowedUsernames.size > 0) {
       filtered = rawData.filter(tweet =>
-        tweet.author_username && liveFeedAccounts.includes(tweet.author_username)
+        tweet.author_username && allowedUsernames.has(tweet.author_username.toLowerCase())
       );
     }
 

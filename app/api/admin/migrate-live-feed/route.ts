@@ -11,11 +11,12 @@ export async function GET() {
 
         // Add column using raw SQL
         // Note: If column exists, this will fail - that's OK
+        let migrationResult = "";
         try {
-            await db.run(sql.raw('ALTER TABLE twitter_accounts ADD COLUMN show_in_live_feed INTEGER DEFAULT 0 NOT NULL'));
-            console.log("Column added successfully");
+            await db.run(sql.raw('ALTER TABLE twitter_accounts ADD COLUMN show_in_live_feed INTEGER DEFAULT 0'));
+            migrationResult = "Column added successfully";
         } catch (e: any) {
-            console.log("Column might already exist:", e.message);
+            migrationResult = "Error adding column: " + e.message;
         }
 
         // Update personal accounts
@@ -49,6 +50,7 @@ export async function GET() {
         return NextResponse.json({
             success: true,
             message: "Migration completed",
+            migrationResult,
             updated,
             total: personalAccounts.length
         });
