@@ -8,9 +8,11 @@ on:
 jobs:
   digest:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Generate Digest
         run: |
-          curl -X GET "${{ secrets.VERCEL_URL }}/api/cron/generate-digest" \
+          curl -sS -X GET "${{ secrets.VERCEL_URL }}/api/cron/generate-digest" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json"
+            -H "Content-Type: application/json" \
+            --fail
