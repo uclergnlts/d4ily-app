@@ -39,7 +39,17 @@ export function TrendingHashtags() {
     }
 
     if (hashtags.length === 0) {
-        return null
+        return (
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm text-center">
+                <div className="flex items-center gap-2 mb-4 justify-center opacity-50">
+                    <TrendingUp className="h-5 w-5" />
+                    <h2 className="font-bold text-lg">Gündemde</h2>
+                </div>
+                <div className="py-6 text-muted-foreground flex flex-col items-center gap-2">
+                    <span className="text-sm">Henüz veri yok.</span>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -54,16 +64,16 @@ export function TrendingHashtags() {
                 {hashtags.map((item, idx) => (
                     <div
                         key={item.tag}
-                        className="group flex items-center justify-between p-3 rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+                        className="group flex items-center justify-between p-3 rounded-lg hover:bg-secondary/50 active:scale-95 transition-all cursor-pointer duration-200"
                     >
                         <div className="flex items-center gap-3">
                             <span className="text-xs font-bold text-muted-foreground w-6">#{idx + 1}</span>
-                            <Hash className="h-4 w-4 text-primary" />
+                            <Hash className="h-4 w-4 text-primary transition-transform group-hover:rotate-12" />
                             <span className="font-medium group-hover:text-primary transition-colors">
                                 {item.tag.replace('#', '')}
                             </span>
                         </div>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                             {item.count} tweet
                         </span>
                     </div>

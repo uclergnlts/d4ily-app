@@ -1,23 +1,29 @@
 # D4ily - Türkiye Gündem Özeti
 
-Yapay zeka destekli günlük Türkiye gündem özeti platformu.
+Yapay zeka destekli günlük Türkiye gündem özeti platformu. Haber gürültüsünden uzak, sadece önemli gelişmeleri sunar.
 
 ## Özellikler
 
-- Günlük haber özetleri
-- Sesli podcast (Spotify entegrasyonu)
-- Önemli tweet'ler
-- Konu bazlı arşiv
-- Tepki sistemi
-- Newsletter aboneliği
-- Sosyal medya paylaşım kartları
+- **Günlük Gündem Özeti (AI):** Son 24 saatteki tweet ve haberlerden oluşturulan tarafsız özet.
+- **Canlı Akış (X/Twitter):** Politikacılar ve gazetecilerin tweetleri (Saatlik güncellenir).
+- **Resmi Gazete Özeti:** Her gece 00:00'da yayınlanan kararların AI özeti.
+- **Piyasa Verileri:** BIST100, Dolar, Altın verileri ile zenginleştirilmiş içerik.
+- **Sesli Okuma:** Günlük özetlerin sesli versiyonu (OpenAI TTS).
+- **Haftalık Bülten:** Haftanın öne çıkan olayları.
+
+## Yeni Özellikler (v1.1) 🚀
+
+- **Canlı Akış İyileştirmesi:** Veriler artık **saatlik** olarak güncelleniyor (önceki: 2 saat).
+- **Kapsamlı Kaynaklar:** 20+ yeni politikacı ve yerel yönetici hesabı eklendi.
+- **Tam Metin:** Tweetler artık kısaltılmadan, tam metin olarak gösteriliyor.
+- **Turso DB:** Veritabanı altyapısı Supabase'den Turso (LibSQL)'a taşındı.
 
 ## Kurulum
 
 ### Gereksinimler
 
 - Node.js 18+
-- pnpm (önerilen) veya npm/yarn
+- pnpm (önerilen) veya npm
 
 ### Adımlar
 
@@ -30,103 +36,42 @@ Yapay zeka destekli günlük Türkiye gündem özeti platformu.
 2. **Bağımlılıkları yükleyin:**
    ```bash
    pnpm install
-   # veya
-   npm install
    ```
 
 3. **Ortam değişkenlerini ayarlayın:**
-   ```bash
-   cp .env.local.example .env.local
+   `.env.local` dosyasını oluşturun:
    ```
-   
-   `.env.local` dosyasını açın ve Supabase bilgilerinizi girin:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   TURSO_DATABASE_URL=your-turso-url
+   TURSO_AUTH_TOKEN=your-turso-token
+   GEMINI_API_KEY=your-gemini-key
+   TWITTER_API_KEY=your-twitter-api-key
+   CRON_SECRET=your-cron-secret
    ```
 
-4. **Geliştirme sunucusunu başlatın:**
+4. **Veritabanını Hazırlayın:**
+   ```bash
+   pnpm db:push
+   ```
+
+5. **Geliştirme sunucusunu başlatın:**
    ```bash
    pnpm dev
-   # veya
-   npm run dev
    ```
-
-5. **Tarayıcınızda açın:**
-   ```
-   http://localhost:3000
-   ```
-
-## Supabase Veritabanı Yapısı
-
-### digests tablosu
-
-```sql
-CREATE TABLE digests (
-  id SERIAL PRIMARY KEY,
-  digest_date DATE NOT NULL UNIQUE,
-  title TEXT,
-  summary TEXT,
-  content JSONB,
-  audio_url TEXT,
-  audio_status TEXT DEFAULT 'pending',
-  audio_duration INTEGER,
-  spotify_url TEXT,
-  important_tweets JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Index for faster date queries
-CREATE INDEX idx_digests_date ON digests(digest_date DESC);
-```
-
-### reactions tablosu
-
-```sql
-CREATE TABLE reactions (
-  id SERIAL PRIMARY KEY,
-  digest_id INTEGER REFERENCES digests(id) ON DELETE CASCADE,
-  visitor_id TEXT NOT NULL,
-  reaction_type TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(digest_id, visitor_id, reaction_type)
-);
-
--- Index for faster reaction lookups
-CREATE INDEX idx_reactions_digest ON reactions(digest_id);
-CREATE INDEX idx_reactions_visitor ON reactions(visitor_id);
-```
-
-### subscribers tablosu (opsiyonel)
-
-```sql
-CREATE TABLE subscribers (
-  id SERIAL PRIMARY KEY,
-  email TEXT NOT NULL UNIQUE,
-  subscribed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  is_active BOOLEAN DEFAULT true
-);
-```
 
 ## Proje Yapısı
 
 ```
 d4ily/
 ├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   ├── arsiv/             # Arşiv sayfaları
-│   ├── bugun/             # Bugünün özeti
-│   ├── konu/              # Konu bazlı sayfalar
-│   ├── share-preview/     # Sosyal medya kartı önizleme
+│   ├── api/               # Cron jobs & API endpoints
+│   ├── akis/              # Canlı Akış sayfası
+│   ├── istatistikler/     # İstatistik paneli
 │   └── ...
-├── components/            # React bileşenleri
-│   ├── ui/               # shadcn/ui bileşenleri
-│   └── ...
-├── lib/                   # Yardımcı fonksiyonlar
-│   ├── supabase/         # Supabase client
-│   └── ...
-├── public/               # Statik dosyalar
+├── components/            # UI Bileşenleri
+├── lib/                   # Arka plan iş mantığı
+│   ├── db/               # Turso/Drizzle şeması
+│   ├── crons.ts          # Haber/Tweet çekme botları
+│   └── ai.ts             # Gemini AI entegrasyonu
 └── ...
 ```
 
@@ -136,39 +81,13 @@ d4ily/
 |-------|----------|
 | `pnpm dev` | Geliştirme sunucusunu başlat |
 | `pnpm build` | Production build oluştur |
-| `pnpm start` | Production sunucusunu başlat |
-| `pnpm lint` | Kod kalitesi kontrolü |
-
-## Teknolojiler
-
-- **Framework:** Next.js 16
-- **Styling:** Tailwind CSS v4
-- **UI Components:** shadcn/ui
-- **Database:** Supabase (PostgreSQL)
-- **Icons:** Lucide React
-- **Charts:** Recharts
-- **Deployment:** Vercel
-
-## API Endpoints
-
-| Endpoint | Açıklama |
-|----------|----------|
-| `GET /api/daily-digest/today` | Bugünün özeti |
-| `GET /api/daily-digest/[date]` | Belirli bir tarihin özeti |
-| `GET /api/anchor-rss` | Podcast RSS feed |
-| `GET /api/reactions` | Tepki sistemi |
-| `GET /rss.xml` | Site RSS feed |
+| `pnpm db:push` | Veritabanı şemasını güncelle |
+| `pnpm db:studio` | Veritabanı yönetim paneli |
 
 ## Deployment
 
-Vercel üzerinde deploy etmek için:
-
-1. [Vercel](https://vercel.com)'e gidin
-2. GitHub repo'nuzu bağlayın
-3. Environment variables ekleyin:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Deploy edin
+Vercel üzerinde barındırılmaktadır. `git push` yapıldığında otomatik deploy olur.
+Cron joblar GitHub Actions tarafından tetiklenir (`.github/workflows`).
 
 ## Lisans
 

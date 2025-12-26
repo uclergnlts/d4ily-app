@@ -10,6 +10,13 @@ export const PERSONAL_ACCOUNTS = [
     "ComezTurhan", "MTanal", "Selcuk", "E_SemihYalcin", "buyukataman", "celal_adan",
     "YildizFeti", "memetsimsek",
 
+    // Yeni Eklenenler (Bakanlar & Yerel & Parti)
+    "AliYerlikaya", "Yusuf__Tekin", "cevdetyilmaz", "NumanKurtulmus", "mehmetmus",
+    "AlparslanBayrak", "a_uraloglu", "AbdulkadirUral", "tanjuozcanchp", "Ahmet_Aras",
+    "burcukoksal03", "OzlemCercioglu", "vahap_secer", "zeydankaralar01", "hamzahdag",
+    "mustafaelitas", "yusufziya_yilmaz", "efkan_ala", "gamzetasciyer", "RHisarciklioglu",
+    "vedatbilgn",
+
     // Gazeteciler & Yorumcular
     "nevsinmengu", "cuneytozdemir", "haskologlu", "sakinan1968", "eafyoncu",
     "m_cemilkilic", "merdanyanardag", "candundaradasi", "eceuner12", "emrahgulsunar",

@@ -744,8 +744,8 @@ export async function getLatestRawTweets(limit = 50, beforeId?: string): Promise
         payload = {};
       }
 
-      // Extract text
-      const text = payload.text || payload.fullText || payload.full_text || "No content";
+      // Extract text - Prioritize full text to avoid "..." truncation
+      const text = payload.fullText || payload.full_text || payload.text || "No content";
 
       return {
         id: raw.id,

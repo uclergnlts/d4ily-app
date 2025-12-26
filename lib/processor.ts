@@ -27,7 +27,8 @@ export class TweetProcessor {
         console.log(`🛡️ Filtering spam from ${tweets.length} tweets...`);
 
         return tweets.filter(t => {
-            const text = (t.text || t.full_text || t.raw_payload?.text || "").toLowerCase();
+            const payload = t.raw_payload || {};
+            const text = (payload.fullText || payload.full_text || payload.text || t.text || "").toLowerCase();
             const username = (t.author?.userName || t.author_username || "").toLowerCase();
 
             // Check blocked users
@@ -53,11 +54,14 @@ export class TweetProcessor {
         if (tweets.length === 0) return [];
 
         // Normalize structure
-        const candidates = tweets.map(t => ({
-            id: t.id,
-            text: (t.text || t.full_text || t.raw_payload?.text || "").toLowerCase(),
-            original: t
-        }));
+        const candidates = tweets.map(t => {
+            const payload = t.raw_payload || {};
+            return {
+                id: t.id,
+                text: (payload.fullText || payload.full_text || payload.text || t.text || "").toLowerCase(),
+                original: t
+            };
+        });
 
         const uniqueTweets: any[] = [];
         const seenTexts = new Set<string>();

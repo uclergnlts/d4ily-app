@@ -20,7 +20,7 @@ export default function ShareButtons({ title, date }: ShareButtonsProps = {}) {
       await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {}
+    } catch (err) { }
   }
 
   const handleTwitterShare = () => {
@@ -45,7 +45,7 @@ export default function ShareButtons({ title, date }: ShareButtonsProps = {}) {
 
       <button
         onClick={handleTwitterShare}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] transition-all hover:bg-[#1DA1F2] hover:text-white"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1DA1F2]/10 text-[#1DA1F2] transition-all hover:bg-[#1DA1F2] hover:text-white active:scale-90"
         aria-label="Twitter'da paylaş"
       >
         <Twitter className="h-4 w-4" />
@@ -53,7 +53,7 @@ export default function ShareButtons({ title, date }: ShareButtonsProps = {}) {
 
       <button
         onClick={handleWhatsAppShare}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]/10 text-[#25D366] transition-all hover:bg-[#25D366] hover:text-white"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]/10 text-[#25D366] transition-all hover:bg-[#25D366] hover:text-white active:scale-90"
         aria-label="WhatsApp'ta paylaş"
       >
         <MessageCircle className="h-4 w-4" />
@@ -61,7 +61,7 @@ export default function ShareButtons({ title, date }: ShareButtonsProps = {}) {
 
       <button
         onClick={handleTelegramShare}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0088cc]/10 text-[#0088cc] transition-all hover:bg-[#0088cc] hover:text-white"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0088cc]/10 text-[#0088cc] transition-all hover:bg-[#0088cc] hover:text-white active:scale-90"
         aria-label="Telegram'da paylaş"
       >
         <Send className="h-4 w-4" />
@@ -70,7 +70,7 @@ export default function ShareButtons({ title, date }: ShareButtonsProps = {}) {
       <button
         onClick={handleCopyLink}
         className={
-          "flex h-9 w-9 items-center justify-center rounded-full transition-all " +
+          "flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-90 " +
           (copied
             ? "bg-green-500 text-white"
             : "bg-secondary text-muted-foreground hover:bg-primary hover:text-primary-foreground")

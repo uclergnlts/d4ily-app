@@ -102,7 +102,7 @@ export function TweetCard({ tweet }: TweetCardProps) {
                         href={tweet.tweet_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold text-primary/80 hover:text-primary transition-colors flex items-center gap-1"
+                        className="text-xs font-semibold text-primary/80 hover:text-primary transition-all active:scale-95 flex items-center gap-1"
                     >
                         X'te Gör
                         <ExternalLink className="h-3 w-3" />
