@@ -18,24 +18,31 @@ export async function GET(request: Request) {
     };
 
     // Schedule Logic:
-    // 1. Fetch Tweets & News: Every 4 hours (0, 4, 8, 12, 16, 20)
+    // 1. Fetch Tweets: Every hour
+    console.log(`[Master Cron] Hour ${hour}: Running tweet fetch...`);
+    try {
+        const tweets = await runFetchTweets();
+        results.fetch_tweets = tweets;
+        results.tasks_run.push('fetch-tweets');
+    } catch (e: any) {
+        console.error("[Master Cron] Tweet fetch error:", e);
+        results.tweets_error = e.message;
+    }
+
+    // 2. Fetch News: Every 4 hours (0, 4, 8, 12, 16, 20)
     if (hour % 4 === 0) {
-        console.log(`[Master Cron] Hour ${hour}: Running fetch tasks...`);
+        console.log(`[Master Cron] Hour ${hour}: Running news fetch...`);
         try {
-            const [tweets, news] = await Promise.all([
-                runFetchTweets(),
-                runFetchNews()
-            ]);
-            results.fetch_tweets = tweets;
+            const news = await runFetchNews();
             results.fetch_news = news;
-            results.tasks_run.push('fetch-tweets', 'fetch-news');
+            results.tasks_run.push('fetch-news');
         } catch (e: any) {
-            console.error("[Master Cron] Fetch error:", e);
-            results.fetch_error = e.message;
+            console.error("[Master Cron] News fetch error:", e);
+            results.news_error = e.message;
         }
     }
 
-    // 2. Generate Digest: At 06:00 UTC
+    // 3. Generate Digest: At 06:00 UTC
     if (hour === 6) {
         console.log(`[Master Cron] Hour ${hour}: Generating digest...`);
         try {
