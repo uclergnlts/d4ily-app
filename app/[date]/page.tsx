@@ -11,6 +11,8 @@ import { getDigestByDate, getTopTweetsByDate, getArchiveDigests } from "@/lib/di
 import Link from "next/link"
 import { ArrowLeft, Search } from "lucide-react"
 import { SocialShareDialog } from "@/components/social-share-dialog"
+import { ReadingProgress } from "@/components/reading-progress"
+import { ExitIntentPopup } from "@/components/exit-intent-popup"
 
 export const revalidate = 3600
 
@@ -65,7 +67,15 @@ export async function generateMetadata({
     ? digest.intro.slice(0, 160)
     : `${formattedDate} tarihli Türkiye gündem özeti. Günün önemli gelişmeleri ve en çok konuşulan konular.`
 
-  const ogImage = digest?.cover_image_url || "/og-image.jpg"
+  // Determine OG Image
+  // Priority: Dynamic generated image with title > Custom cover image > Default fallback
+  const ogTitle = digest?.title || `Türkiye Gündemi - ${formattedDate}`
+  const dynamicOgUrl = `/api/og?title=${encodeURIComponent(ogTitle)}&date=${date}`
+
+  const images = [dynamicOgUrl]
+  if (digest?.cover_image_url) {
+    images.push(digest.cover_image_url)
+  }
 
   return {
     title,
@@ -82,15 +92,12 @@ export async function generateMetadata({
       modifiedTime: digest?.updated_at || digest?.created_at || date,
       authors: ["D4ily"],
       tags: digest ? extractTopics(digest.content) : [],
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-          type: "image/jpeg",
-        },
-      ],
+      images: images.map(url => ({
+        url,
+        width: 1200,
+        height: 630,
+        alt: title,
+      })),
       locale: "tr_TR",
       siteName: "D4ily",
     },
@@ -98,7 +105,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: [dynamicOgUrl], // Twitter usually picks the first one
       creator: "@d4ilytr",
     },
     other: {
@@ -152,12 +159,14 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
       "@type": "NewsArticle",
       headline: digest.title || "Türkiye Gündem Özeti",
       description: digest.intro || "Günlük Türkiye gündem özeti",
-      image: digest.cover_image_url || "https://d4ily.com/og-image.jpg",
+      image: [
+        digest.cover_image_url || `https://d4ily.com/api/og?title=${encodeURIComponent(digest.title || "Gündem Özeti")}&date=${date}`,
+      ],
       datePublished: digest.created_at || digest.digest_date,
       dateModified: digest.updated_at || digest.created_at || digest.digest_date,
       author: {
         "@type": "Organization",
-        name: "D4ily",
+        name: "D4ily Editör Ekibi",
         url: "https://d4ily.com",
       },
       publisher: {
@@ -166,6 +175,8 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
         logo: {
           "@type": "ImageObject",
           url: "https://d4ily.com/icons/icon-512x512.jpg",
+          width: 512,
+          height: 512
         },
       },
       mainEntityOfPage: {
@@ -174,6 +185,16 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
       },
       inLanguage: "tr-TR",
       isAccessibleForFree: true,
+      keywords: extractTopics(digest.content).join(", "),
+      copyrightYear: new Date(digest.digest_date).getFullYear(),
+      copyrightHolder: {
+        "@type": "Organization",
+        name: "D4ily"
+      },
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["#audio-summary-container", "h1", ".digest-intro"]
+      }
     }
     : null
 
@@ -264,6 +285,8 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
       )}
 
       <Footer />
+      <ReadingProgress />
+      <ExitIntentPopup />
     </div>
   )
 }

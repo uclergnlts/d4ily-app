@@ -1,8 +1,8 @@
 name: Generate Daily Digest
 on:
   schedule:
-    # Her gün 06:00 UTC'de çalışır (Türkiye saati 09:00)
-    - cron: '0 6 * * *'
+    # Her gün 03:30 UTC'de çalışır (Türkiye saati 06:30)
+    - cron: '30 3 * * *'
   workflow_dispatch: # Manuel tetikleme için
 
 jobs:

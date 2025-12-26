@@ -14,7 +14,7 @@ const SPAM_KEYWORDS = [
     "yasal bahis", "promosyon", "şans oyunları"
 ];
 
-const BLOCKED_USERS = [
+const BLOCKED_USERS: string[] = [
     // Add known spammer usernames here if needed
 ];
 

@@ -220,7 +220,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
   // LOADING UI
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-6">
+      <div id="audio-summary-container" className="mx-auto max-w-3xl px-4 py-6">
         <div className="overflow-hidden rounded-2xl bg-zinc-900 p-5 shadow-xl">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-zinc-800 overflow-hidden">
@@ -256,7 +256,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
   // No episode but Spotify exists -> Spotify button card
   if (!episode && spotifyUrl) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-6">
+      <div id="audio-summary-container" className="mx-auto max-w-3xl px-4 py-6">
         <div className="overflow-hidden rounded-2xl bg-zinc-900 p-5 shadow-xl">
           <div className="flex items-center gap-4">
             <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#1DB954] to-[#169c46]">
@@ -325,7 +325,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
   // No episode -> "not ready" card (or error)
   if (!episode) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-6">
+      <div id="audio-summary-container" className="mx-auto max-w-3xl px-4 py-6">
         <div className="overflow-hidden rounded-2xl bg-zinc-900 p-5 shadow-xl">
           <div className="flex items-center gap-4">
             <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-zinc-800">
@@ -447,9 +447,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
             </p>
           </div>
 
-          <span className="text-sm text-zinc-400 tabular-nums">
-            {audioDuration > 0 ? formatTime(audioDuration) : episode.duration || "--:--"}
-          </span>
+          <span className="hidden md:block text-xs text-zinc-500">D4ily AI</span>
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-6">

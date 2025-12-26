@@ -41,7 +41,7 @@ export async function generateDailyDigest(
     ).join("\n");
 
     const newsText = news.map(n =>
-        `- ${n.title} (${n.source_name}): ${n.summary_raw?.substring(0, 200)}...`
+        `- ${n.title} (${n.source_name}): ${n.summary_raw?.substring(0, 200)}... URL: ${n.url}`
     ).join("\n");
 
     const marketText = marketData ? `
@@ -59,62 +59,78 @@ export async function generateDailyDigest(
     
     TASK:
     Analyze the provided Tweets, News, and Financial Data to create a comprehensive, long-form daily digest in TURKISH.
-    Your goal is to inform the user completely about what happened yesterday and what to expect today.
-    The tone should be professional, objective, insightful, and engaging. Avoid superficial summaries; provide context.
+    Your goal is not just to summarize, but to provide a deep, narrative-driven analysis of the day's agenda.
+    The output must be detailed, structured, and extensive (comparable to a professional diverse news briefing).
     
     INPUT DATA:
     
     ${marketText}
 
     --- TWEETS (Social Media Pulse & Reactions) ---
-    ${tweetsText.substring(0, 25000)} 
+    ${tweetsText.substring(0, 30000)} 
     
     --- NEWS (Mainstream Headlines) ---
-    ${newsText.substring(0, 15000)}
+    ${newsText.substring(0, 25000)}
     
     REQUIREMENTS & STRUCTURE (Strictly Follow This):
 
-    *** CRITICAL LENGTH CONSTRAINT ***
-    The 'content' field MUST contain AT LEAST 1250 CHARACTERS.
-    - If your draft is under 1250 characters, ADD MORE DETAIL, MORE ANALYSIS, MORE CONTEXT
-    - Expand "Detaylı Gündem Analizi" with extensive analysis, quotes, and background information
-    - Include specific examples, data points, and perspectives
-    - Provide historical context and explain implications
+    *** CRITICAL CITATION RULE ***
+    - **ALWAYS cite sources explicitly.**
+    - Use Markdown links for citations using this exact format: \`[Kaynak Adı veya Metni](URL "Haber Başlığı")\`
+    - Example: "...bu durum \`[NTV'nin haberine göre](https://ntv.com.tr/... "NTV: Enflasyon Rakamları Açıklandı")\` piyasaları etkiledi."
+    - If citing a tweet: \`[@username](https://x.com/username/status/... "Tweet İçeriği")\` şeklinde belirt.
+
+    *** CRITICAL LENGTH & DEPTH CONSTRAINT ***
+    - The 'content' field MUST be concise but detailed (Target: 1500-2000 characters).
+    - Do NOT be overly verbose. Focus on the most critical information.
+    - If a topic is complex, break it down but keep it tight.
+    - Use a professional, objective, yet engaging journalist tone.
+    - **Start with a warm opening:** e.g., "${date} sabahından herkese merhaba, Türkiye gündemini birlikte gözden geçirelim."
+
+    **STRUCTURE FOR 'content' FIELD (Markdown):**
+
+    [Intro Paragraph]
+    - Write a cohesive paragraph (2-3 sentences) summarizing the general mood of the country.
+
+    ---
+
+    ## Günün Ana Başlıkları (Maddeli Özet)
+    - Select 5-7 MAJOR topics.
+    - Format each topic as a main bullet with a **Bold Headline**, followed by a brief summary line.
+    - Under each main bullet, add 2-3 sub-bullets (nested) with SPECIFIC details (data, quotes).
+    - **Example Format:**
+      - **Konu Başlığı**: Konunun özeti.
+        - Detay 1: ... (Use citation links here!)
+        - Detay 2: ...
+
+    ---
+
+    ## Dün Dikkat Çeken Eğilimler
+    - Analyze 3-4 broader trends/patterns observed.
+    - Keep this section sharp and insightful.
+
+    ---
+
+    ## Bugün İzlenmesi Gereken Başlıklar
+    - List 3-5 specific items/events to watch today.
+
+    **End with a short concluding sentence.**
     
-    1. **Title**: A catchy, powerful headline summarizing the biggest story.
-    2. **Intro**: 2-3 sentences setting the mood of the day.
+    ---------------------------------------------------------
     
-    3. **Content (Markdown Body)**:
-       MUST include the following sections with H2 (##) headers:
-       
-       ## 📋 Dünün Öne Çıkan Gelişmeleri
-       - Provide a bulleted list of 5-7 distinct important events from yesterday.
-       - Each bullet should be 1-2 sentences. 
-       - Cover different topics (Politics, Economy, Sports, World).
-       
-       ## 🔍 Detaylı Gündem Analizi
-       - This is the main body. Select the top 2-3 most discussed topics and analyze them in depth.
-       - WRITE AT LEAST 3-4 PARAGRAPHS per topic. Do not be brief.
-       - **Crucial**: Cite specific tweets or news sources provided in the input. Example: "X kullanıcısı @username'in belirttiği gibi..." or "NTV'nin haberine göre...".
-       - Explain WHY this matters and what the background is.
-       
-       ## 📅 Bugün Takip Edilmesi Gereken Başlıklar
-       - A section dedicated to what is expected to happen today or strictly followed.
-       - List 3-5 items to watch out for (meetings, decisions, matches, etc.).
-       
-    4. **Trends**: Extract 5-7 viral hashtags/keywords.
+    4. **Trends (JSON Field)**: Extract 5-7 viral hashtags/keywords as an array of strings.
     
-    5. **Watchlist**: (For metadata) Return the same items from "Bugün Takip Edilmesi Gereken Başlıklar" as a generic array.
+    5. **Watchlist (JSON Field)**: Return the titles of the items from "Bugün İzlenmesi Gereken Başlıklar" as a generic array.
     
     OUTPUT FORMAT (JSON):
     {
-      "title": "...",
-      "intro": "...",
-      "content": "markdown string...",
+      "title": "A catchy, powerful headline",
+      "intro": "The warm opening sentence + the context paragraph",
+      "content": "The full markdown string starting from '---' divider downwards",
       "trends": ["...", "..."],
       "watchlist": ["...", "..."]
     }
-  `;
+    `;
 
     try {
         const result = await jsonModel.generateContent(prompt);

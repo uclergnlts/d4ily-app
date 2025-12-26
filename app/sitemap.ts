@@ -88,5 +88,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   })
 
-  return [...staticPages, ...digestPages, ...monthlyArchivePages]
+  // Categories
+  const categories = ["gundem", "siyaset", "ekonomi", "spor"]
+  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${baseUrl}/kategori/${category}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }))
+
+  const trendingTopics = await import("@/lib/digest-data").then(mod => mod.getTrendingTopics(20)).catch(() => [])
+
+  const topicPages: MetadataRoute.Sitemap = trendingTopics.map((topic) => ({
+    url: `${baseUrl}/konu/${topic.word.toLowerCase()}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 0.6,
+  }))
+
+  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...monthlyArchivePages]
 }

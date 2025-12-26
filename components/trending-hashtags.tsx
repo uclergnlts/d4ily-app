@@ -27,7 +27,7 @@ export function TrendingHashtags() {
             <div className="rounded-xl border border-border bg-card p-6">
                 <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="h-5 w-5 text-orange-500" />
-                    <h3 className="font-bold text-lg">Gündemde</h3>
+                    <h2 className="font-bold text-lg">Gündemde</h2>
                 </div>
                 <div className="space-y-2">
                     {[1, 2, 3].map(i => (
@@ -46,7 +46,7 @@ export function TrendingHashtags() {
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="h-5 w-5 text-orange-500 animate-pulse" />
-                <h3 className="font-bold text-lg">Gündemde</h3>
+                <h2 className="font-bold text-lg">Gündemde</h2>
                 <span className="text-xs text-muted-foreground ml-auto">Son 24 saat</span>
             </div>
 

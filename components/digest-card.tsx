@@ -14,17 +14,46 @@ import {
   Building2,
   Users,
   Flame,
+  ExternalLink,
 } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface DigestCardProps {
   digest: Digest | null
   showHeader?: boolean
 }
 
-function parseBoldText(text: string): React.ReactNode[] {
+// Helper component for tooltips
+function LinkTooltip({ text, url, title }: { text: string; url: string; title?: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-primary underline decoration-dotted decoration-2 underline-offset-4 hover:decoration-solid hover:text-accent transition-colors cursor-pointer"
+        >
+          {text}
+        </a>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[300px] p-0 overflow-hidden border-border/50 shadow-xl" sideOffset={5}>
+        <div className="bg-popover p-3">
+          {title && <div className="font-semibold text-sm mb-1 line-clamp-2 text-foreground">{title}</div>}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground break-all">
+            <ExternalLink className="h-3 w-3 shrink-0" />
+            <span className="truncate">{url}</span>
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+function parseBoldOnly(text: string, baseKey: number): React.ReactNode[] {
   const parts: React.ReactNode[] = []
   let remaining = text
-  let partKey = 0
+  let partKey = baseKey
 
   while (remaining.length > 0) {
     const startIdx = remaining.indexOf("**")
@@ -47,7 +76,7 @@ function parseBoldText(text: string): React.ReactNode[] {
 
     const boldText = afterStart.substring(0, endIdx)
     parts.push(
-      <strong key={"bold-" + partKey++} className="font-semibold text-foreground">
+      <strong key={`bold-${partKey++}`} className="font-semibold text-foreground">
         {boldText}
       </strong>,
     )
@@ -55,6 +84,45 @@ function parseBoldText(text: string): React.ReactNode[] {
   }
 
   return parts.length > 0 ? parts : [text]
+}
+
+function parseRichText(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = []
+  let remaining = text
+  let key = 0
+
+  while (remaining.length > 0) {
+    const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/)
+
+    if (!linkMatch || linkMatch.index === undefined) {
+      parts.push(...parseBoldOnly(remaining, key))
+      break
+    }
+
+    if (linkMatch.index > 0) {
+      const beforeLink = remaining.substring(0, linkMatch.index)
+      parts.push(...parseBoldOnly(beforeLink, key))
+    }
+
+    const linkText = linkMatch[1]
+    const urlPart = linkMatch[2]
+    const titleMatch = urlPart.match(/^([^ ]+) "(.*)"$/)
+    const url = titleMatch ? titleMatch[1] : urlPart.split(' ')[0]
+    const title = titleMatch ? titleMatch[2] : (urlPart.includes('"') ? urlPart.split('"')[1] : undefined)
+
+    parts.push(
+      <LinkTooltip
+        key={`link-${key++}`}
+        text={linkText}
+        url={url}
+        title={title}
+      />
+    )
+
+    remaining = remaining.substring(linkMatch.index + linkMatch[0].length)
+  }
+
+  return parts
 }
 
 function getCoverImage(title: string, content: string): string {
@@ -125,7 +193,7 @@ function parseContent(content: string) {
       const text = currentParagraph.join(" ")
       elements.push(
         <p key={key++} className="mb-6 text-base leading-loose text-foreground/90 sm:text-lg">
-          {parseBoldText(text)}
+          {parseRichText(text)}
         </p>,
       )
       currentParagraph = []
@@ -149,7 +217,7 @@ function parseContent(content: string) {
       flushParagraph()
       if (sectionCount > 0) {
         const variants = ["dots", "line", "icon"] as const
-        elements.push(<SectionDivider key={"divider-" + key++} variant={variants[sectionCount % 3]} />)
+        elements.push(<SectionDivider key={`divider-${key++}`} variant={variants[sectionCount % 3]} />)
       }
       sectionCount++
       const title = trimmedLine.substring(3)
@@ -194,7 +262,7 @@ function parseContent(content: string) {
       elements.push(
         <ul key={key++} className="mb-4 list-disc pl-6 space-y-2">
           <li className="text-base leading-relaxed text-foreground/90 sm:text-lg pl-2 marker:text-primary">
-            {parseBoldText(content)}
+            {parseRichText(content)}
           </li>
         </ul>,
       )

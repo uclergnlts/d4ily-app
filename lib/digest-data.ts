@@ -665,7 +665,7 @@ export const revalidate = 60
  * Fetch raw tweets for live feed
  * Only returns tweets from personal accounts (show_in_live_feed=true)
  */
-export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
+export async function getLatestRawTweets(limit = 50, beforeId?: string): Promise<Tweet[]> {
   try {
     // Get live feed accounts
     // We use the hardcoded PERSONAL_ACCOUNTS list from config to ensure strict filtering
@@ -680,7 +680,10 @@ export async function getLatestRawTweets(limit = 50): Promise<Tweet[]> {
     const rawData = await db
       .select()
       .from(tweetsRaw)
-      .where(sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`)
+      .where(and(
+        sql`${tweetsRaw.fetched_at} >= datetime('now', '-24 hours')`,
+        beforeId ? lte(tweetsRaw.tweet_id, beforeId) : undefined
+      ))
       .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
       .limit(limit * 3) // Fetch more to allow for filtering
 

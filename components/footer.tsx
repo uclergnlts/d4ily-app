@@ -42,7 +42,7 @@ export default function Footer() {
     <footer className="border-t border-border bg-card px-4 py-8">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 pb-8 border-b border-border">
-          <h3 className="text-center text-lg font-semibold text-foreground mb-4">S.S.S</h3>
+          <h2 className="text-center text-lg font-semibold text-foreground mb-4">S.S.S</h2>
           <div className="max-w-2xl mx-auto space-y-2">
             {faqs.map((faq, index) => (
               <div key={index} className="border border-border rounded-lg overflow-hidden">

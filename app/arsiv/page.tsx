@@ -12,6 +12,16 @@ const pageData = {
   archiveDescription: "Son 30 günün özetlerine göz atın",
 }
 
+export async function generateMetadata(): Promise<import("next").Metadata> {
+  return {
+    title: "Arşiv - D4ily",
+    description: "Geçmiş günlerin Türkiye gündem özetlerine göz atın. Siyaset, ekonomi, spor ve daha fazlası.",
+    alternates: {
+      canonical: "https://d4ily.com/arsiv",
+    },
+  }
+}
+
 export default async function ArsivPage() {
   const initialDigests = await getArchiveDigests()
 

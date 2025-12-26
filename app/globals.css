@@ -139,6 +139,11 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Global Focus Visibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-serif);

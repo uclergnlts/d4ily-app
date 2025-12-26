@@ -61,16 +61,17 @@ export function SocialShareCard({
     setIsDownloading(true)
 
     try {
-      const { toPng } = await import("html-to-image")
+      const html2canvas = (await import("html2canvas")).default
 
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        style: {
-          transform: 'scale(1)', // Avoid scaling issues
-        },
-        pixelRatio: 2, // High resolution
-        filter: (node) => node.tagName !== 'BUTTON', // Ignore buttons
+      const canvas = await html2canvas(cardRef.current, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2, // High resolution
+        backgroundColor: "#18181b", // zinc-900 matches background
+        logging: false,
       })
+
+      const dataUrl = canvas.toDataURL("image/png")
 
       const link = document.createElement("a")
       link.download = `d4ily-${date}.png`
@@ -107,19 +108,37 @@ export function SocialShareCard({
     <div className="flex flex-col gap-4 w-full max-w-[540px] mx-auto">
       <div
         ref={cardRef}
-        className={`w-full ${variant === "story" ? "aspect-[9/16]" : "aspect-square"} bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-6 sm:p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-xl shadow-2xl`}
+        style={{ backgroundColor: "#18181b" }} // Fallback HEX
+        className={`w-full ${variant === "story" ? "aspect-[9/16]" : "aspect-square"} p-6 sm:p-8 md:p-10 flex flex-col justify-between relative overflow-hidden rounded-xl shadow-2xl`}
       >
+        {/* Gradient Background using Standard CSS */}
+        <div
+          className="absolute inset-0 z-0 bg-zinc-900"
+          style={{ background: "linear-gradient(to bottom right, #18181b, #27272a, #18181b)" }}
+        />
+
         {coverImageUrl && (
           <>
             {/* Cover Background */}
             <div className="absolute inset-0 z-0">
-              <img src={coverImageUrl} alt="" className="w-full h-full object-cover opacity-30" />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-900/80 to-zinc-900/60" />
+              <img
+                src={coverImageUrl}
+                alt=""
+                className="w-full h-full object-cover opacity-30"
+                crossOrigin="anonymous"
+              />
+              <div
+                className="absolute inset-0"
+                style={{ background: "linear-gradient(to top, #09090b, rgba(24, 24, 27, 0.8), rgba(24, 24, 27, 0.6))" }}
+              />
             </div>
           </>
         )}
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-950/20 via-transparent to-purple-950/10" />
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to top right, rgba(23, 37, 84, 0.2), transparent, rgba(59, 7, 100, 0.1))" }}
+        />
 
         {/* Noise texture overlay */}
         <div
@@ -135,23 +154,29 @@ export function SocialShareCard({
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-0.5">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">d4ily</h1>
-              <div className="flex items-center gap-1.5 text-zinc-400 text-sm sm:text-base">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white" style={{ color: '#ffffff' }}>d4ily</h1>
+              <div className="flex items-center gap-1.5 text-sm sm:text-base" style={{ color: '#a1a1aa' }}>
                 <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>{formatDate(date)}</span>
               </div>
             </div>
             {/* Day number badge */}
-            <div className="flex flex-col items-center justify-center bg-white/10 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm">
-              <span className="text-3xl sm:text-4xl font-black text-white leading-none">{getDayNumber(date)}</span>
-              <span className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-wider">Gün</span>
+            <div
+              className="flex flex-col items-center justify-center rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-sm"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+            >
+              <span className="text-3xl sm:text-4xl font-black leading-none" style={{ color: '#ffffff' }}>{getDayNumber(date)}</span>
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider" style={{ color: '#a1a1aa' }}>Gün</span>
             </div>
           </div>
 
           {/* Main content - centered */}
           <div className="flex-1 flex flex-col justify-center py-4 sm:py-6">
             {/* Headline */}
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight mb-4 sm:mb-6 text-balance line-clamp-3">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight mb-4 sm:mb-6 text-balance line-clamp-3"
+              style={{ color: '#ffffff' }}
+            >
               {headline}
             </h2>
 
@@ -159,26 +184,35 @@ export function SocialShareCard({
             <ul className="space-y-1.5 sm:space-y-2">
               {bulletPoints.slice(0, 4).map((point, index) => (
                 <li key={index} className="flex items-start gap-2 sm:gap-3">
-                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500 mt-1.5 sm:mt-2 flex-shrink-0" />
-                  <span className="text-sm sm:text-base text-zinc-300 leading-relaxed line-clamp-2">{point}</span>
+                  <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full mt-1.5 sm:mt-2 flex-shrink-0" style={{ backgroundColor: '#3b82f6' }} />
+                  <span className="text-sm sm:text-base leading-relaxed line-clamp-2" style={{ color: '#d4d4d8' }}>{point}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between border-t border-zinc-700/50 pt-3 sm:pt-4">
-            <div className="flex items-center gap-1.5 sm:gap-2 text-zinc-400">
+          <div
+            className="flex items-center justify-between pt-3 sm:pt-4"
+            style={{ borderTop: '1px solid rgba(63, 63, 70, 0.5)' }}
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2" style={{ color: '#a1a1aa' }}>
               <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="text-sm sm:text-base font-medium">{readingTime}</span>
             </div>
-            <span className="text-zinc-500 text-sm sm:text-base font-medium">www.d4ily.com</span>
+            <span className="text-sm sm:text-base font-medium" style={{ color: '#71717a' }}>www.d4ily.com</span>
           </div>
         </div>
 
         {/* Decorative corner accents */}
-        <div className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 w-32 h-32 sm:w-48 sm:h-48 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-16 -left-16 sm:-bottom-24 sm:-left-24 w-32 h-32 sm:w-48 sm:h-48 bg-purple-500/10 rounded-full blur-3xl" />
+        <div
+          className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 w-32 h-32 sm:w-48 sm:h-48 rounded-full blur-3xl"
+          style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+        />
+        <div
+          className="absolute -bottom-16 -left-16 sm:-bottom-24 sm:-left-24 w-32 h-32 sm:w-48 sm:h-48 rounded-full blur-3xl"
+          style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)' }}
+        />
       </div>
 
       {showDownload && (
@@ -205,3 +239,4 @@ export function SocialShareCard({
     </div>
   )
 }
+

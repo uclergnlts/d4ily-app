@@ -11,11 +11,13 @@ const merriweather = Merriweather({
   weight: ["300", "400", "700", "900"],
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
 })
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-display",
+  display: "swap",
 })
 
 export const metadata: Metadata = {

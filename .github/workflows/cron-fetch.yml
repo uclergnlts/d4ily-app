@@ -2,8 +2,8 @@ name: Fetch Tweets & News
 
 on:
   schedule:
-    # Her 4 saatte bir çalışır (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
-    - cron: "0 */4 * * *"
+    # Her 2 saatte bir çalışır (00:00, 02:00, ... UTC)
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 jobs:

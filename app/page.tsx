@@ -15,15 +15,23 @@ import {
   Mic,
   PlayCircle,
   FileText,
+  ScanSearch,
+  BrainCircuit,
+  Newspaper,
+  Calendar,
+  MessageSquare
 } from "lucide-react"
 import { getLatestDigestDate, getArchiveDigests, getTrendingTopics, getLatestWeeklyDigest } from "@/lib/digest-data"
 import { NewsletterForm } from "@/components/newsletter-form"
 import { getLatestPodcastEpisode } from "@/lib/podcast"
-import { TrendingHashtags } from "@/components/trending-hashtags"
-import { MessageSquare, Calendar } from "lucide-react"
+import { MarketWidget } from "@/components/market-widget"
+import { OfficialGazetteCard } from "@/components/official-gazette-card"
+import { getOfficialGazetteSummary } from "@/lib/services/official-gazette"
+import { PodcastScrollLink } from "@/components/podcast-scroll-link"
+import { Ticker } from "@/components/ticker"
 
 export const metadata: Metadata = {
-  title: "D4ily - Türkiye Günlük Haber Özeti | 5 Dakikada Gündem",
+  title: "D4ily - Türkiye Gündemi, En Saf Haliyle",
   description:
     "Türkiye gündemini her gün yapay zeka ile analiz edip özetliyoruz. 500+ tweet hesabı, 50+ haber kaynağı. Sabah kahvenizi içerken 5 dakikada tüm önemli gelişmeleri öğrenin.",
   alternates: {
@@ -31,17 +39,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "D4ily - Türkiye Günlük Haber Özeti",
-    description: "Türkiye gündemini her gün yapay zeka ile analiz edip 5 dakikada tüm önemli gelişmeler.",
+    description: "Bilgi kirliliğinden arındırılmış, yapay zeka destekli günlük haber özeti.",
     url: "https://d4ily.com",
     type: "website",
   },
 }
 
-import { Ticker } from "@/components/ticker"
-
-import { MarketWidget } from "@/components/market-widget"
-import { OfficialGazetteCard } from "@/components/official-gazette-card"
-import { getOfficialGazetteSummary } from "@/lib/services/official-gazette"
+export const revalidate = 0;
 
 export default async function HomePage() {
   const latestDigestDate = await getLatestDigestDate()
@@ -54,9 +58,6 @@ export default async function HomePage() {
   const recentSix = recentDigests.slice(0, 6)
   const totalDigests = recentDigests.length
 
-  // ... rest of the code ...
-
-
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -66,47 +67,7 @@ export default async function HomePage() {
         name: "D4ily nedir?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "D4ily, Türkiye gündemini her gün yapay zeka ile analiz edip 5 dakikada okuyabileceğiniz şekilde özetleyen bir haber platformudur. 500+ tweet hesabı ve 50+ haber kaynağından bilgi toplarız.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Güncellemeler ne zaman yapılır?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "D4ily her gün sabah saat 06:00'da güncellenir. Böylece kahvaltınızı yaparken günün tüm önemli gelişmelerini öğrenebilirsiniz.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Ücretsiz mi?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Evet, D4ily tamamen ücretsizdir. Tüm günlük özetlere ve arşive herkes erişebilir.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Sesli özet nedir?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Her günlük özetin sesli versiyonu da mevcuttur. Okumaya vaktiniz yoksa, podcast gibi dinleyerek gündemi takip edebilirsiniz.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Hangi konular ele alınıyor?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "D4ily'de Türkiye siyaseti, ekonomi, uluslararası ilişkiler, spor, teknoloji ve güncel olaylar gibi geniş bir yelpazede konular ele alınmaktadır.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Haber kaynaklarınız neler?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "500'den fazla doğrulanmış Twitter hesabı, 50'den fazla haber sitesi ve resmi kurumların açıklamalarını yapay zeka ile analiz ediyoruz.",
+          text: "D4ily, Türkiye gündemini her gün yapay zeka ile analiz edip 5 dakikada okuyabileceğiniz şekilde özetleyen yeni nesil bir haber platformudur.",
         },
       },
     ],
@@ -134,86 +95,119 @@ export default async function HomePage() {
       <Navigation />
 
       <main className="flex-1 w-full">
-        {/* --- HERO SECTION --- */}
-        <section className="relative pt-12 pb-20 md:pt-32 lg:pb-40 overflow-hidden w-full">
-          {/* Background Elements */}
-          <div className="absolute top-0 left-1/2 -z-10 h-[300px] w-[300px] md:h-[600px] md:w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-[60px] md:blur-[100px]" />
-          <div className="absolute top-20 -right-12 md:right-0 -z-10 h-[200px] w-[200px] md:h-[400px] md:w-[400px] rounded-full bg-blue-500/5 blur-[40px] md:blur-[80px]" />
+        {/* --- HERO SECTION (REFINED) --- */}
+        <section className="relative pt-20 pb-20 md:pt-32 lg:pb-32 overflow-hidden w-full bg-background border-b border-border/30">
+          {/* Subtle Background */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+            <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/3 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-500/3 rounded-full blur-[100px]" />
+          </div>
 
-          <div className="container mx-auto px-4 md:px-6 relative z-10 max-w-7xl">
-            <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6 md:space-y-8 animate-fade-in-up">
+          <div className="container mx-auto px-4 md:px-6 relative z-10 max-w-5xl text-center">
 
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs md:text-sm font-medium text-primary backdrop-blur-sm transition-colors hover:bg-primary/10">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Yapay Zeka Destekli Gündem Analizi</span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs md:text-sm font-medium text-primary mb-8 animate-fade-in">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Yapay Zeka Destekli Gündem Analizi</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold font-display tracking-tight text-foreground leading-[1.1] mb-6">
+              Bilgi Kirliliğinde Kaybolma, <br className="hidden md:block" />
+              <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                Gündeme Hakim Ol.
+              </span>
+            </h1>
+
+            <p className="text-lg sm:text-2xl text-muted-foreground/90 max-w-2xl mx-auto leading-relaxed mb-10 font-medium">
+              Binlerce haber, tweet ve resmi açıklamayı analiz ediyoruz.
+              Size sadece en saf, rafine ve doğrulanmış özeti sunuyoruz.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+              <Link
+                href={`/${latestDigestDate}`}
+                className="group relative inline-flex h-14 w-full sm:w-auto items-center justify-center rounded-full bg-foreground px-8 text-lg font-semibold text-background transition-all hover:bg-foreground/90 hover:scale-[1.02] shadow-xl shadow-black/5"
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Bugünün Özetini Oku
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+
+              <PodcastScrollLink />
+            </div>
+
+            {/* TRUST GRID (SIMPLIFIED) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 border-t border-border/40 pt-10 px-4">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl md:text-3xl font-bold text-foreground">500+</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Kaynak Taranıyor</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl md:text-3xl font-bold text-foreground">07:00</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Her Sabah Yayında</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl md:text-3xl font-bold text-foreground">5 Dk</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Okuma Süresi</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl md:text-3xl font-bold text-foreground">%100</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Yapay Zeka & Editör</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* --- HOW IT WORKS (NEW) --- */}
+        <section className="py-16 border-b border-border/40 bg-zinc-50/50 dark:bg-zinc-900/20">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold font-serif mb-3">Nasıl Çalışır?</h2>
+              <p className="text-muted-foreground">Karmaşık gündemi sizin için nasıl sadeleştiriyoruz?</p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 relative">
+              {/* Connector Lines (Desktop) */}
+              <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-border via-primary/30 to-border z-0" />
+
+              {/* Step 1 */}
+              <div className="relative z-10 bg-background/50 backdrop-blur border border-border/50 rounded-2xl p-6 text-center shadow-sm">
+                <div className="w-16 h-16 mx-auto bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center text-blue-600 mb-4 shadow-sm">
+                  <ScanSearch className="h-8 w-8" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">1. Veri Tarama</h3>
+                <p className="text-sm text-muted-foreground">Twitter'da doğrulanmış 500+ gazeteci, haber ajansı ve resmi kurumun paylaşımları taranır.</p>
               </div>
 
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1] md:leading-[1.1]">
-                Türkiye Gündemi, <br className="hidden md:block" />
-                <span className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent">
-                  Saniyeler İçinde
-                </span>{" "}
-                Önünüzde.
-              </h1>
-
-              {/* Subheadline */}
-              <p className="text-base sm:text-xl text-muted-foreground max-w-2xl leading-relaxed px-2">
-                Her sabah binlerce tweet ve yüzlerce haberi sizin için tarıyor,
-                analiz ediyor ve <span className="text-foreground font-semibold">5 dakikalık</span> sade bir özete dönüştürüyoruz.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col w-full sm:flex-row sm:w-auto gap-3 pt-2 md:pt-4">
-                <Link
-                  href={`/${latestDigestDate}`}
-                  className="group inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:scale-105 active:scale-95"
-                >
-                  Bugünün Özetini Oku
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link
-                  href="/arsiv"
-                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-full border border-input bg-background/50 backdrop-blur-sm px-8 text-base font-medium transition-all hover:bg-accent hover:text-accent-foreground"
-                >
-                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                  Geçmiş Özetler
-                </Link>
+              {/* Step 2 */}
+              <div className="relative z-10 bg-background/50 backdrop-blur border border-border/50 rounded-2xl p-6 text-center shadow-sm">
+                <div className="w-16 h-16 mx-auto bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center text-purple-600 mb-4 shadow-sm">
+                  <BrainCircuit className="h-8 w-8" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">2. AI Analizi</h3>
+                <p className="text-sm text-muted-foreground">D4ily AI motoru; tekrarlananları eler, tık tuzağı başlıkları ayıklar ve konuyu özüne indirger.</p>
               </div>
 
-              {/* Social Proof / Stats */}
-              <div className="pt-8 md:pt-12 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 w-full border-t border-border/40 mt-8 md:mt-12">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xl md:text-2xl font-bold font-serif">500+</span>
-                  <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Tweet Kaynağı</span>
+              {/* Step 3 */}
+              <div className="relative z-10 bg-background/50 backdrop-blur border border-border/50 rounded-2xl p-6 text-center shadow-sm">
+                <div className="w-16 h-16 mx-auto bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center text-green-600 mb-4 shadow-sm">
+                  <Newspaper className="h-8 w-8" />
                 </div>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xl md:text-2xl font-bold font-serif">50+</span>
-                  <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Haber Sitesi</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xl md:text-2xl font-bold font-serif">{totalDigests}+</span>
-                  <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Yayınlanan Özet</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xl md:text-2xl font-bold font-serif">07:00</span>
-                  <span className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider">Her Sabah</span>
-                </div>
+                <h3 className="font-bold text-lg mb-2">3. Günlük Özet</h3>
+                <p className="text-sm text-muted-foreground">Her sabah 07:00'de, okunması 5 dakika süren rafine bir bülten ve sesli özet sunulur.</p>
               </div>
-
             </div>
           </div>
         </section>
 
-        {/* --- DAILY BRIEF: Market & Gazette --- */}
-        <section className="py-8 border-b border-border/40 bg-zinc-50/50 dark:bg-zinc-900/20 w-full">
+        {/* --- MARKET & GAZETTE --- */}
+        <section className="py-12 border-b border-border/40 w-full bg-background">
           <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-              <div className="lg:col-span-2">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Piyasalar</h3>
-                  <span className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded font-bold">CANLI</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-serif font-bold text-xl">Piyasalarda Son Durum</h3>
+                  <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 </div>
                 <MarketWidget />
               </div>
@@ -224,87 +218,13 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* --- FEATURE HIGHLIGHTS (BENTO GRID STYLE) --- */}
-        <section className="py-12 md:py-24 bg-secondary/20 border-y border-border/50 w-full">
+        {/* --- LATEST DIGESTS --- */}
+        <section className="py-16 md:py-24 bg-secondary/10 w-full">
           <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="text-center mb-10 md:mb-16 max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif">Neden D4ily?</h2>
-              <p className="text-muted-foreground text-base md:text-lg">
-                Bilgi kirliliğinde kaybolmayın. Size sadece bilmeniz gerekenleri, en saf haliyle sunuyoruz.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
-              {/* Card 1: AI Power */}
-              <div className="md:col-span-2 group relative overflow-hidden rounded-3xl bg-card border border-border/50 p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 h-48 w-48 md:h-64 md:w-64 rounded-full bg-purple-500/10 blur-3xl group-hover:bg-purple-500/20 transition-all" />
-                <div className="relative z-10 flex flex-col md:flex-row gap-4 md:gap-6 items-start">
-                  <div className="flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Zap className="h-6 w-6 md:h-7 md:w-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg md:text-xl font-bold mb-2">Gelişmiş AI Filtreleme</h3>
-                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-                      Sıradan haber toplayıcıların aksine, D4ily yapay zekası içeriği "anlar".
-                      Aynı haberin kopyalarını eler, tık tuzağı başlıkları görmezden gelir ve
-                      sadece gerçeği özüne sadık kalarak özetler.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Time */}
-              <div className="group relative overflow-hidden rounded-3xl bg-card border border-border/50 p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute top-0 right-0 -mr-10 h-32 w-32 rounded-full bg-orange-500/10 blur-2xl group-hover:bg-orange-500/15 transition-all" />
-                <div className="flex h-12 w-12 md:h-14 md:w-14 mb-4 md:mb-6 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600">
-                  <Clock className="h-6 w-6 md:h-7 md:w-7" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold mb-2">5 Dakika Yeter</h3>
-                <p className="text-muted-foreground text-sm md:text-base">
-                  Saatlerce kaydırma (doomscrolling) yapmaya son. Kahveniz bitmeden gündeme hakim olun.
-                </p>
-              </div>
-
-              {/* Card 3: Audio */}
-              <div className="group relative overflow-hidden rounded-3xl bg-card border border-border/50 p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute top-0 right-0 -mr-10 h-32 w-32 rounded-full bg-green-500/10 blur-2xl group-hover:bg-green-500/15 transition-all" />
-                <div className="flex h-12 w-12 md:h-14 md:w-14 mb-4 md:mb-6 items-center justify-center rounded-2xl bg-green-500/10 text-green-600">
-                  <Headphones className="h-6 w-6 md:h-7 md:w-7" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold mb-2">Yolda Dinle</h3>
-                <p className="text-muted-foreground text-sm md:text-base">
-                  Okumaya müsait değil misiniz? Podcast tadındaki sesli özetlerimizle yolda, sporda gündemden kopmayın.
-                </p>
-              </div>
-
-              {/* Card 4: Trust */}
-              <div className="md:col-span-2 group relative overflow-hidden rounded-3xl bg-card border border-border/50 p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
-                <div className="absolute top-0 right-0 -mr-16 -mt-16 h-48 w-48 md:h-64 md:w-64 rounded-full bg-blue-500/10 blur-3xl group-hover:bg-blue-500/20 transition-all" />
-                <div className="relative z-10 flex flex-col md:flex-row gap-4 md:gap-6 items-start">
-                  <div className="flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600">
-                    <Shield className="h-6 w-6 md:h-7 md:w-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg md:text-xl font-bold mb-2">Güvenilir & Doğrulanmış Kaynaklar</h3>
-                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-                      Twitter'ın bilgi kirliliğinden arındırılmış bir akış. Sadece doğrulanmış gazeteciler,
-                      resmi kurumlar ve saygın haber portallarının verilerini işliyoruz. Manipülasyona kapalı.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* --- LATEST DIGESTS SHOWCASE --- */}
-        <section className="py-12 md:py-24 w-full">
-          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-12 gap-4">
-              <div className="space-y-2 text-center md:text-left w-full md:w-auto">
-                <h2 className="text-3xl md:text-4xl font-bold font-serif">Son Gündem Özetleri</h2>
-                <p className="text-muted-foreground">Kaçırdığınız günleri arşivden yakalayın.</p>
+            <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+              <div>
+                <h2 className="text-3xl font-bold font-serif mb-2">Gündem Arşivi</h2>
+                <p className="text-muted-foreground">Geçmiş günlerin özetlerine göz atın.</p>
               </div>
               <Link href="/arsiv" className="group hidden md:flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
                 Tüm Arşivi Gör
@@ -318,56 +238,44 @@ export default async function HomePage() {
                 const date = new Date(digest.digest_date)
                 return (
                   <Link key={digest.digest_date} href={`/${digest.digest_date}`} className="group relative block h-full">
-                    <div className="relative h-full overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1">
-                      {/* Header Gradient */}
-                      {/* Header Image or Gradient */}
-                      <div className="h-48 md:h-56 relative p-4 md:p-6 flex flex-col justify-between overflow-hidden">
+                    <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-lg">
+                      {/* Image Area */}
+                      <div className="h-48 relative overflow-hidden bg-muted">
                         {digest.cover_image_url ? (
                           <>
                             <Image
                               src={digest.cover_image_url}
                               alt={digest.title}
                               fill
-                              className="object-cover transition-transform duration-700 group-hover:scale-110"
+                              className="object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                           </>
                         ) : (
-                          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-100 group-hover:opacity-90 transition-opacity`} />
+                          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
                         )}
 
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
-
-                        <div className="relative z-20 flex justify-between items-start text-white">
-                          <div className="flex flex-col">
-                            <span className="text-3xl md:text-5xl font-bold tracking-tighter drop-shadow-md">{date.getDate()}</span>
-                            <span className="text-[10px] md:text-xs font-medium uppercase tracking-widest opacity-90 drop-shadow-sm">
-                              {date.toLocaleDateString("tr-TR", { month: "long" })}
-                            </span>
-                          </div>
-                          <div className="rounded-full bg-white/20 backdrop-blur-md px-2.5 py-1 text-[10px] md:text-xs font-semibold border border-white/10 shadow-sm">
-                            {idx === 0 ? 'Son Yayın' : date.getFullYear()}
-                          </div>
+                        <div className="absolute top-4 left-4 inline-flex items-center rounded-md bg-background/90 px-2 py-1 text-xs font-bold shadow-sm">
+                          {date.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })}
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-                        <h3 className="text-lg md:text-xl font-bold font-serif leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                      {/* Content Area */}
+                      <div className="p-5 flex flex-col h-[200px]">
+                        <h3 className="text-xl font-bold font-serif leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
                           {digest.title || "Günün Gündem Özeti"}
                         </h3>
-                        <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed">
+                        <p className="text-sm text-balance text-muted-foreground line-clamp-3 leading-relaxed mb-auto">
                           {digest.intro}
                         </p>
-                        <div className="pt-2 flex items-center text-xs font-medium text-muted-foreground gap-4">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> 5 dk okuma
+
+                        <div className="pt-4 mt-2 border-t border-border/50 flex items-center justify-between text-xs font-medium text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" /> 5 dk okuma
                           </span>
-                          {idx === 0 && (
-                            <span className="flex items-center gap-1 text-green-600">
-                              <TrendingUp className="h-3 w-3" /> Popüler
-                            </span>
-                          )}
+                          <span className="group-hover:translate-x-1 transition-transform text-primary flex items-center gap-1">
+                            Oku <ArrowRight className="h-3 w-3" />
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -377,154 +285,110 @@ export default async function HomePage() {
             </div>
 
             <div className="mt-8 text-center md:hidden">
-              <Link href="/arsiv" className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+              <Link href="/arsiv" className="btn-secondary w-full justify-center">
                 Tüm Arşivi Gör
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
           </div>
         </section>
 
-        {/* --- WEEKLY DIGEST PREVIEW --- */}
+        {/* --- WEEKLY DIGEST PREVIEW (CLEANER) --- */}
         {latestWeekly && (
-          <section className="py-12 md:py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-950/20 dark:via-blue-950/20 dark:to-cyan-950/20 w-full">
-            <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-              <div className="text-center mb-10 md:mb-12">
-                <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20">
-                  <Calendar className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-600">Haftalık Analiz</span>
+          <section className="py-16 md:py-20 border-y border-border/40 w-full relative overflow-hidden">
+            <div className="absolute inset-0 bg-primary/5 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] opacity-50" />
+
+            <div className="container mx-auto px-4 md:px-6 max-w-5xl">
+              <div className="bg-card border border-border shadow-xl rounded-3xl overflow-hidden md:flex">
+                <div className="md:w-1/3 bg-primary/10 p-8 flex flex-col justify-center items-center text-center border-b md:border-b-0 md:border-r border-border/50">
+                  <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center text-primary mb-4">
+                    <Calendar className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold font-serif mb-1">Haftalık Özeti</h3>
+                  <p className="text-sm text-muted-foreground opacity-80">Son 7 Günün Panoraması</p>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold font-serif mb-3">Bu Haftanın Özeti</h2>
-                <p className="text-muted-foreground">Son 7 günün kapsamlı analizi</p>
-              </div>
-
-              <Link href={`/hafta/${latestWeekly.week_id}`} className="block group">
-                <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-12 transition-all hover:shadow-2xl hover:-translate-y-2">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl group-hover:bg-purple-500/30 transition-all" />
-
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-600 text-xs font-bold uppercase tracking-wide">
-                        Yeni Yayınlandı
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Hafta {latestWeekly.week_number}, {latestWeekly.year}
-                      </span>
-                    </div>
-
-                    <h3 className="text-2xl md:text-3xl font-bold font-serif mb-4 group-hover:text-primary transition-colors">
-                      {latestWeekly.title}
-                    </h3>
-
-                    <p className="text-lg text-muted-foreground mb-6 line-clamp-3">
-                      {latestWeekly.intro}
-                    </p>
-
-                    <div className="flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span>{latestWeekly.digests_count} Günlük Özet</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                        <span>{latestWeekly.tweets_count} Tweet</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 inline-flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
-                      Haftalık Özeti Oku
-                      <ArrowRight className="h-5 w-5" />
-                    </div>
+                <div className="md:w-2/3 p-8 md:p-10 flex flex-col justify-center">
+                  <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-wider text-primary">
+                    <span>Hafta {latestWeekly.week_number}</span>
+                    <span className="w-1 h-1 rounded-full bg-primary" />
+                    <span>{latestWeekly.year}</span>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4">{latestWeekly.title}</h2>
+                  <p className="text-muted-foreground mb-6 line-clamp-2 md:line-clamp-3 leading-relaxed">
+                    {latestWeekly.intro}
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <Link href={`/hafta/${latestWeekly.week_id}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90">
+                      Özeti İncele <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link href="/haftalik-ozet" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+                      Tüm Haftalar
+                    </Link>
                   </div>
                 </div>
-              </Link>
-
-              <div className="mt-6 text-center">
-                <Link href="/haftalik-ozet" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tüm Haftalık Özetleri Gör
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
               </div>
             </div>
           </section>
         )}
 
-        {/* --- TRENDING TOPICS (PILL DESIGN) --- */}
-        <section className="py-12 md:py-16 border-y border-border/40 bg-accent/20 w-full">
-          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="flex items-center gap-3 mb-6 md:mb-8 justify-center">
-              <Flame className="h-5 w-5 md:h-6 md:w-6 text-orange-500 animate-pulse" />
-              <h2 className="text-xl md:text-2xl font-bold font-serif text-center">Bu Hafta Neler Konuşuluyor?</h2>
+        {/* --- TRENDING HASHTAGS --- */}
+        <section className="py-12 bg-background w-full">
+          <div className="container mx-auto px-4 max-w-4xl text-center">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Flame className="h-5 w-5 text-orange-500" />
+              <h2 className="text-xl font-bold font-serif">Sosyal Medya Gündeminde Neler Var?</h2>
             </div>
-
-            <div className="flex flex-wrap justify-center gap-2 md:gap-3 max-w-4xl mx-auto">
-              {trendingTopics.map((topic, i) => (
+            <div className="flex flex-wrap justify-center gap-2">
+              {trendingTopics.map((topic) => (
                 <Link
                   key={topic.word}
                   href={`/konu/${topic.word.toLowerCase()}`}
-                  className="group flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-medium transition-all hover:border-primary hover:shadow-lg hover:-translate-y-0.5"
+                  className="px-4 py-1.5 rounded-full border border-border/60 bg-secondary/30 text-sm hover:border-primary/50 hover:bg-background transition-all"
                 >
-                  <span className="text-primary/50 text-xs font-bold mr-1">#{i + 1}</span>
-                  {topic.word}
-                  {topic.change === 'up' && <TrendingUp className="h-3 w-3 text-green-500 ml-1" />}
+                  #{topic.word}
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* --- PODCAST CTA --- */}
-        <section className="py-12 md:py-24 relative overflow-hidden w-full">
-          <div className="absolute inset-0 bg-neutral-900 -z-20" />
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 -z-10 mix-blend-overlay" />
+        {/* --- PODCAST SECTION (COMPACT) --- */}
+        <section className="py-16 md:py-24 bg-zinc-950 text-white overflow-hidden relative w-full">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
 
-          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center text-white">
-              <div className="space-y-6 md:space-y-8 animate-fade-in-right order-2 md:order-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 rounded-full bg-green-500/20 px-4 py-1.5 text-sm font-medium text-green-400 border border-green-500/30">
-                  <Mic className="h-4 w-4" />
-                  <span>D4ily Podcast</span>
+          <div className="container mx-auto px-4 max-w-6xl relative z-10">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 text-green-400 font-bold tracking-wide text-xs uppercase">
+                  <Headphones className="h-4 w-4" />
+                  Audio Experience
                 </div>
-
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-3xl md:text-5xl font-bold font-serif leading-tight">
-                    Gözlerinizi Dinlendirin, <br />
-                    Kulaklarınızı Açın.
-                  </h2>
-                  {latestPodcast ? (
-                    <div className="flex flex-col gap-1 mt-2">
-                      <span className="text-green-400 text-sm font-semibold tracking-wide uppercase">Son Bölüm Yayında • {new Date(latestPodcast.pubDate).toLocaleDateString('tr-TR')}</span>
-                      <p className="text-white text-lg md:text-xl font-medium line-clamp-2">
-                        {latestPodcast.title}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-
-                <p className="text-neutral-400 text-base md:text-lg leading-relaxed max-w-md mx-auto md:mx-0">
-                  Her sabahın özeti, profesyonel seslendirme ve akıcı bir anlatımla podcast platformlarında.
+                <h2 className="text-4xl md:text-5xl font-bold font-serif leading-tight">
+                  Gözlerinizi dinlendirin. <br />
+                  <span className="text-green-500">Kulağınız bizde olsun.</span>
+                </h2>
+                <p className="text-zinc-400 text-lg leading-relaxed max-w-md">
+                  D4ily Podcast ile gündem, siz neredeyseniz orada. Yapay zeka seslendirmesiyle 5 dakikalık akıcı özetler.
                 </p>
-
-                <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                  <a href={latestPodcast?.link || "https://open.spotify.com/show/1zytVKv9PQmGuKGhWLEzfU?si=d72b6680d2bd4af1"} target="_blank" rel="noopener"
-                    className="flex items-center gap-3 rounded-full bg-[#1DB954] px-6 py-3 md:px-8 md:py-4 font-bold text-black transition-transform hover:scale-105 active:scale-95 text-sm md:text-base">
-                    <PlayCircle className="h-5 w-5 md:h-6 md:w-6 fill-current" />
-                    {latestPodcast ? "Son Bölümü Dinle" : "Spotify'da Dinle"}
+                <div className="flex gap-4 pt-2">
+                  <a href={latestPodcast?.link || "#"} target="_blank" className="inline-flex items-center gap-2 bg-green-500 text-black px-6 py-3 rounded-full font-bold hover:bg-green-400 transition-colors">
+                    <PlayCircle className="h-5 w-5" />
+                    Şimdi Dinle
                   </a>
                 </div>
               </div>
-
-              <div className="relative flex justify-center animate-fade-in-left order-1 md:order-2">
-                <div className="relative w-48 h-48 md:w-80 md:h-80 z-10">
-                  {/* Placeholder for visuals or album art. Using a stylized div for now */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-green-500 to-blue-600 rounded-3xl rotate-6 opacity-30 blur-lg animate-pulse" />
-                  <div className="absolute inset-0 bg-neutral-800 rounded-3xl border border-neutral-700 shadow-2xl flex items-center justify-center overflow-hidden">
-                    <Image
-                      src="/podcast-cover.png"
-                      alt="Podcast Cover"
-                      width={320} height={320}
-                      className="object-cover w-full h-full hover:scale-110 transition-transform duration-700"
-                    />
+              <div className="relative">
+                <div className="relative aspect-square max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
+                  <Image
+                    src="/podcast-cover.png"
+                    alt="D4ily Podcast"
+                    width={600} height={600}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
+                    <div>
+                      <p className="text-green-400 text-sm font-bold mb-1">YENİ BÖLÜM</p>
+                      <p className="text-xl font-bold line-clamp-2">{latestPodcast?.title || "Bugünün Gündem Özeti"}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -532,15 +396,11 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* --- FINAL CTA --- */}
-        <section className="py-20 md:py-32 text-center bg-background relative overflow-hidden w-full">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-primary/5 rounded-full blur-[60px] md:blur-[120px] -z-10" />
-          <div className="container mx-auto px-4 max-w-7xl">
-            <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 md:mb-6 tracking-tight">E-Bültene Abone Olun</h2>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto mb-8 md:mb-10">
-              Her sabah 07:00'da gündemi mail kutunuza getirelim. Ücretsiz.
-            </p>
-
+        {/* --- NEWSLETTER CTA (MINIMALIST) --- */}
+        <section className="py-20 bg-background text-center w-full border-t border-border">
+          <div className="container mx-auto px-4 max-w-md">
+            <h2 className="text-2xl font-bold font-serif mb-3">Günü Kaçırmayın</h2>
+            <p className="text-muted-foreground mb-8">Her sabah 07:00'de gündem cebinizde.</p>
             <NewsletterForm />
           </div>
         </section>

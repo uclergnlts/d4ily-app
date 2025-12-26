@@ -14,19 +14,19 @@ interface HeroSectionProps {
 export default function HeroSection({ title, intro, date, coverImage, greetingText }: HeroSectionProps) {
   const formattedDate = date
     ? new Date(date).toLocaleDateString("tr-TR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : new Date().toLocaleDateString("tr-TR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -95,6 +95,7 @@ export default function HeroSection({ title, intro, date, coverImage, greetingTe
               height={450}
               className="h-auto w-full object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, 800px"
             />
           </div>
         )}

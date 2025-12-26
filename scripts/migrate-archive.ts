@@ -80,7 +80,7 @@ async function migrateArchive() {
                 });
 
                 // Clean content
-                content = content.replace(/Sosyal Paylaşım Kartı Oluştur.*/s, ''); // Remove UI elements text
+                content = content.replace(/Sosyal Paylaşım Kartı Oluştur[\s\S]*/, ''); // Remove UI elements text
 
                 // Intro (First paragraph)
                 const intro = $$('main .max-w-4xl p').first().text().trim().substring(0, 300);
