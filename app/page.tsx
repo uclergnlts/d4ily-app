@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 0;
+export const revalidate = 600;
 
 export default async function HomePage() {
   const latestDigestDate = await getLatestDigestDate()
