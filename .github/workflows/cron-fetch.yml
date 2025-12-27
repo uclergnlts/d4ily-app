@@ -14,14 +14,14 @@ jobs:
     steps:
       - name: Fetch Tweets
         run: |
-          curl -sS -X GET "${{ secrets.VERCEL_URL }}/api/cron/fetch-tweets" \
+          curl -L -sS -X GET "https://d4ily.com/api/cron/fetch-tweets" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
 
       - name: Fetch News
         run: |
-          curl -sS -X GET "${{ secrets.VERCEL_URL }}/api/cron/fetch-news" \
+          curl -L -sS -X GET "https://d4ily.com/api/cron/fetch-news" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail

@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Generate Digest
         run: |
-          curl -sS -X GET "${{ secrets.VERCEL_URL }}/api/cron/generate-digest" \
+          curl -L -sS -X GET "https://d4ily.com/api/cron/generate-digest" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
