@@ -1,0 +1,140 @@
+
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { sql } from 'drizzle-orm';
+
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const secret = searchParams.get('secret');
+
+        if (secret !== process.env.ADMIN_SECRET) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        console.log("🛠️ Setting up CORE database tables via Admin Endpoint...");
+        const results = [];
+
+        // --- 1. tweets_raw ---
+        await db.run(sql`
+            CREATE TABLE IF NOT EXISTS tweets_raw (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                tweet_id TEXT NOT NULL,
+                source TEXT DEFAULT 'apify/x' NOT NULL,
+                published_at TEXT,
+                fetched_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                lang TEXT,
+                author_username TEXT,
+                retweet_count INTEGER,
+                reply_count INTEGER,
+                like_count INTEGER,
+                quote_count INTEGER,
+                view_count INTEGER,
+                bookmark_count INTEGER,
+                raw_payload TEXT NOT NULL
+            )
+        `);
+        await db.run(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS tweets_raw_tweet_id_unique ON tweets_raw (tweet_id)
+        `);
+        results.push("tweets_raw created");
+
+        // --- 2. news_raw ---
+        await db.run(sql`
+            CREATE TABLE IF NOT EXISTS news_raw (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                source_id TEXT,
+                source_name TEXT,
+                title TEXT,
+                url TEXT NOT NULL,
+                published_at TEXT,
+                fetched_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                lang TEXT,
+                summary_raw TEXT,
+                raw_payload TEXT NOT NULL
+            )
+        `);
+        await db.run(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS news_raw_url_unique ON news_raw (url)
+        `);
+        results.push("news_raw created");
+
+        // --- 3. daily_digests ---
+        await db.run(sql`
+            CREATE TABLE IF NOT EXISTS daily_digests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                digest_date TEXT NOT NULL,
+                title TEXT,
+                intro TEXT,
+                content TEXT NOT NULL,
+                trends TEXT,
+                watchlist TEXT,
+                tweets_count INTEGER,
+                news_count INTEGER,
+                model_name TEXT,
+                prompt_version TEXT,
+                status TEXT DEFAULT 'generated' NOT NULL,
+                error_message TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                published_at TEXT,
+                audio_url TEXT,
+                audio_duration_seconds INTEGER,
+                audio_status TEXT DEFAULT 'pending',
+                audio_voice TEXT,
+                date TEXT DEFAULT CURRENT_DATE NOT NULL,
+                word_count INTEGER DEFAULT 0 NOT NULL,
+                published INTEGER DEFAULT 0 NOT NULL,
+                cover_image_url TEXT,
+                greeting_text TEXT,
+                spotify_url TEXT,
+                category TEXT DEFAULT 'gundem'
+            )
+        `);
+        await db.run(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS daily_digests_digest_date_unique ON daily_digests (digest_date)
+        `);
+        results.push("daily_digests created");
+
+        // --- 4. weekly_digests ---
+        await db.run(sql`
+            CREATE TABLE IF NOT EXISTS weekly_digests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                week_id TEXT NOT NULL,
+                year INTEGER NOT NULL,
+                week_number INTEGER NOT NULL,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                title TEXT NOT NULL,
+                intro TEXT,
+                content TEXT NOT NULL,
+                highlights TEXT,
+                trends TEXT,
+                digests_count INTEGER DEFAULT 0,
+                tweets_count INTEGER DEFAULT 0,
+                news_count INTEGER DEFAULT 0,
+                model_name TEXT,
+                status TEXT DEFAULT 'generated' NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                cover_image_url TEXT
+            )
+        `);
+        await db.run(sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS weekly_digests_week_id_unique ON weekly_digests (week_id)
+        `);
+        results.push("weekly_digests created");
+
+        return NextResponse.json({
+            success: true,
+            results: results,
+            message: "All core tables setup completed!"
+        });
+
+    } catch (error: any) {
+        console.error("Database setup failed:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
