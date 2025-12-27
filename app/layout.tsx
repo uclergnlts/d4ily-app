@@ -1,24 +1,10 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Merriweather, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
 import ReadingProgress from "@/components/reading-progress"
 import ScrollToTop from "@/components/scroll-to-top"
 import "./globals.css"
-
-const merriweather = Merriweather({
-  weight: ["300", "400", "700", "900"],
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-})
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://d4ily.com"),
@@ -128,7 +114,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="tr" className={`${merriweather.variable} ${playfairDisplay.variable}`}>
+    <html lang="tr">
       <head>
         <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="icon" href="/favicon.png" type="image/png" />
