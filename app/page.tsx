@@ -48,12 +48,21 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const latestDigestDate = await getLatestDigestDate()
-  const recentDigests = await getArchiveDigests()
-  const trendingTopics = await getTrendingTopics(7)
-  const latestPodcast = await getLatestPodcastEpisode()
-  const latestWeekly = await getLatestWeeklyDigest()
-  const gazetteSummary = await getOfficialGazetteSummary()
+  const [
+    latestDigestDate,
+    recentDigests,
+    trendingTopics,
+    latestPodcast,
+    latestWeekly,
+    gazetteSummary,
+  ] = await Promise.all([
+    getLatestDigestDate(),
+    getArchiveDigests(),
+    getTrendingTopics(7),
+    getLatestPodcastEpisode().catch(() => null),
+    getLatestWeeklyDigest(),
+    getOfficialGazetteSummary().catch(() => null),
+  ])
 
   const recentSix = recentDigests.slice(0, 6)
   const totalDigests = recentDigests.length
