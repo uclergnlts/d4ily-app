@@ -842,6 +842,15 @@ export function getCurrentWeekInfo(): { weekId: string; year: number; weekNumber
   // Get Sunday 
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+
+  // Format dates locally to avoid UTC shift
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const weekId = `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
 
@@ -849,8 +858,8 @@ export function getCurrentWeekInfo(): { weekId: string; year: number; weekNumber
     weekId,
     year: now.getFullYear(),
     weekNumber,
-    startDate: monday.toISOString().split('T')[0],
-    endDate: sunday.toISOString().split('T')[0],
+    startDate: formatDate(monday),
+    endDate: formatDate(sunday),
   };
 }
 
