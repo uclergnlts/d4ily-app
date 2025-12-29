@@ -1,17 +1,21 @@
 import type { MetadataRoute } from "next"
-import { getArchiveDigests } from "@/lib/digest-data"
+import { getArchiveDigests, getWeeklyDigestsArchive } from "@/lib/digest-data"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://d4ily.com"
 
   // Get all archived digests for dynamic pages
   let digests: Awaited<ReturnType<typeof getArchiveDigests>> = []
+  let weeklyDigests: Awaited<ReturnType<typeof getWeeklyDigestsArchive>> = []
 
   try {
-    digests = await getArchiveDigests()
+    [digests, weeklyDigests] = await Promise.all([
+      getArchiveDigests(),
+      getWeeklyDigestsArchive(52) // Last year
+    ])
   } catch (error) {
-    // If database fetch fails, return only static pages
     digests = []
+    weeklyDigests = []
   }
 
   // Static pages
@@ -35,9 +39,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/haberler`,
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/arsiv`,
       lastModified: new Date(),
       changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/haftalik-ozet`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
       priority: 0.8,
     },
     {
@@ -46,12 +62,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/hakkimizda`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/gizlilik`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/kullanim-kosullari`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/cerez-politikasi`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
   ]
 
+  // Daily digest pages
   const digestPages: MetadataRoute.Sitemap = digests
-    .filter((digest) => digest.digest_date) // Only include digests with valid dates
+    .filter((digest) => digest.digest_date)
     .map((digest) => {
-      // Safely parse date, fallback to current date if invalid
       let lastModified: Date
       try {
         const dateStr = digest.updated_at || digest.created_at || digest.digest_date
@@ -69,6 +109,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     })
 
+  // Weekly digest pages
+  const weeklyPages: MetadataRoute.Sitemap = weeklyDigests.map((weekly) => ({
+    url: `${baseUrl}/hafta/${weekly.week_id}`,
+    lastModified: weekly.updated_at ? new Date(weekly.updated_at) : new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }))
+
+  // Monthly archive pages
   const monthlyArchivePages: MetadataRoute.Sitemap = []
   const uniqueMonths = new Set<string>()
 
@@ -89,7 +138,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   // Categories
-  const categories = ["gundem", "siyaset", "ekonomi", "spor"]
+  const categories = ["gundem", "siyaset", "ekonomi", "spor", "teknoloji", "saglik"]
   const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
     url: `${baseUrl}/kategori/${category}`,
     lastModified: new Date(),
@@ -97,6 +146,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  // Trending topics
   const trendingTopics = await import("@/lib/digest-data").then(mod => mod.getTrendingTopics(20)).catch(() => [])
 
   const topicPages: MetadataRoute.Sitemap = trendingTopics.map((topic) => ({
@@ -106,5 +156,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...monthlyArchivePages]
+  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...weeklyPages, ...monthlyArchivePages]
 }
+

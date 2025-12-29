@@ -8,6 +8,7 @@ import ScrollToTop from "@/components/scroll-to-top"
 import { Ticker } from "@/components/ticker"
 import { getMarketData } from "@/lib/services/market"
 import { CookieBanner } from "@/components/cookie-banner"
+import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
 
 const merriweather = Merriweather({
@@ -65,7 +66,7 @@ export const metadata: Metadata = {
       "tr-TR": "https://d4ily.com",
     },
     types: {
-      "application/rss+xml": "https://d4ily.com/rss.xml",
+      "application/rss+xml": "https://d4ily.com/rss",
     },
   },
   appleWebApp: {
@@ -147,6 +148,21 @@ export default async function RootLayout({
             gtag('config', 'G-PB68GL3Z68');
           `}
         </Script>
+        <Script id="service-worker" strategy="afterInteractive">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(function(registration) {
+                    console.log('SW registered:', registration.scope);
+                  })
+                  .catch(function(error) {
+                    console.log('SW registration failed:', error);
+                  });
+              });
+            }
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -206,6 +222,7 @@ export default async function RootLayout({
         {children}
         <ScrollToTop />
         <CookieBanner />
+        <WebVitals />
         <Analytics />
       </body>
     </html>
