@@ -19,6 +19,8 @@ import {
 import { getLatestDigestDate, getArchiveDigests, getTrendingTopics, getLatestWeeklyDigest } from "@/lib/digest-data"
 import { NewsletterForm } from "@/components/newsletter-form"
 import { getLatestPodcastEpisode } from "@/lib/podcast"
+import { getOfficialGazetteSummary } from "@/lib/services/official-gazette"
+import { OfficialGazetteCard } from "@/components/official-gazette-card"
 
 export const metadata: Metadata = {
   title: "D4ily - Türkiye Gündemi, En Saf Haliyle",
@@ -44,13 +46,15 @@ export default async function HomePage() {
     recentDigests,
     trendingTopics,
     latestPodcast,
-    latestWeekly
+    latestWeekly,
+    gazetteSummary
   ] = await Promise.all([
     getLatestDigestDate(),
     getArchiveDigests(),
     getTrendingTopics(5),
     getLatestPodcastEpisode(),
-    getLatestWeeklyDigest()
+    getLatestWeeklyDigest(),
+    getOfficialGazetteSummary()
   ])
 
   const recentThree = recentDigests.slice(0, 3)
@@ -335,6 +339,15 @@ export default async function HomePage() {
                   <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
               </Link>
+            </div>
+          </section>
+        )}
+
+        {/* ===== OFFICIAL GAZETTE ===== */}
+        {gazetteSummary && (
+          <section className="py-8 md:py-12">
+            <div className="container mx-auto px-4 max-w-4xl">
+              <OfficialGazetteCard summary={gazetteSummary} />
             </div>
           </section>
         )}
