@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Activity, Database, FileText, RefreshCw, Server, AlertCircle, CheckCircle, Edit, Calendar
+    Activity, Database, FileText, RefreshCw, Server, AlertCircle, CheckCircle, Edit, Calendar, BarChart3
 } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
     const router = useRouter();
@@ -104,12 +105,21 @@ export default function AdminDashboardPage() {
     return (
         <div className="p-6 sm:p-12 max-w-6xl mx-auto space-y-8">
             {/* Header */}
-            <header>
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                    <Activity className="text-accent" />
-                    Dashboard
-                </h1>
-                <p className="text-gray-500 text-sm mt-1">Sistem durumu ve operasyonel kontrol merkezi</p>
+            <header className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <Activity className="text-accent" />
+                        Dashboard
+                    </h1>
+                    <p className="text-gray-500 text-sm mt-1">Sistem durumu ve operasyonel kontrol merkezi</p>
+                </div>
+                <Link
+                    href="/istatistikler"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                >
+                    <BarChart3 className="w-4 h-4" />
+                    Detaylı İstatistikler
+                </Link>
             </header>
 
             {/* Status Badge */}

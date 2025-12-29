@@ -70,23 +70,49 @@ export default function Footer() {
               </div>
               <span className="text-lg font-bold text-foreground">D4ily</span>
             </div>
-            <p className="mt-2 max-w-xs text-sm text-muted-foreground">15 dakikada Türkiye gündemini yakalayın</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">4 in 1:</span>{" "}
+              Gündem • Analiz • Trend • Özet
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">5 dakikada Türkiye gündemi</p>
           </div>
 
-          {/* Linkler */}
-          <div className="flex items-center justify-center gap-6">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Ana Sayfa
-            </Link>
-            <Link href="/arsiv" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Arşiv
-            </Link>
-            <Link
-              href="/istatistikler"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              İstatistikler
-            </Link>
+          {/* Linkler - İçerik */}
+          <div className="flex flex-col items-center gap-4 lg:items-start">
+            <h3 className="text-sm font-semibold text-foreground">İçerik</h3>
+            <div className="flex flex-wrap justify-center gap-4 lg:flex-col lg:gap-2">
+              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Ana Sayfa
+              </Link>
+              <Link href="/arsiv" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Arşiv
+              </Link>
+              <Link href="/haftalik-ozet" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Haftalık Özet
+              </Link>
+              <Link href="/akis" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Canlı Akış
+              </Link>
+            </div>
+          </div>
+
+          {/* Linkler - Kurumsal */}
+          <div className="flex flex-col items-center gap-4 lg:items-start">
+            <h3 className="text-sm font-semibold text-foreground">Kurumsal</h3>
+            <div className="flex flex-wrap justify-center gap-4 lg:flex-col lg:gap-2">
+              <Link href="/hakkimizda" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Biz Kimiz?
+              </Link>
+              <Link href="/gizlilik" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Gizlilik Politikası
+              </Link>
+              <Link href="/kullanim-kosullari" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Kullanım Koşulları
+              </Link>
+              <Link href="/cerez-politikasi" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Çerez Politikası
+              </Link>
+            </div>
           </div>
 
           {/* Spotify follow button and Mini abonelik formu */}

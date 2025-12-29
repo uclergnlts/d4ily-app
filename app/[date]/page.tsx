@@ -140,9 +140,14 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
     notFound()
   }
 
-  const digest = await getDigestByDate(date)
-  const tweets = await getTopTweetsByDate(date, 20)
-  const { prevDate, nextDate } = await getAdjacentDates(date)
+  // ⚡ Performance: Run all queries in parallel
+  const [digest, tweets, adjacentDates] = await Promise.all([
+    getDigestByDate(date),
+    getTopTweetsByDate(date, 20),
+    getAdjacentDates(date)
+  ])
+
+  const { prevDate, nextDate } = adjacentDates
 
   const formattedDate = digest
     ? new Date(digest.digest_date).toLocaleDateString("tr-TR", {

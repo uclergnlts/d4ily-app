@@ -5,6 +5,8 @@ import { getWeeklyDigestByWeekId } from "@/lib/digest-data";
 import { Calendar, TrendingUp, FileText, MessageSquareText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
+import ShareButtons from "@/components/share-buttons";
+
 export async function generateMetadata({ params }: { params: { weekId: string } }) {
     const { weekId } = await params;
     const weeklyDigest = await getWeeklyDigestByWeekId(weekId);
@@ -15,9 +17,27 @@ export async function generateMetadata({ params }: { params: { weekId: string } 
         };
     }
 
+    const ogSearchParams = new URLSearchParams();
+    ogSearchParams.set("title", weeklyDigest.title);
+    ogSearchParams.set("week", weeklyDigest.week_number.toString());
+    ogSearchParams.set("date", `${new Date(weeklyDigest.start_date).toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} - ${new Date(weeklyDigest.end_date).toLocaleDateString("tr-TR", { day: "numeric", month: "long" })}`);
+
     return {
         title: `${weeklyDigest.title} - D4ily Haftalık Özet`,
         description: weeklyDigest.intro,
+        openGraph: {
+            images: [
+                {
+                    url: `/api/og/weekly?${ogSearchParams.toString()}`,
+                    width: 1200,
+                    height: 630,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            images: [`/api/og/weekly?${ogSearchParams.toString()}`],
+        },
     };
 }
 
@@ -31,6 +51,8 @@ export default async function WeeklyDigestPage({ params }: { params: { weekId: s
 
     const startDate = new Date(weeklyDigest.start_date);
     const endDate = new Date(weeklyDigest.end_date);
+    const dateRange = `${startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} - ${endDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}`;
+    const shareUrl = `https://d4ily.com/hafta/${weekId}`; // Update with real domain if needed
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
@@ -45,7 +67,7 @@ export default async function WeeklyDigestPage({ params }: { params: { weekId: s
                         <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
                             <Calendar className="h-4 w-4 text-primary" />
                             <span className="text-sm font-medium text-primary">
-                                {startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} - {endDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                                {dateRange}
                             </span>
                         </div>
 
@@ -56,6 +78,8 @@ export default async function WeeklyDigestPage({ params }: { params: { weekId: s
                         <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
                             {weeklyDigest.intro}
                         </p>
+
+                        <ShareButtons title={weeklyDigest.title} url={shareUrl} />
 
                         {/* Stats */}
                         <div className="mt-8 flex flex-wrap gap-6">

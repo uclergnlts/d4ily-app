@@ -1,24 +1,15 @@
-import { config } from "dotenv";
-import { sql } from "drizzle-orm";
-import { resolve } from "path";
 
-// Load env vars first
-config({ path: resolve(process.cwd(), ".env.local") });
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+import { db } from "../lib/db";
+import { newsRaw, processedArticles } from "../lib/db/schema";
+import { count } from "drizzle-orm";
 
-async function main() {
-    // Dynamic import to ensure env vars are populated
-    const { db } = await import("@/lib/db");
-    const { tweetsRaw, newsRaw } = await import("@/lib/db/schema");
-
-    try {
-        const tweetsCount = await db.select({ count: sql<number>`cast(count(*) as integer)` }).from(tweetsRaw);
-        const newsCount = await db.select({ count: sql<number>`cast(count(*) as integer)` }).from(newsRaw);
-
-        console.log(`Tweets Count: ${tweetsCount[0].count}`);
-        console.log(`News Count: ${newsCount[0].count}`);
-    } catch (e) {
-        console.error(e);
-    }
+async function checkCounts() {
+    const rawCount = await db.select({ value: count() }).from(newsRaw);
+    const procCount = await db.select({ value: count() }).from(processedArticles);
+    console.log("News Raw Count:", rawCount[0].value);
+    console.log("Processed Count:", procCount[0].value);
 }
 
-main();
+checkCounts();

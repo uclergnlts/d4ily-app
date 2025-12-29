@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests } from "@/lib/db/schema";
+import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests, processedArticles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { generateDailyDigest, generateWeeklyDigest } from "@/lib/ai";
 import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-data";
@@ -100,6 +100,9 @@ export async function runFetchNews() {
             for (const item of feed.items) {
                 if (!item.link) continue;
 
+                // DEBUG log
+                if (item.enclosure) console.log(`[DEBUG] Found enclosure for ${item.title}:`, item.enclosure);
+
                 try {
                     await db.insert(newsRaw).values({
                         url: item.link,
@@ -107,8 +110,15 @@ export async function runFetchNews() {
                         title: item.title,
                         published_at: item.isoDate || item.pubDate,
                         fetched_at: new Date().toISOString(),
+
                         summary_raw: item.contentSnippet || item.content?.substring(0, 500),
-                        raw_payload: JSON.stringify(item),
+                        raw_payload: JSON.stringify({
+                            ...item,
+                            enclosure: item.enclosure,
+                            'media:content': item['media:content'],
+                            image: item.image,
+                            itunes: item.itunes
+                        }),
                         lang: "tr",
                     }).onConflictDoUpdate({
                         target: [newsRaw.url],
@@ -116,7 +126,13 @@ export async function runFetchNews() {
                             fetched_at: new Date().toISOString(),
                             title: item.title,
                             summary_raw: item.contentSnippet || item.content?.substring(0, 500),
-                            raw_payload: JSON.stringify(item),
+                            raw_payload: JSON.stringify({
+                                ...item,
+                                enclosure: item.enclosure,
+                                'media:content': item['media:content'],
+                                image: item.image,
+                                itunes: item.itunes
+                            }),
                         }
                     });
                     newCount++;
@@ -143,16 +159,17 @@ export async function runGenerateDigest() {
             .where(sql`fetched_at >= datetime('now', '-1 day')`)
             .limit(200);
 
+        // Use processedArticles instead of newsRaw to get AI summaries and images
         const recentNews = await db.select()
-            .from(newsRaw)
-            .where(sql`fetched_at >= datetime('now', '-1 day')`)
+            .from(processedArticles)
+            .where(sql`processed_at >= datetime('now', '-1 day')`)
             .limit(100);
 
         if (recentTweets.length === 0 && recentNews.length === 0) {
             return { message: "No new data to digest.", skipped: true };
         }
 
-        console.log(`Generating digest for ${todayStr} with ${recentTweets.length} tweets and ${recentNews.length} news items.`);
+        console.log(`Generating digest for ${todayStr} with ${recentTweets.length} tweets and ${recentNews.length} processed news items (with images).`);
 
         const processedTweets = TweetProcessor.process(recentTweets);
         console.log(`Smart Editor: Reduced ${recentTweets.length} -> ${processedTweets.length} tweets.`);

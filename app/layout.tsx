@@ -5,6 +5,9 @@ import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
 import ReadingProgress from "@/components/reading-progress"
 import ScrollToTop from "@/components/scroll-to-top"
+import { Ticker } from "@/components/ticker"
+import { getMarketData } from "@/lib/services/market"
+import { CookieBanner } from "@/components/cookie-banner"
 import "./globals.css"
 
 const merriweather = Merriweather({
@@ -122,11 +125,13 @@ export const viewport: Viewport = {
   userScalable: true,
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const marketData = await getMarketData()
+
   return (
     <html lang="tr" className={`${merriweather.variable} ${playfairDisplay.variable}`}>
       <head>
@@ -196,9 +201,11 @@ export default function RootLayout({
       </head>
       <body className="font-serif antialiased bg-background">
         <div className="bg-noise" />
+        <Ticker data={marketData} />
         <ReadingProgress />
         {children}
         <ScrollToTop />
+        <CookieBanner />
         <Analytics />
       </body>
     </html>

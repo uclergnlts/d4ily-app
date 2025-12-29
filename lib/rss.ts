@@ -1,6 +1,16 @@
 import Parser from "rss-parser";
 
-const parser = new Parser();
+const parser = new Parser({
+    customFields: {
+        item: [
+            ['media:content', 'media:content', { keepArray: true }],
+            ['enclosure', 'enclosure'],
+            ['image', 'image'],
+            ['itunes:image', 'itunes:image'],
+            ['content:encoded', 'content:encoded']
+        ]
+    }
+});
 
 export interface RssItem {
     title?: string;

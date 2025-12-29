@@ -5,6 +5,11 @@ import { NextResponse } from "next/server";
  * Returns an error response if unauthorized, null if authorized
  */
 export function checkCronAuth(request: Request): NextResponse | null {
+    // Skip auth in development
+    if (process.env.NODE_ENV === 'development') {
+        return null;
+    }
+
     const authHeader = request.headers.get("authorization") || "";
     const token = authHeader.replace("Bearer ", "").trim();
 

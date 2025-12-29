@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 export const dailyDigests = sqliteTable("daily_digests", {
     id: integer("id").primaryKey({ autoIncrement: true }),
@@ -46,6 +46,11 @@ export const tweetsRaw = sqliteTable("tweets_raw", {
     view_count: integer("view_count"),
     bookmark_count: integer("bookmark_count"),
     raw_payload: text("raw_payload", { mode: "json" }).notNull(),
+}, (table) => {
+    return {
+        fetchedIdx: index("tweets_fetched_idx").on(table.fetched_at),
+        publishedIdx: index("tweets_published_idx").on(table.published_at),
+    };
 });
 
 export const newsRaw = sqliteTable("news_raw", {
@@ -59,6 +64,10 @@ export const newsRaw = sqliteTable("news_raw", {
     lang: text("lang"),
     summary_raw: text("summary_raw"),
     raw_payload: text("raw_payload", { mode: "json" }).notNull(),
+}, (table) => {
+    return {
+        fetchedIdx: index("news_fetched_idx").on(table.fetched_at),
+    };
 });
 
 export const dailyEvents = sqliteTable("daily_events", {
@@ -159,4 +168,22 @@ export const officialGazetteSummaries = sqliteTable("official_gazette_summaries"
     summary_markdown: text("summary_markdown").notNull(),
     gazette_url: text("gazette_url").notNull(),
     created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const processedArticles = sqliteTable("processed_articles", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    original_news_id: integer("original_news_id").references(() => newsRaw.id),
+    title: text("title").notNull(),
+    summary: text("summary").notNull(),
+    category: text("category").default("Gündem"),
+    image_url: text("image_url"),
+    source_name: text("source_name"),
+    published_at: text("published_at"),
+    processed_at: text("processed_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    is_published: integer("is_published", { mode: "boolean" }).default(true).notNull(),
+}, (table) => {
+    return {
+        processedAtIdx: index("processed_articles_processed_at_idx").on(table.processed_at),
+        originalIdIdx: index("processed_articles_original_id_idx").on(table.original_news_id),
+    };
 });

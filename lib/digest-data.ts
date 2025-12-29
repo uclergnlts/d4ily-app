@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { dailyDigests, tweetsRaw, weeklyDigests } from "@/lib/db/schema"
 import { desc, eq, like, sql, gte, lte, and } from "drizzle-orm"
+import { unstable_cache } from "next/cache"
 
 export interface Digest {
   id: number
@@ -184,19 +185,27 @@ export async function getDigestByDate(date: string): Promise<Digest | null> {
   }
 }
 
-export async function getArchiveDigests(): Promise<Digest[]> {
+// ⚡ Cached version of archive digests fetch
+const fetchArchiveDigests = async (): Promise<Digest[]> => {
   try {
     const data = await db
-      .select()
+      .select({
+        id: dailyDigests.id,
+        digest_date: dailyDigests.digest_date,
+        title: dailyDigests.title,
+        intro: dailyDigests.intro,
+        cover_image_url: dailyDigests.cover_image_url,
+        audio_url: dailyDigests.audio_url,
+      })
       .from(dailyDigests)
       .orderBy(desc(dailyDigests.digest_date))
       .limit(30)
 
     if (!data || data.length === 0) return getMockDigests()
 
-    // ✅ transform urls in list too
     return (data as unknown as Digest[]).map((d) => ({
       ...d,
+      content: "",
       audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
       cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
     }))
@@ -204,6 +213,12 @@ export async function getArchiveDigests(): Promise<Digest[]> {
     return getMockDigests()
   }
 }
+
+export const getArchiveDigests = unstable_cache(
+  fetchArchiveDigests,
+  ['archive-digests'],
+  { revalidate: 300 } // Cache for 5 minutes
+)
 
 export async function getDigestsByCategory(category: string, limit = 30): Promise<Digest[]> {
   try {
@@ -424,7 +439,8 @@ export async function getLatestTopTweets(limit = 20): Promise<Tweet[]> {
   }
 }
 
-export async function getTrendingTopics(days = 7): Promise<TrendingTopic[]> {
+// ⚡ Cached trending topics
+const fetchTrendingTopics = async (days = 7): Promise<TrendingTopic[]> => {
   try {
     const data = await db
       .select({ content: dailyDigests.content })
@@ -441,6 +457,12 @@ export async function getTrendingTopics(days = 7): Promise<TrendingTopic[]> {
     return getDefaultTrendingTopics()
   }
 }
+
+export const getTrendingTopics = unstable_cache(
+  fetchTrendingTopics,
+  ['trending-topics'],
+  { revalidate: 600 } // Cache for 10 minutes
+)
 
 function countWordFrequency(text: string): TrendingTopic[] {
   const stopWords = [
@@ -717,13 +739,14 @@ export async function getLatestRawTweets(limit = 50, beforeId?: string): Promise
       .select()
       .from(tweetsRaw)
       .where(and(
-        sql`${tweetsRaw.fetched_at} >= datetime('now', '-24 hours')`,
+        sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`,
         beforeId ? lte(tweetsRaw.tweet_id, beforeId) : undefined
       ))
       .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
       .limit(limit * 3) // Fetch more to allow for filtering
 
     let filtered = rawData;
+    // Strict filtering re-enabled as per user request
     if (allowedUsernames.size > 0) {
       filtered = rawData.filter(tweet =>
         tweet.author_username && allowedUsernames.has(tweet.author_username.toLowerCase())
@@ -863,7 +886,8 @@ export function getCurrentWeekInfo(): { weekId: string; year: number; weekNumber
   };
 }
 
-export async function getLatestWeeklyDigest(): Promise<WeeklyDigest | null> {
+// ⚡ Cached latest weekly digest
+const fetchLatestWeeklyDigest = async (): Promise<WeeklyDigest | null> => {
   try {
     const data = await db
       .select()
@@ -879,6 +903,12 @@ export async function getLatestWeeklyDigest(): Promise<WeeklyDigest | null> {
     return null;
   }
 }
+
+export const getLatestWeeklyDigest = unstable_cache(
+  fetchLatestWeeklyDigest,
+  ['latest-weekly-digest'],
+  { revalidate: 1800 } // Cache for 30 minutes
+)
 
 export async function getWeeklyDigestByWeekId(weekId: string): Promise<WeeklyDigest | null> {
   try {

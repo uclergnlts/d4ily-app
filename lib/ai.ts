@@ -1,22 +1,41 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-    console.warn("GEMINI_API_KEY is not defined in environment variables.");
+// Lazy initialization to ensure env vars are loaded
+let _genAI: GoogleGenerativeAI | null = null;
+let _jsonModel: any = null;
+let _textModel: any = null;
+
+function getGenAI() {
+    if (!_genAI) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("GEMINI_API_KEY is not defined in environment variables. Please set it in .env.local");
+        }
+        _genAI = new GoogleGenerativeAI(apiKey);
+    }
+    return _genAI;
 }
 
-const genAI = new GoogleGenerativeAI(apiKey || "");
-
-const jsonModel = genAI.getGenerativeModel({
-    model: "gemini-flash-latest",
-    generationConfig: {
-        responseMimeType: "application/json",
+function getJsonModel() {
+    if (!_jsonModel) {
+        _jsonModel = getGenAI().getGenerativeModel({
+            model: "gemini-flash-latest",
+            generationConfig: {
+                responseMimeType: "application/json",
+            }
+        });
     }
-});
+    return _jsonModel;
+}
 
-const textModel = genAI.getGenerativeModel({
-    model: "gemini-flash-latest",
-});
+function getTextModel() {
+    if (!_textModel) {
+        _textModel = getGenAI().getGenerativeModel({
+            model: "gemini-flash-latest",
+        });
+    }
+    return _textModel;
+}
 
 export interface DigestData {
     title: string;
@@ -33,7 +52,7 @@ export async function generateDailyDigest(
     news: any[],
     marketData?: any // Optional market data
 ): Promise<DigestData> {
-    if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+    // API key is checked in getJsonModel()
 
     // Prepare context
     const tweetsText = tweets.map(t =>
@@ -41,7 +60,9 @@ export async function generateDailyDigest(
     ).join("\n");
 
     const newsText = news.map(n =>
-        `- ${n.title} (${n.source_name}): ${n.summary_raw?.substring(0, 200)}... URL: ${n.url}`
+        `- **${n.title}** (${n.source_name} | ${n.category})
+   Özet: ${n.summary?.substring(0, 250)}...
+   ${n.image_url ? `Görsel: ${n.image_url}` : ''}`
     ).join("\n");
 
     const marketText = marketData ? `
@@ -69,8 +90,15 @@ export async function generateDailyDigest(
     --- TWEETS (Social Media Pulse & Reactions) ---
     ${tweetsText.substring(0, 30000)} 
     
-    --- NEWS (Mainstream Headlines) ---
+    --- NEWS (AI-Processed Articles with Summaries & Images) ---
     ${newsText.substring(0, 25000)}
+    
+    NOTE: News items are pre-processed with:
+    - AI-generated summaries in Turkish
+    - Category classification (e.g., Gündem, Ekonomi, Politika, Spor)
+    - Image URLs (where available)
+    
+    You can reference these images in your digest content if relevant, but this is optional.
     
     REQUIREMENTS & STRUCTURE (Strictly Follow This):
 
@@ -133,7 +161,7 @@ export async function generateDailyDigest(
     `;
 
     try {
-        const result = await jsonModel.generateContent(prompt);
+        const result = await getJsonModel().generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -160,7 +188,7 @@ export async function generateWeeklyDigest(
     endDate: string,
     dailyDigests: any[]
 ): Promise<WeeklyDigestData> {
-    if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+    // API key is checked in getJsonModel()
 
     // Prepare context from daily digests
     const digestsText = dailyDigests.map((d, idx) =>
@@ -226,7 +254,7 @@ export async function generateWeeklyDigest(
     `;
 
     try {
-        const result = await jsonModel.generateContent(prompt);
+        const result = await getJsonModel().generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -239,13 +267,61 @@ export async function generateWeeklyDigest(
 }
 
 export async function generateWithGemini(prompt: string): Promise<string | null> {
-    if (!apiKey) return null;
     try {
-        const result = await textModel.generateContent(prompt);
+        const result = await getTextModel().generateContent(prompt);
         const response = await result.response;
         return response.text();
     } catch (error) {
         console.error("Error generating generic content with Gemini:", error);
         return null; // Or throw depending on preference. Returning null is safer for non-critical features.
+    }
+}
+
+export interface ProcessedArticleData {
+    title: string;
+    summary: string;
+    category: string;
+}
+
+export async function summarizeArticle(
+    title: string,
+    rawContent: string,
+    source: string
+): Promise<ProcessedArticleData> {
+    // API key is checked in getJsonModel()
+
+    const prompt = `
+    You are a professional editor for a news aggregator.
+    
+    TASK:
+    Analyze the following news item and process it for our feed.
+    
+    INPUT:
+    Source: ${source}
+    Title: ${title}
+    Content/Excerpt: ${rawContent.substring(0, 1500)}
+    
+    REQUIREMENTS:
+    1. **Title**: Create a clickable, engaging, but NOT clickbait title in Turkish (Max 80 chars).
+    2. **Summary**: Write a concise, 2-3 sentence summary in Turkish (Max 250 chars). Focus on the "what" and "why".
+    3. **Category**: Choose the best category from: [Gündem, Ekonomi, Spor, Teknoloji, Dünya, Magazin, Sağlık].
+    
+    OUTPUT JSON:
+    {
+      "title": "...",
+      "summary": "...",
+      "category": "..."
+    }
+    `;
+
+    try {
+        const result = await getJsonModel().generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        return JSON.parse(text) as ProcessedArticleData;
+    } catch (error) {
+        console.error("Error summarizing article with Gemini:", error);
+        // Fallback or rethrow
+        throw error;
     }
 }
