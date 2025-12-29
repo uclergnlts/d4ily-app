@@ -19,7 +19,7 @@ function getGenAI() {
 function getJsonModel() {
     if (!_jsonModel) {
         _jsonModel = getGenAI().getGenerativeModel({
-            model: "gemini-flash-latest",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json",
             }
@@ -31,7 +31,7 @@ function getJsonModel() {
 function getTextModel() {
     if (!_textModel) {
         _textModel = getGenAI().getGenerativeModel({
-            model: "gemini-flash-latest",
+            model: "gemini-2.5-flash",
         });
     }
     return _textModel;

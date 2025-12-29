@@ -196,7 +196,7 @@ export async function runGenerateDigest() {
             watchlist: digestData.watchlist,
             tweets_count: recentTweets.length,
             news_count: recentNews.length,
-            model_name: "gemini-flash-latest",
+            model_name: "gemini-2.5-flash",
             status: "generated",
             cover_image_url: coverImageUrl,
             date: todayStr,
@@ -211,7 +211,7 @@ export async function runGenerateDigest() {
                 tweets_count: recentTweets.length,
                 news_count: recentNews.length,
                 updated_at: new Date().toISOString(),
-                model_name: "gemini-1.5-pro (updated)"
+                model_name: "gemini-2.5-flash (updated)"
             }
         });
 
@@ -263,7 +263,7 @@ export async function runGenerateWeeklyDigest() {
             digests_count: dailyDigests.length,
             tweets_count: tweetsCount,
             news_count: newsCount,
-            model_name: "gemini-flash-latest",
+            model_name: "gemini-2.5-flash",
             status: "generated",
         }).onConflictDoUpdate({
             target: [weeklyDigests.week_id],
@@ -277,7 +277,7 @@ export async function runGenerateWeeklyDigest() {
                 tweets_count: tweetsCount,
                 news_count: newsCount,
                 updated_at: new Date().toISOString(),
-                model_name: "gemini-flash-latest (updated)"
+                model_name: "gemini-2.5-flash (updated)"
             }
         });
 
