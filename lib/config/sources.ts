@@ -23,7 +23,7 @@ export const PERSONAL_ACCOUNTS = [
     "ismailari_", "ismailsaymaz", "kucukkayaismail", "muratagirel", "baristerkoglu",
     "barispehlivan", "ugur_dundar", "fatihportakal", "yilmazozdil", "sedat_peker",
     "barisyarkadas", "saygi_ozturk", "muratyetkin2", "fehimtastekin", "abdulkadir_selvi",
-    "fatihaltayli", "timursoykan", "cigdemtoker", "alicanuludag", "sahmetsahmet", "lordsinov", "haskologlu",
+    "fatihaltayli", "timursoykan", "cigdemtoker", "alicanuludag", "sahmetsahmet", "lordsinov",
 
 
     // Ekonomi & Finans
