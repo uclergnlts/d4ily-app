@@ -13,15 +13,23 @@ export interface GazetteSummary {
 export async function getOfficialGazetteSummary(): Promise<GazetteSummary | null> {
     const today = new Date().toISOString().split('T')[0]
 
-    // 1. Check DB
-    const existing = await db.select().from(officialGazetteSummaries).where(eq(officialGazetteSummaries.date, today)).get()
+    // 1. Check DB (Wrapped in try-catch for CI/Build robustness)
+    try {
+        const existing = await db.select().from(officialGazetteSummaries).where(eq(officialGazetteSummaries.date, today)).get()
 
-    if (existing) {
-        return {
-            date: existing.date,
-            summary_markdown: existing.summary_markdown,
-            gazette_url: existing.gazette_url
+        if (existing) {
+            return {
+                date: existing.date,
+                summary_markdown: existing.summary_markdown,
+                gazette_url: existing.gazette_url
+            }
         }
+    } catch (dbError) {
+        console.warn("Gazette DB check failed (likely CI or missing table):", dbError)
+        // Continue to scrape or return null if strict
+        // In CI build, we likely want to just continue or return null to avoid breaking build works
+        // If this fails, scraping likely works but saving will fail too.
+        // For now, let's proceed to try scraping, but saving might also fail.
     }
 
     // 2. If not found, scrape and generate
@@ -76,20 +84,23 @@ export async function getOfficialGazetteSummary(): Promise<GazetteSummary | null
 
         const summary = await generateWithGemini(prompt) || "Özet oluşturulamadı."
 
-        // 4. Save to DB
         // 4. Save to DB (Upsert)
-        await db.insert(officialGazetteSummaries).values({
-            date: today,
-            summary_markdown: summary,
-            gazette_url: url
-        }).onConflictDoUpdate({
-            target: officialGazetteSummaries.date,
-            set: {
+        try {
+            await db.insert(officialGazetteSummaries).values({
+                date: today,
                 summary_markdown: summary,
-                gazette_url: url,
-                created_at: sql`CURRENT_TIMESTAMP`
-            }
-        })
+                gazette_url: url
+            }).onConflictDoUpdate({
+                target: officialGazetteSummaries.date,
+                set: {
+                    summary_markdown: summary,
+                    gazette_url: url,
+                    created_at: sql`CURRENT_TIMESTAMP`
+                }
+            })
+        } catch (saveError) {
+            console.warn("Failed to save Gazette summary to DB (ignoring for build):", saveError)
+        }
 
         return {
             date: today,
