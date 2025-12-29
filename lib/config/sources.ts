@@ -62,6 +62,5 @@ export const RSS_FEEDS = [
     "https://www.aa.com.tr/tr/rss/default?cat=guncel",
     "https://tr.sputniknews.com/export/rss2/archive/index.xml",
     "http://feeds.bbci.co.uk/turkce/rss.xml",
-    "https://bianet.org/rss/bianet",
     "https://www.ntv.com.tr/gundem.rss"
 ];

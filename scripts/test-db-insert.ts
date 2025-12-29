@@ -8,11 +8,11 @@ async function main() {
     // Dynamic imports to ensure env vars are ready
     const { db } = await import("@/lib/db");
     const { tweetsRaw } = await import("@/lib/db/schema");
-    const { nanoid } = await import("nanoid");
+    // const { nanoid } = await import("nanoid"); // REMOVED: nanoid is not in package.json
 
     console.log("Testing DB insertion...");
     try {
-        const dummyId = nanoid();
+        const dummyId = crypto.randomUUID(); // Use native UUID
         console.log(`Inserting dummy tweet with tweet_id: ${dummyId}`);
 
         await db.insert(tweetsRaw).values({
