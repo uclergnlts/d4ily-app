@@ -60,7 +60,7 @@ export default function NewsletterPopup() {
 
           <h2 className="mb-2 text-center font-display text-2xl font-bold text-foreground">Günlük Özeti Kaçırmayın</h2>
           <p className="mb-6 text-center text-sm text-muted-foreground">
-            Her sabah 06:00'da Türkiye gündeminin özeti e-postanızda olsun.
+            Her sabah 06:00&apos;da Türkiye gündeminin özeti e-postanızda olsun.
           </p>
 
           {status === "success" ? (

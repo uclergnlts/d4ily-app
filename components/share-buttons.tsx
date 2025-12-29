@@ -30,13 +30,13 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
       </span>
 
       <a
-        href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
+        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${title}" başlığını incele: `)}${encodedTitle}&url=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white text-sm font-medium hover:bg-zinc-800 transition-colors"
       >
         <Twitter className="w-4 h-4" />
-        <span className="hidden sm:inline">X'te Paylaş</span>
+        <span className="hidden sm:inline">X&apos;te Paylaş</span>
       </a>
 
       <a

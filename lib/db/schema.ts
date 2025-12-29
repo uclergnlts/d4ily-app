@@ -187,3 +187,59 @@ export const processedArticles = sqliteTable("processed_articles", {
         originalIdIdx: index("processed_articles_original_id_idx").on(table.original_news_id),
     };
 });
+
+export const topics = sqliteTable("topics", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull().unique(), // e.g. "Ekonomi"
+    slug: text("slug").notNull().unique(), // e.g. "ekonomi"
+    description: text("description"),
+    parent_id: integer("parent_id").references((): any => topics.id), // Recursive for subtopics
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const blogPosts = sqliteTable("blog_posts", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    title: text("title").notNull(),
+    slug: text("slug").notNull().unique(),
+    excerpt: text("excerpt"),
+    content: text("content").notNull(), // Markdown/MDX
+    cover_image_url: text("cover_image_url"),
+    published: integer("published", { mode: "boolean" }).default(false).notNull(),
+    seo_score: integer("seo_score").default(0),
+    view_count: integer("view_count").default(0),
+    topic_id: integer("topic_id").references(() => topics.id),
+    tags: text("tags", { mode: "json" }),
+    meta_title: text("meta_title"),
+    meta_description: text("meta_description"),
+    published_at: text("published_at"),
+    updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const keywords = sqliteTable("keywords", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    term: text("term").notNull().unique(), // e.g. "enflasyon nedir"
+    volume: integer("volume").default(0),
+    difficulty: integer("difficulty").default(0),
+    target_post_id: integer("target_post_id").references(() => blogPosts.id),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const internalLinks = sqliteTable("internal_links", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    source_post_id: integer("source_post_id").references(() => blogPosts.id), // Link from here
+    target_post_id: integer("target_post_id").references(() => blogPosts.id), // Link to here
+    anchor_text: text("anchor_text").notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const blogGenerationLogs = sqliteTable("blog_generation_logs", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    run_date: text("run_date").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    selected_topic: text("selected_topic").notNull(),
+    cluster: text("cluster"), // Semantic cluster ID or keyword
+    evergreen_score: integer("evergreen_score"),
+    result: text("result").notNull(), // success, skipped, failed
+    reason: text("reason"), // e.g. "duplicate_found", "low_score"
+    generated_post_id: integer("generated_post_id"), // if success
+});

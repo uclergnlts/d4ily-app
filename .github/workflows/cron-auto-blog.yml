@@ -1,0 +1,18 @@
+
+name: Cron - Auto Blog Generation
+
+on:
+  schedule:
+    # Sunday, Tuesday, Thursday at 03:30 UTC
+    - cron: '30 3 * * 0,2,4'
+  workflow_dispatch:
+
+jobs:
+  auto-blog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Auto Blog API
+        run: |
+          curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          "${{ secrets.BASE_URL }}/api/cron/auto-blog-from-agenda"

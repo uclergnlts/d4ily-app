@@ -348,7 +348,7 @@ export default function DigestCard({ digest, showHeader = true }: DigestCardProp
                   <span>{readingTime} dk okuma</span>
                 </div>
               </div>
-              <ShareButtons title={digest.title} date={digest.digest_date} />
+              <ShareButtons title={digest.title || "Gündem Özeti"} url={`https://d4ily.com/${digest.digest_date}`} />
             </div>
 
             <p className="text-lg leading-relaxed text-muted-foreground">
@@ -366,7 +366,7 @@ export default function DigestCard({ digest, showHeader = true }: DigestCardProp
             <span className="font-medium">
               {countWords(digest.content)} kelime • {readingTime} dakika okuma
             </span>
-            <ShareButtons title={digest.title} date={digest.digest_date} />
+            <ShareButtons title={digest.title || "Gündem Özeti"} url={`https://d4ily.com/${digest.digest_date}`} />
           </div>
         </footer>
       </div>

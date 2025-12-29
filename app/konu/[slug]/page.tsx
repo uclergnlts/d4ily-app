@@ -1,112 +1,155 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { getDigestsByTopic, formatDateShort, countWords } from "@/lib/digest-data"
-import { Calendar, Clock, TrendingUp } from "lucide-react"
 
-export const revalidate = 3600
+import { db } from "@/lib/db";
+import { topics, blogPosts } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Metadata } from "next"; // Standard Metadata type
+import { LayoutDashboard, Calendar, Eye, ArrowRight } from "lucide-react";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
-  const topicName = slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
-
-  return {
-    title: `${topicName} Haberleri - Son 30 Gün | D4ily`,
-    description: `${topicName} ile ilgili son 30 günün gündem özetleri. Türkiye'de ${topicName} hakkında neler oluyor, takip edin.`,
-    alternates: {
-      canonical: `https://d4ily.com/konu/${slug}`,
-    },
-    openGraph: {
-      title: `${topicName} Haberleri | D4ily`,
-      description: `${topicName} ile ilgili son 30 günün gündem özetleri`,
-      url: `https://d4ily.com/konu/${slug}`,
-      type: "website",
-    },
+interface PageProps {
+  params: {
+    slug: string;
   }
 }
 
-export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const topicName = slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
+// Generate Metadata for SEO
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const slug = params.slug;
+  const topic = await db.select().from(topics).where(eq(topics.slug, slug)).get();
 
-  const digests = await getDigestsByTopic(topicName)
-
-  const topicItems = digests.map((digest) => ({
-    id: digest.id,
-    title: digest.title || `Gündem – ${digest.digest_date}`,
-    summary: digest.intro || digest.content.slice(0, 150) + "...",
-    date: formatDateShort(digest.digest_date),
-    readingTime: `${Math.max(1, Math.ceil(countWords(digest.content) / 200))} dk`,
-    href: `/turkiye-gundemi-${digest.digest_date}`,
-  }))
-
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Ana Sayfa", item: "https://d4ily.com" },
-      { "@type": "ListItem", position: 2, name: "Konular", item: "https://d4ily.com/konu" },
-      { "@type": "ListItem", position: 3, name: topicName, item: `https://d4ily.com/konu/${slug}` },
-    ],
+  if (!topic) {
+    return {
+      title: "Konu Bulunamadı | D4ily",
+    };
   }
 
+  return {
+    title: `${topic.name} ile İlgili En Son Haberler ve Rehberler | D4ily`,
+    description: topic.description || `${topic.name} konusu hakkında detaylı analizler, güncel haberler ve kapsamlı rehberler. D4ily ile ${topic.name} gündemini takip edin.`,
+    alternates: {
+      canonical: `/konu/${slug}`,
+    },
+    openGraph: {
+      title: `${topic.name} - D4ily`,
+      description: topic.description || `${topic.name} hakkında her şey.`,
+      type: "website",
+    }
+  };
+}
+
+export default async function TopicPage({ params }: PageProps) {
+  const slug = params.slug;
+
+  // Fetch Topic
+  const topic = await db.select().from(topics).where(eq(topics.slug, slug)).get();
+
+  if (!topic) {
+    notFound();
+  }
+
+  // Fetch Related Posts
+  const posts = await db.select()
+    .from(blogPosts)
+    .where(eq(blogPosts.topic_id, topic.id))
+    .orderBy(desc(blogPosts.created_at))
+    .limit(20);
+
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <Navigation />
-
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:py-12">
-        <header className="mb-8 animate-fade-in">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-            <TrendingUp className="h-3.5 w-3.5" />
-            Konu
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+      {/* Header Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-12 md:py-16 max-w-4xl text-center">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            {topic.name}
+          </h1>
+          {/* SEO Description Data (300-500 words per requirement, currently using DB description) */}
+          {/* Ideally this would be a long rich text field from the DB. Using description for now. */}
+          <div className="prose prose-lg mx-auto text-gray-600 leading-relaxed">
+            <p>{topic.description || `${topic.name} kategorisindeki en güncel gelişmeler, uzman analizleri ve detaylı rehberler bu sayfada listelenmektedir.`}</p>
           </div>
-          <h1 className="mb-2 font-serif text-3xl font-bold text-gray-900 sm:text-4xl">{topicName}</h1>
-          <p className="text-sm text-gray-600 sm:text-base">Son 30 günde {topicItems.length} gündem özetinde geçti</p>
-        </header>
+        </div>
+      </div>
 
-        {topicItems.length === 0 ? (
-          <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-            <p className="text-gray-600">Bu konu için henüz özet bulunamadı.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {topicItems.map((item, index) => (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="group block rounded-xl bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-6"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <h2 className="mb-2 font-serif text-lg font-semibold text-gray-900 transition-colors group-hover:text-accent sm:text-xl">
-                  {item.title}
-                </h2>
-                <p className="mb-4 text-sm leading-relaxed text-gray-600 line-clamp-2">{item.summary}</p>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {item.date}
-                  </span>
-                  <span className="h-1 w-1 rounded-full bg-gray-400" />
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    {item.readingTime}
-                  </span>
-                </div>
+      {/* Content Section */}
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+            İlgili İçerikler
+          </h2>
+          <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+            Toplam {posts.length} yazı
+          </span>
+        </div>
+
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {posts.map((post) => (
+              <Link href={`/blog/${post.slug}`} key={post.id} className="group block h-full">
+                <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full group-hover:-translate-y-1">
+                  {/* Image */}
+                  <div className="relative aspect-[1.6/1] overflow-hidden bg-gray-100">
+                    {post.cover_image_url ? (
+                      <img
+                        src={post.cover_image_url}
+                        alt={post.title}
+                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                        <LayoutDashboard className="w-12 h-12 opacity-20" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
+                      {topic.name}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {new Date(post.published_at || post.created_at).toLocaleDateString('tr-TR')}
+                      </span>
+                      {(post.view_count || 0) > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5" />
+                          {post.view_count}
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                      {post.title}
+                    </h3>
+
+                    <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1 leading-relaxed">
+                      {post.excerpt || post.meta_description}
+                    </p>
+
+                    <div className="flex items-center text-indigo-600 font-medium text-sm mt-auto group/btn">
+                      Devamını Oku
+                      <ArrowRight className="w-4 h-4 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </article>
               </Link>
             ))}
           </div>
+        ) : (
+          <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+            <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LayoutDashboard className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">Henüz içerik yok</h3>
+            <p className="text-gray-500 max-w-md mx-auto">
+              "{topic.name}" konusu hakkında henüz bir yazı yayınlanmamış. Yakında eklenecek içerikleri takipte kalın.
+            </p>
+          </div>
         )}
-      </main>
-
-      <Footer />
+      </div>
     </div>
-  )
+  );
 }

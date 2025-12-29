@@ -32,7 +32,7 @@ export default function TermsPage() {
                     <section className="mb-8">
                         <h2>1. Kabul</h2>
                         <p>
-                            D4ily web sitesini ("Site") kullanarak bu Kullanım Koşullarını kabul etmiş olursunuz.
+                            D4ily web sitesini (&quot;Site&quot;) kullanarak bu Kullanım Koşullarını kabul etmiş olursunuz.
                             Bu koşulları kabul etmiyorsanız, lütfen Siteyi kullanmayınız.
                         </p>
                     </section>
@@ -54,7 +54,7 @@ export default function TermsPage() {
                     <section className="mb-8">
                         <h2>3. Fikri Mülkiyet</h2>
                         <p>
-                            Sitedeki tüm içerikler (metin, görsel, logo, tasarım) D4ily'nin fikri mülkiyetidir.
+                            Sitedeki tüm içerikler (metin, görsel, logo, tasarım) D4ily&apos;nin fikri mülkiyetidir.
                             İçeriklerin izinsiz kopyalanması, dağıtılması veya ticari amaçla kullanılması yasaktır.
                         </p>
                         <p>

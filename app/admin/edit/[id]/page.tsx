@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Loader2, Upload, Link as LinkIcon,
@@ -42,11 +42,7 @@ export default function EditDigestPage() {
     // Image upload mode
     const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
 
-    useEffect(() => {
-        fetchDigest();
-    }, [digestId]);
-
-    const fetchDigest = async () => {
+    const fetchDigest = useCallback(async () => {
         try {
             const res = await fetch(`/api/admin/digest?id=${digestId}`);
             const data = await res.json();
@@ -69,7 +65,11 @@ export default function EditDigestPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [digestId]);
+
+    useEffect(() => {
+        fetchDigest();
+    }, [fetchDigest]);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -211,8 +211,8 @@ export default function EditDigestPage() {
                 {/* Message Banner */}
                 {message && (
                     <div className={`p-4 rounded-lg flex items-center gap-3 ${message.type === 'success'
-                            ? 'bg-green-50 text-green-700 border border-green-200'
-                            : 'bg-red-50 text-red-700 border border-red-200'
+                        ? 'bg-green-50 text-green-700 border border-green-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
                         }`}>
                         {message.type === 'success' ? (
                             <CheckCircle className="w-5 h-5" />
@@ -296,8 +296,8 @@ export default function EditDigestPage() {
                             <button
                                 onClick={() => setImageMode('url')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${imageMode === 'url'
-                                        ? 'bg-accent text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-accent text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 <LinkIcon className="w-4 h-4" />
@@ -306,8 +306,8 @@ export default function EditDigestPage() {
                             <button
                                 onClick={() => setImageMode('upload')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${imageMode === 'upload'
-                                        ? 'bg-accent text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-accent text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 <Upload className="w-4 h-4" />

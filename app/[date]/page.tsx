@@ -128,6 +128,8 @@ async function getAdjacentDates(currentDate: string) {
   }
 }
 
+import { injectInternalLinks } from "@/lib/services/internal-linker"
+
 export default async function DatePage({ params }: { params: Promise<{ date: string }> }) {
   const resolvedParams = await params
   const date = resolvedParams.date
@@ -146,6 +148,11 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
     getTopTweetsByDate(date, 20),
     getAdjacentDates(date)
   ])
+
+  // Inject internal links if digest exists
+  if (digest?.content) {
+    digest.content = await injectInternalLinks(digest.content);
+  }
 
   const { prevDate, nextDate } = adjacentDates
 

@@ -99,18 +99,9 @@ function getMockDigests(): Digest[] {
   ]
 }
 
-function getSupabaseStorageUrl(path: string | null | undefined): string | null {
-  if (!path) return null
 
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path
-  }
+// Helper removed
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl) return null
-
-  return `${supabaseUrl}/storage/v1/object/public/${path}`
-}
 
 /** ✅ light cache (1 minute) */
 const digestCache = new Map<string, { data: Digest; timestamp: number }>()
@@ -138,8 +129,8 @@ export async function getLatestDigest(): Promise<Digest> {
     const d0 = data[0] as unknown as Digest
     const digest: Digest = {
       ...d0,
-      audio_url: getSupabaseStorageUrl(d0.audio_url) || undefined,
-      cover_image_url: getSupabaseStorageUrl(d0.cover_image_url) || d0.cover_image_url,
+      audio_url: d0.audio_url || undefined,
+      cover_image_url: d0.cover_image_url,
     }
 
     digestCache.set(cacheKey, { data: digest, timestamp: Date.now() })
@@ -174,8 +165,8 @@ export async function getDigestByDate(date: string): Promise<Digest | null> {
     const d0 = data[0] as unknown as Digest
     const digest: Digest = {
       ...d0,
-      audio_url: getSupabaseStorageUrl(d0.audio_url) || undefined,
-      cover_image_url: getSupabaseStorageUrl(d0.cover_image_url) || d0.cover_image_url,
+      audio_url: d0.audio_url || undefined,
+      cover_image_url: d0.cover_image_url,
     }
 
     digestCache.set(cacheKey, { data: digest, timestamp: Date.now() })
@@ -206,8 +197,8 @@ const fetchArchiveDigests = async (): Promise<Digest[]> => {
     return (data as unknown as Digest[]).map((d) => ({
       ...d,
       content: "",
-      audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
-      cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
+      audio_url: d.audio_url || undefined,
+      cover_image_url: d.cover_image_url,
     }))
   } catch (e) {
     return getMockDigests()
@@ -233,8 +224,8 @@ export async function getDigestsByCategory(category: string, limit = 30): Promis
 
     return (data as unknown as Digest[]).map((d) => ({
       ...d,
-      audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
-      cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
+      audio_url: d.audio_url || undefined,
+      cover_image_url: d.cover_image_url,
     }))
   } catch (e) {
     return []
@@ -267,8 +258,8 @@ export async function getArchiveDigestsByMonth(year: string, month: string): Pro
       .filter((d: any) => d.digest_date >= startDate && d.digest_date <= endDate)
       .map((d) => ({
         ...d,
-        audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
-        cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
+        audio_url: d.audio_url || undefined,
+        cover_image_url: d.cover_image_url,
       }))
   } catch (e) {
     return []
@@ -302,8 +293,8 @@ export async function getDigestsByTopic(topic: string): Promise<Digest[]> {
       })
       .map((d) => ({
         ...d,
-        audio_url: getSupabaseStorageUrl(d.audio_url) || undefined,
-        cover_image_url: getSupabaseStorageUrl(d.cover_image_url) || d.cover_image_url,
+        audio_url: d.audio_url || undefined,
+        cover_image_url: d.cover_image_url,
       }))
   } catch (e) {
     return []

@@ -31,6 +31,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             path: "/admin/sources",
             description: "Twitter & RSS kaynakları"
         },
+        {
+            name: "Blog Yönetimi",
+            icon: FileEdit,
+            path: "/admin/blog",
+            description: "İçerik ve SEO yönetimi"
+        },
+        {
+            name: "Konu Haritası",
+            icon: Settings, // Or FolderTree if available, but Settings is safe
+            path: "/admin/topics",
+            description: "Topical Authority"
+        },
     ];
 
     const isActive = (path: string) => {
@@ -93,8 +105,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                         setSidebarOpen(false);
                                     }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${active
-                                            ? "bg-accent text-white shadow-lg"
-                                            : "hover:bg-gray-800 text-gray-300 hover:text-white"
+                                        ? "bg-accent text-white shadow-lg"
+                                        : "hover:bg-gray-800 text-gray-300 hover:text-white"
                                         }`}
                                 >
                                     <Icon className="w-5 h-5 flex-shrink-0" />

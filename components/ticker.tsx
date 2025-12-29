@@ -82,7 +82,7 @@ export function Ticker({ data }: TickerProps) {
                         Yapay Zeka Destekli Analiz
                     </span>
                     <span className="hidden md:inline text-white/20">•</span>
-                    <span className="hidden md:inline">Haftalık Bülten Pazar 06:00'da</span>
+                    <span className="hidden md:inline">Haftalık Bülten Pazar 06:00&apos;da</span>
                 </div>
             </div>
         </div>

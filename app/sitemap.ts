@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next"
 import { getArchiveDigests, getWeeklyDigestsArchive } from "@/lib/digest-data"
+import { db } from "@/lib/db"
+import { topics, blogPosts } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://d4ily.com"
@@ -88,7 +91,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Daily digest pages
+  // Blog Posts - Priority 0.7
+  let blogPages: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await db.select().from(blogPosts).where(eq(blogPosts.published, true));
+    blogPages = posts.map(post => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.updated_at || post.created_at),
+      changeFrequency: "weekly",
+      priority: 0.7
+    }));
+  } catch (e) {
+    console.error("Sitemap: Failed to fetch blog posts", e);
+  }
+
+  // DB Topics - Priority 0.9
+  let dbTopicPages: MetadataRoute.Sitemap = [];
+  try {
+    const allTopics = await db.select().from(topics);
+    dbTopicPages = allTopics.map(topic => ({
+      url: `${baseUrl}/konu/${topic.slug}`,
+      lastModified: new Date(), // Topics are evergreen, maybe check last post date?
+      changeFrequency: "daily",
+      priority: 0.9
+    }));
+  } catch (e) {
+    console.error("Sitemap: Failed to fetch topics", e);
+  }
+
+  // Daily digest pages - Priority 1.0 (Updated from 0.7)
   const digestPages: MetadataRoute.Sitemap = digests
     .filter((digest) => digest.digest_date)
     .map((digest) => {
@@ -104,8 +135,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return {
         url: `${baseUrl}/${digest.digest_date}`,
         lastModified,
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
+        changeFrequency: "daily" as const, // Updated to daily as requested implicitly by high priority? Or keep weekly? User said priority 1.0.
+        priority: 1.0, // Updated per user request
       }
     })
 
@@ -137,7 +168,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   })
 
-  // Categories
+  // Categories (Static for now, could be dynamic)
   const categories = ["gundem", "siyaset", "ekonomi", "spor", "teknoloji", "saglik"]
   const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
     url: `${baseUrl}/kategori/${category}`,
@@ -146,10 +177,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  // Trending topics
+  // Trending topics (Legacy/Algorithmic) - Priority 0.6
+  // Note: We overlap with DB topics potentially. Keeping for now but DB topics are primary.
   const trendingTopics = await import("@/lib/digest-data").then(mod => mod.getTrendingTopics(20)).catch(() => [])
 
-  const topicPages: MetadataRoute.Sitemap = trendingTopics.map((topic) => ({
+  const trendingTopicPages: MetadataRoute.Sitemap = trendingTopics.map((topic) => ({
     url: `${baseUrl}/konu/${topic.word.toLowerCase()}`,
     lastModified: new Date(),
     changeFrequency: "daily",
@@ -166,6 +198,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }))
 
-  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...weeklyPages, ...ampPages, ...monthlyArchivePages]
+  return [...staticPages, ...categoryPages, ...dbTopicPages, ...trendingTopicPages, ...digestPages, ...weeklyPages, ...blogPages, ...ampPages, ...monthlyArchivePages]
 }
 

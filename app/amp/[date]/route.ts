@@ -33,98 +33,77 @@ const ampCustomStyles = `
 `
 
 function isValidDateFormat(date: string): boolean {
-    if (!date || date.length !== 10) return false
-    const parts = date.split("-")
-    if (parts.length !== 3) return false
-    const year = Number.parseInt(parts[0])
-    const month = Number.parseInt(parts[1])
-    const day = Number.parseInt(parts[2])
-    if (isNaN(year) || isNaN(month) || isNaN(day)) return false
-    if (year < 2020 || year > 2100) return false
-    if (month < 1 || month > 12) return false
-    if (day < 1 || day > 31) return false
-    return true
+  if (!date || date.length !== 10) return false
+  const parts = date.split("-")
+  if (parts.length !== 3) return false
+  const year = Number.parseInt(parts[0])
+  const month = Number.parseInt(parts[1])
+  const day = Number.parseInt(parts[2])
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return false
+  if (year < 2020 || year > 2100) return false
+  if (month < 1 || month > 12) return false
+  if (day < 1 || day > 31) return false
+  return true
 }
 
 // Convert markdown-like content to AMP-safe HTML
 function contentToAmpHtml(content: string): string {
-    if (!content) return ''
+  if (!content) return ''
 
-    let html = content
-        // Headers
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h2>$1</h2>')
-        // Bold
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        // Italic
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        // Line breaks to paragraphs
-        .split('\n\n')
-        .map(p => p.trim())
-        .filter(p => p.length > 0)
-        .map(p => {
-            // Don't wrap if already a heading
-            if (p.startsWith('<h')) return p
-            // Handle list items
-            if (p.startsWith('- ') || p.startsWith('* ')) {
-                const items = p.split('\n').map(item =>
-                    `<li>${item.replace(/^[-*] /, '')}</li>`
-                ).join('')
-                return `<ul>${items}</ul>`
-            }
-            return `<p>${p.replace(/\n/g, '<br>')}</p>`
-        })
-        .join('\n')
+  let html = content
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+    // Bold
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    // Line breaks to paragraphs
+    .split('\n\n')
+    .map(p => p.trim())
+    .filter(p => p.length > 0)
+    .map(p => {
+      // Don't wrap if already a heading
+      if (p.startsWith('<h')) return p
+      // Handle list items
+      if (p.startsWith('- ') || p.startsWith('* ')) {
+        const items = p.split('\n').map(item =>
+          `<li>${item.replace(/^[-*] /, '')}</li>`
+        ).join('')
+        return `<ul>${items}</ul>`
+      }
+      return `<p>${p.replace(/\n/g, '<br>')}</p>`
+    })
+    .join('\n')
 
-    return html
+  return html
 }
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ date: string }>
-}): Promise<Metadata> {
-    const resolvedParams = await params
-    const date = resolvedParams.date
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ date: string }> }
+) {
+  const resolvedParams = await params
+  const date = resolvedParams.date
 
-    if (!isValidDateFormat(date)) {
-        return { title: "AMP - Sayfa Bulunamadı" }
-    }
+  if (!isValidDateFormat(date)) {
+    notFound()
+  }
 
-    const digest = await getDigestByDate(date)
-    const formattedDate = formatDateTR(date)
+  const digest = await getDigestByDate(date)
 
-    return {
-        title: digest?.title ? `${digest.title} - ${formattedDate}` : `Gündem Özeti - ${formattedDate}`,
-        description: digest?.intro || `${formattedDate} tarihli Türkiye gündem özeti.`,
-        alternates: {
-            canonical: `https://d4ily.com/${date}`,
-        },
-    }
-}
+  if (!digest) {
+    notFound()
+  }
 
-export default async function AmpPage({ params }: { params: Promise<{ date: string }> }) {
-    const resolvedParams = await params
-    const date = resolvedParams.date
+  const formattedDate = formatDateTR(date)
+  const ampContent = contentToAmpHtml(digest.content)
+  const canonicalUrl = `https://d4ily.com/${date}`
+  const ampUrl = `https://d4ily.com/amp/${date}`
 
-    if (!isValidDateFormat(date)) {
-        notFound()
-    }
-
-    const digest = await getDigestByDate(date)
-
-    if (!digest) {
-        notFound()
-    }
-
-    const formattedDate = formatDateTR(date)
-    const ampContent = contentToAmpHtml(digest.content)
-    const canonicalUrl = `https://d4ily.com/${date}`
-    const ampUrl = `https://d4ily.com/amp/${date}`
-
-    // AMP pages must return raw HTML, not use React rendering for the document structure
-    const ampHtml = `<!doctype html>
+  // AMP pages must return raw HTML, not use React rendering for the document structure
+  const ampHtml = `<!doctype html>
 <html amp lang="tr">
 <head>
   <meta charset="utf-8">
@@ -193,10 +172,10 @@ export default async function AmpPage({ params }: { params: Promise<{ date: stri
 </body>
 </html>`
 
-    return new Response(ampHtml, {
-        headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'public, max-age=3600, s-maxage=3600',
-        },
-    })
+  return new Response(ampHtml, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    },
+  })
 }
