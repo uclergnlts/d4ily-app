@@ -106,7 +106,7 @@ export default function CookiePolicyPage() {
                     <section className="mb-8">
                         <h2>Üçüncü Taraf Çerezleri</h2>
                         <p>
-                            Web sitemiz Google Analytics kullanmaktadır. Google'ın gizlilik uygulamaları
+                            Web sitemiz Google Analytics kullanmaktadır. Google&apos;ın gizlilik uygulamaları
                             hakkında bilgi almak için{" "}
                             <a
                                 href="https://policies.google.com/privacy"
@@ -116,7 +116,7 @@ export default function CookiePolicyPage() {
                             >
                                 Google Gizlilik Politikası
                             </a>
-                            'nı inceleyebilirsiniz.
+                            &apos;nı inceleyebilirsiniz.
                         </p>
                     </section>
 

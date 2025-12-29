@@ -180,7 +180,7 @@ export default function ImportantTweets({ tweets }: ImportantTweetsProps) {
                         className="flex items-center gap-1.5 rounded-full bg-[#1DA1F2]/10 px-3 py-1.5 text-sm font-medium text-[#1DA1F2] transition-all hover:bg-[#1DA1F2] hover:text-white shadow-soft"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
-                        <span>Tweet'e Git</span>
+                        &lt;span&gt;Tweet&apos;e Git&lt;/span&gt;
                       </a>
                     )}
                   </div>
@@ -192,7 +192,7 @@ export default function ImportantTweets({ tweets }: ImportantTweetsProps) {
       </div>
 
       <div className="mt-5 text-center">
-        <p className="text-sm text-muted-foreground/70">Son 24 saatin en önemli tweet'leri</p>
+        &lt;p className=&quot;text-sm text-muted-foreground/70&quot;&gt;Son 24 saatin en önemli tweet&apos;leri&lt;/p&gt;
       </div>
     </section>
   )

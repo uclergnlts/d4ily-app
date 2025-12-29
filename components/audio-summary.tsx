@@ -314,7 +314,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
               rel="noopener noreferrer"
               className="text-xs text-[#1DB954] hover:underline"
             >
-              Spotify'da aç ve takip et
+              Spotify&apos;da aç ve takip et
             </a>
           </div>
         </div>
@@ -380,7 +380,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
               rel="noopener noreferrer"
               className="text-xs text-[#1DB954] hover:underline"
             >
-              Spotify'da dinle
+              Spotify&apos;da dinle
             </a>
           </div>
         </div>
@@ -522,7 +522,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
             className="inline-flex items-center gap-2 rounded-full bg-[#1DB954] px-5 py-2 text-sm font-semibold text-black transition-all hover:bg-[#1ed760] hover:scale-105"
           >
             <Music className="h-4 w-4" />
-            <span>Spotify&apos;da Dinle!</span>
+            &lt;span&gt;Spotify&apos;da Dinle!&lt;/span&gt;
           </a>
         </div>
       </div>

@@ -32,7 +32,7 @@ export default function PrivacyPage() {
                     <section className="mb-8">
                         <h2>1. Genel Bilgi</h2>
                         <p>
-                            D4ily ("biz", "bizim" veya "Platform") olarak, gizliliğinize saygı duyuyor ve kişisel verilerinizi
+                            D4ily (&quot;biz&quot;, &quot;bizim&quot; veya &quot;Platform&quot;) olarak, gizliliğinize saygı duyuyor ve kişisel verilerinizi
                             korumak için gerekli önlemleri alıyoruz. Bu Gizlilik Politikası, web sitemizi kullandığınızda
                             hangi bilgileri topladığımızı ve bu bilgileri nasıl kullandığımızı açıklamaktadır.
                         </p>

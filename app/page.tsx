@@ -386,7 +386,7 @@ export default async function HomePage() {
                   className="inline-flex items-center gap-2 bg-green-500 text-black px-5 py-2.5 rounded-full font-semibold text-sm hover:bg-green-400 transition-colors"
                 >
                   <PlayCircle className="h-4 w-4" />
-                  Spotify'da Dinle
+                  Spotify&apos;da Dinle
                 </a>
               </div>
             </div>
@@ -398,7 +398,7 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 max-w-md text-center">
             <h2 className="text-xl font-bold font-serif mb-2">Günü Kaçırmayın</h2>
             <p className="text-sm text-muted-foreground mb-6">
-              Her sabah 07:00'de gündem cebinizde.
+              Her sabah 07:00&apos;de gündem cebinizde.
             </p>
             <NewsletterForm />
           </div>

@@ -55,7 +55,7 @@ export function OfficialGazetteCard({ summary }: OfficialGazetteCardProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-xs font-semibold text-red-600 dark:text-red-400 hover:underline gap-1 transition-transform active:scale-95"
             >
-                Resmi Gazete'yi İncele
+                Resmi Gazete&apos;yi İncele
                 <ExternalLink className="w-3 h-3" />
             </a>
         </div>

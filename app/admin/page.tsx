@@ -196,7 +196,7 @@ export default function AdminDashboardPage() {
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                     <p className="text-xs text-gray-600">
                         💡 <strong>Not:</strong> Tüm işlemler GitHub Actions üzerinden otomatik çalışır.
-                        Manuel tetikleme için GitHub repository → Actions → İlgili workflow → "Run workflow" kullanın.
+                        Manuel tetikleme için GitHub repository → Actions → İlgili workflow → &quot;Run workflow&quot; kullanın.
                     </p>
                 </div>
             </div>

@@ -103,7 +103,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     <div className="mb-8">
                         <Link href="/blog" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
                             <ArrowLeft className="w-4 h-4 mr-1" />
-                            Blog'a Dön
+                            Blog&apos;a Dön
                         </Link>
 
                         <h1 className="text-3xl md:text-5xl font-black font-serif leading-tight mb-6">

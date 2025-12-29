@@ -145,7 +145,7 @@ export default async function TopicPage({ params }: PageProps) {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-1">Henüz içerik yok</h3>
             <p className="text-gray-500 max-w-md mx-auto">
-              "{topic.name}" konusu hakkında henüz bir yazı yayınlanmamış. Yakında eklenecek içerikleri takipte kalın.
+              &quot;{topic.name}&quot; konusu hakkında henüz bir yazı yayınlanmamış. Yakında eklenecek içerikleri takipte kalın.
             </p>
           </div>
         )}

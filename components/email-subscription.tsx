@@ -38,7 +38,7 @@ export default function EmailSubscription() {
             </div>
             <h2 className="mb-2 text-xl font-bold text-foreground sm:text-2xl">Günlük Özet E-postası</h2>
             <p className="mb-6 max-w-md text-sm text-muted-foreground sm:text-base">
-              Her gün sabah 06:00'da gündemin özetini e-postanıza gönderelim. Kahvenizi içerken Türkiye gündemini
+              Her gün sabah 06:00&apos;da gündemin özetini e-postanıza gönderelim. Kahvenizi içerken Türkiye gündemini
               yakalayın.
             </p>
 
