@@ -152,7 +152,7 @@ export async function generateDailyDigest(
     
     OUTPUT FORMAT (JSON):
     {
-      "title": "A catchy, powerful headline",
+      "title": "A catchy, powerful headline (CRITICAL: Max 60 chars, curiosity-inducing but NOT clickbait. Use numbers, specific details, or questions when possible. Examples: 'Merkez Bankası Faizi Sabit Tuttu: Piyasalar Ne Diyor?', '3 Büyükler Arasında Puan Farkı Kapandı', 'Seçim Anketinde Sürpriz Sonuç Çıktı')",
       "intro": "The warm opening sentence + the context paragraph",
       "content": "The full markdown string starting from '---' divider downwards",
       "trends": ["...", "..."],

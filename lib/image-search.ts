@@ -15,13 +15,14 @@ const BLOCKED_DOMAINS = [
 
 export async function fetchGoogleImage(query: string): Promise<string | null> {
     try {
-        // Add negative keywords to avoid text/logos
-        const refinedQuery = `${query} -logo -text`;
-        console.log(`Fetching image for: ${refinedQuery}`);
+        // Add keywords for high-quality, HD images suitable for Google Discover
+        // Google Discover requires minimum 1200px width
+        const refinedQuery = `${query} hd yüksek çözünürlük -logo -text -screenshot`;
+        console.log(`Fetching HD image for: ${refinedQuery}`);
 
         const result = await GOOGLE_IMG_SCRAP({
             search: refinedQuery,
-            limit: 15, // Fetch more to allow filtering
+            limit: 20, // Fetch more to find HD images
             safeSearch: true,
         });
 
