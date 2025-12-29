@@ -584,6 +584,26 @@ function countWordFrequency(text: string): TrendingTopic[] {
     "bizim",
     "sizin",
     "onlarin",
+    // Technical / URL fragments  
+    "https", "http", "www", "com", "org", "net", "html", "php", "aspx",
+    "twitter", "facebook", "instagram", "youtube", "tiktok",
+    "status", "post", "tweet", "link", "url", "site", "web", "page",
+    // Generic news words
+    "haber", "haberler", "haberi", "dakika", "gelisme", "aciklama",
+    "video", "foto", "fotograf", "gorsel", "resim", "galeri",
+    "detay", "detayli", "detaylar", "bilgi", "bilgiler",
+    "kaynak", "kaynaklar", "icerik", "metin", "yazi",
+    // More generic words
+    "ozel", "ozgu", "ozgur", "saran", "anlatti", "konustu",
+    "duyurdu", "paylasti", "yazdi",
+    "turkiye", "ankara", "istanbul", "izmir",
+    "bugun", "yarin", "simdi",
+    "siyasi", "siyaset", "yargi", "yargiya",
+    "milyon", "milyar", "yuzde",
+    "olmus", "olmak", "yapti",
+    "icinde", "disinda", "yaninda",
+    "sadece", "bile", "artik", "henuz", "hala", "yine",
+    "cunku", "eger", "belki", "zaten",
   ]
 
   const words = text
