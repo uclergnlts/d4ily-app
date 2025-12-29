@@ -156,6 +156,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...weeklyPages, ...monthlyArchivePages]
+  // AMP pages for digests
+  const ampPages: MetadataRoute.Sitemap = digests
+    .filter((digest) => digest.digest_date)
+    .map((digest) => ({
+      url: `${baseUrl}/amp/${digest.digest_date}`,
+      lastModified: new Date(digest.updated_at || digest.created_at || digest.digest_date),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }))
+
+  return [...staticPages, ...categoryPages, ...topicPages, ...digestPages, ...weeklyPages, ...ampPages, ...monthlyArchivePages]
 }
 
