@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Newspaper, Home, Archive, Menu, X, Zap, Calendar } from "lucide-react"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
+import { PushNotificationButton } from "./push-notification-button"
 
 function getTodayDate(): string {
   return new Date().toISOString().split("T")[0]
@@ -69,6 +70,10 @@ export default function Navigation() {
             <Calendar className="h-4 w-4" />
             Haftalık Özet
           </Link>
+
+          <div className="ml-2 pl-2 border-l border-border">
+            <PushNotificationButton />
+          </div>
         </div>
 
         <button
