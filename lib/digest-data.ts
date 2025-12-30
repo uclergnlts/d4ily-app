@@ -746,13 +746,15 @@ export async function getLatestRawTweets(limit = 50, beforeId?: string): Promise
     const allowedUsernames = new Set(PERSONAL_ACCOUNTS.map(u => u.toLowerCase()));
 
     // Fetch raw data (fetched in last 12 hours)
+    const timeWindowCondition = sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`
+    const idCondition = beforeId ? lte(tweetsRaw.tweet_id, beforeId) : undefined
+
+    const whereClause = idCondition ? and(timeWindowCondition, idCondition) : timeWindowCondition
+
     const rawData = await db
       .select()
       .from(tweetsRaw)
-      .where(and(
-        sql`${tweetsRaw.fetched_at} >= datetime('now', '-12 hours')`,
-        beforeId ? lte(tweetsRaw.tweet_id, beforeId) : undefined
-      ))
+      .where(whereClause)
       .orderBy(desc(tweetsRaw.tweet_id)) // Sort by Snowflake ID (reliable chronological order)
       .limit(limit * 3) // Fetch more to allow for filtering
 
