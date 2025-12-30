@@ -73,7 +73,15 @@ export async function POST(request: Request) {
         const aiResult = await model.generateContent(finalPrompt);
         const textResponse = aiResult.response.text();
         const jsonString = textResponse.replace(/^```json\s*|\s*```$/g, "").trim();
-        const analysis = JSON.parse(jsonString);
+        
+        let analysis: any;
+        try {
+            analysis = JSON.parse(jsonString);
+        } catch (e) {
+            console.error("JSON Parse Error in Auto-Blog Route:", e);
+            console.error("Raw AI Response:", textResponse);
+            throw new Error("Failed to parse AI response for topic extraction.");
+        }
 
         const candidate = analysis.best_pick;
 

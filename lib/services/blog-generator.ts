@@ -43,6 +43,17 @@ function cleanJson(text: string): string {
     return text.replace(/^```json\s*|\s*```$/g, "").trim();
 }
 
+function safeJsonParse(text: string, context: string): any {
+    try {
+        const cleaned = cleanJson(text);
+        return JSON.parse(cleaned);
+    } catch (e) {
+        console.error(`JSON Parse Error in ${context}:`, e);
+        console.error(`Raw AI Response (${context}):`, text);
+        throw new Error(`Failed to parse AI response for ${context}`);
+    }
+}
+
 export async function generateBlogPostFromTopic(topicName: string, topicId?: number): Promise<BlogPostGenerationResult> {
     console.log(`🚀 Starting Blog Generation Pipeline for: "${topicName}"`);
 
@@ -54,7 +65,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
             .replace("{topic}", topicName)
             .replace("{trends_context}", "Current high inflation in Turkey, Minimum wage discussions, Election aftermath") // Context can be dynamic later
     );
-    const strategy = JSON.parse(cleanJson(strategyResult.response.text()));
+    const strategy = safeJsonParse(strategyResult.response.text(), "SEO Strategist");
     console.log("✅ Strategy defined:", strategy.content_angle);
 
     // 2. KEYWORD RESEARCHER
@@ -65,7 +76,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
             .replace("{primary_keyword}", strategy.primary_keyword)
             .replace("{content_angle}", strategy.content_angle)
     );
-    const keywords = JSON.parse(cleanJson(researchResult.response.text()));
+    const keywords = safeJsonParse(researchResult.response.text(), "Keyword Researcher");
     console.log("✅ Keywords found:", keywords.clustered_keywords.length, "clusters");
 
     // 3. CONTENT BRIEF CREATOR
@@ -94,7 +105,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
     const editResult = await getJsonModel().generateContent(
         editorPrompt.replace("{draft_content}", draftContent)
     );
-    const critique = JSON.parse(cleanJson(editResult.response.text()));
+    const critique = safeJsonParse(editResult.response.text(), "Editorial Checker");
     console.log(`✅ Editorial Score: ${critique.score}/100`);
 
     // 6. SCHEMA ARCHITECT
