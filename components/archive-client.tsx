@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import Image from "next/image"
 import Link from "next/link"
 import { Calendar, Clock } from "lucide-react"
 
@@ -116,16 +117,18 @@ export default function ArchiveClient({ items, initialCategory = "all" }: { item
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Image Section */}
-              <div className="relative w-full sm:w-48 h-48 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                {item.coverImage ? (
-                  <img
-                    src={item.coverImage}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-300">
-                    <Calendar className="w-8 h-8 opacity-50" />
+                <div className="relative w-full sm:w-48 h-48 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                  {item.coverImage ? (
+                    <Image
+                      src={item.coverImage}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, 12rem"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                      <Calendar className="w-8 h-8 opacity-50" />
                   </div>
                 )}
               </div>
