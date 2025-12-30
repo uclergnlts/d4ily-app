@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         const aiResult = await model.generateContent(finalPrompt);
         const textResponse = aiResult.response.text();
         const jsonString = textResponse.replace(/^```json\s*|\s*```$/g, "").trim();
-        
+
         let analysis: any;
         try {
             analysis = JSON.parse(jsonString);
@@ -137,8 +137,11 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("Auto-Blog Cron Error:", error);
+        // FORCE 200 OK to see error in GitHub Actions (curl --fail suppresses 500 body)
         return NextResponse.json({
-            error: error.message || "Unknown error"
-        }, { status: 500 });
+            success: false,
+            error: error.message || "Unknown error",
+            stack: error.stack
+        }, { status: 200 });
     }
 }
