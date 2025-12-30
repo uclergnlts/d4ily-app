@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 interface DigestCardProps {
   digest: Digest | null
@@ -311,10 +312,12 @@ export default function DigestCard({ digest, showHeader = true }: DigestCardProp
       >
         {useCustomCover ? (
           <>
-            <img
+            <Image
               src={digest.cover_image_url || "/placeholder.svg"}
               alt={`${digest.title || "Gündem"} kapak görseli`}
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 hover:scale-105"
+              sizes="(min-width: 1024px) 960px, 100vw"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
