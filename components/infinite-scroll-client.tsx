@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { Tweet } from "@/lib/digest-data"
 import { TweetCard } from "@/components/tweet-card"
 import { Loader2 } from "lucide-react"
@@ -16,6 +16,15 @@ export function InfiniteScrollClient({ initialTweets }: InfiniteScrollClientProp
     const [cursor, setCursor] = useState<string | undefined>(
         initialTweets.length > 0 ? getTweetIdFromUrl(initialTweets[initialTweets.length - 1]) : undefined
     )
+
+    // Sync state when initialTweets changes (after router.refresh())
+    useEffect(() => {
+        setTweets(initialTweets)
+        setHasMore(true)
+        setCursor(
+            initialTweets.length > 0 ? getTweetIdFromUrl(initialTweets[initialTweets.length - 1]) : undefined
+        )
+    }, [initialTweets])
 
     function getTweetIdFromUrl(tweet: Tweet): string | undefined {
         // Need Snowflake ID for cursor. 

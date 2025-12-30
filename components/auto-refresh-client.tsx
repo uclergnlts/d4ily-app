@@ -6,7 +6,7 @@ import { RefreshCw } from "lucide-react";
 
 export function AutoRefreshClient() {
     const router = useRouter();
-    const [timeLeft, setTimeLeft] = useState(3600); // 1 hour = 3600 seconds
+    const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -14,7 +14,7 @@ export function AutoRefreshClient() {
                 if (prev <= 1) {
                     // Refresh the page data
                     router.refresh();
-                    return 3600; // Reset timer to 1 hour
+                    return 300; // Reset timer to 5 minutes
                 }
                 return prev - 1;
             });
@@ -25,7 +25,7 @@ export function AutoRefreshClient() {
 
     // Manual refresh button
     const handleManualRefresh = () => {
-        setTimeLeft(3600);
+        setTimeLeft(300);
         router.refresh();
     };
 
