@@ -124,7 +124,7 @@ export default function Footer() {
               className="inline-flex items-center gap-2 rounded-full bg-[#1DB954] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1ed760]"
             >
               <Music className="h-4 w-4" />
-              &lt;span&gt;Spotify&apos;da Takip Et&lt;/span&gt;
+              <span>Spotify&apos;da Takip Et</span>
             </a>
             {/* Mini abonelik formu */}
             <div className="flex flex-col items-center lg:items-end">

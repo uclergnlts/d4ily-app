@@ -515,17 +515,17 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
         </div>
 
         <div className="mt-5 flex justify-center">
-          <a
-            href={finalSpotifyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-[#1DB954] px-5 py-2 text-sm font-semibold text-black transition-all hover:bg-[#1ed760] hover:scale-105"
-          >
-            <Music className="h-4 w-4" />
-            &lt;span&gt;Spotify&apos;da Dinle!&lt;/span&gt;
-          </a>
+            <a
+              href={finalSpotifyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#1DB954] px-5 py-2 text-sm font-semibold text-black transition-all hover:bg-[#1ed760] hover:scale-105"
+            >
+              <Music className="h-4 w-4" />
+              <span>Spotify&apos;da Dinle!</span>
+            </a>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
 }
