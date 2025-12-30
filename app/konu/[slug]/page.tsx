@@ -1,10 +1,10 @@
 
 import { db } from "@/lib/db";
 import { topics, blogPosts } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next"; // Standard Metadata type
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { LayoutDashboard, Calendar, Eye, ArrowRight } from "lucide-react";
 
 interface PageProps {
@@ -91,9 +91,11 @@ export default async function TopicPage({ params }: PageProps) {
                   {/* Image */}
                   <div className="relative aspect-[1.6/1] overflow-hidden bg-gray-100">
                     {post.cover_image_url ? (
-                      <img
+                      <Image
                         src={post.cover_image_url}
                         alt={post.title}
+                        fill
+                        sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
                         className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (

@@ -2,6 +2,7 @@
 import { db } from "@/lib/db";
 import { processedArticles } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -45,11 +46,12 @@ export default async function NewsPage() {
                             <Link href={`/haber/${item.id}`} className="flex flex-col h-full">
                                 {item.image_url && (
                                     <div className="relative h-48 w-full overflow-hidden bg-muted">
-                                        <img
+                                        <Image
                                             src={item.image_url}
                                             alt={item.title}
+                                            fill
+                                            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 100vw"
                                             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                                            loading="lazy"
                                         />
                                         <div className="absolute top-3 left-3">
                                             <span className="px-2 py-1 text-xs font-semibold text-white bg-red-600 rounded-sm shadow-sm">
