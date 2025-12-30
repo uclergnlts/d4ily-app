@@ -11,6 +11,7 @@ on:
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
