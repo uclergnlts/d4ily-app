@@ -10,9 +10,12 @@ on:
 jobs:
   auto-blog:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Call Auto Blog API
         run: |
-          curl -X POST \
-          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-          "https://d4ily.com/api/cron/auto-blog-from-agenda"
+          curl -L -sS -X POST "https://d4ily.com/api/cron/auto-blog-from-agenda" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --fail
+
