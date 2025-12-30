@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { dailyDigests, tweetsRaw, weeklyDigests } from "@/lib/db/schema"
-import { desc, eq, like, sql, gte, lte, and } from "drizzle-orm"
+import { desc, eq, like, sql, gte, lte, and, lt, gt } from "drizzle-orm"
 import { unstable_cache } from "next/cache"
 
 export interface Digest {
@@ -173,6 +173,38 @@ export async function getDigestByDate(date: string): Promise<Digest | null> {
     return digest
   } catch (e) {
     return null
+  }
+}
+
+/**
+ * Belirli bir tarihe göre önceki ve sonraki özetleri getirir.
+ * Arşivdeki sınır (30 kayıt) nedeniyle navigasyonun bozulmaması için
+ * doğrudan veritabanından sorgular.
+ */
+export async function getAdjacentDigestDates(
+  date: string
+): Promise<{ prevDate?: string; nextDate?: string }> {
+  try {
+    const [prev] = await db
+      .select({ digest_date: dailyDigests.digest_date })
+      .from(dailyDigests)
+      .where(lt(dailyDigests.digest_date, date))
+      .orderBy(desc(dailyDigests.digest_date))
+      .limit(1)
+
+    const [next] = await db
+      .select({ digest_date: dailyDigests.digest_date })
+      .from(dailyDigests)
+      .where(gt(dailyDigests.digest_date, date))
+      .orderBy(dailyDigests.digest_date)
+      .limit(1)
+
+    return {
+      prevDate: prev?.digest_date,
+      nextDate: next?.digest_date,
+    }
+  } catch (e) {
+    return { prevDate: undefined, nextDate: undefined }
   }
 }
 
