@@ -15,6 +15,13 @@
       "when": 1766670156325,
       "tag": "0001_slow_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1767128010129,
+      "tag": "0002_old_thanos",
+      "breakpoints": true
     }
   ]
 }
