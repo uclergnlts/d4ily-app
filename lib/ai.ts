@@ -46,6 +46,37 @@ export interface DigestData {
     quote?: string;
 }
 
+// Helper function to format date with Turkish day names
+function formatTurkishDate(dateString: string): string {
+    const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+    const date = new Date(dateString);
+    const dayName = days[date.getDay()];
+    const dayNum = date.getDate();
+    const monthName = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    // Check for special days
+    const isLastWeekOfYear = date.getMonth() === 11 && dayNum >= 25;
+    const isFirstWeekOfYear = date.getMonth() === 0 && dayNum <= 7;
+    const isNewYearsEve = date.getMonth() === 11 && dayNum === 31;
+    const isNewYear = date.getMonth() === 0 && dayNum === 1;
+
+    if (isNewYearsEve) {
+        return "Yılbaşı Gecesi";
+    } else if (isNewYear) {
+        return `${year} yılının ilk günü`;
+    } else if (isLastWeekOfYear) {
+        return `${year} yılının son ${dayName}'si`;
+    } else if (isFirstWeekOfYear) {
+        return `${year} yılının ilk ${dayName}'si`;
+    }
+
+    return `${dayNum} ${monthName} ${dayName}`;
+}
+
 export async function generateDailyDigest(
     date: string,
     tweets: any[],
@@ -53,6 +84,9 @@ export async function generateDailyDigest(
     marketData?: any // Optional market data
 ): Promise<DigestData> {
     // API key is checked in getJsonModel()
+
+    // Format date for greeting
+    const formattedDate = formatTurkishDate(date);
 
     // Prepare context
     const tweetsText = tweets.map(t =>
@@ -76,7 +110,7 @@ export async function generateDailyDigest(
     const prompt = `
     You are the Chief Editor for "D4ily", Turkey's premium daily newsletter.
     
-    DATE: ${date}
+    DATE: ${formattedDate} (${date})
     
     TASK:
     Analyze the provided Tweets, News, and Financial Data to create a comprehensive, long-form daily digest in TURKISH.
@@ -113,7 +147,7 @@ export async function generateDailyDigest(
     - Do NOT be overly verbose. Focus on the most critical information.
     - If a topic is complex, break it down but keep it tight.
     - Use a professional, objective, yet engaging journalist tone.
-    - **Start with a warm opening:** e.g., "${date} sabahından herkese merhaba, Türkiye gündemini birlikte gözden geçirelim."
+    - **Start with a warm opening:** e.g., "${formattedDate} sabahından herkese merhaba, Türkiye gündemini birlikte gözden geçirelim."
 
     **STRUCTURE FOR 'content' FIELD (Markdown):**
 
