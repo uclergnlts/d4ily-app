@@ -10,7 +10,12 @@ import { ScrollToTop } from "@/components/scroll-to-top"
 import DayNavigation from "@/components/day-navigation"
 import ReactionButtons from "@/components/reaction-buttons"
 import NewsletterPopup from "@/components/newsletter-popup"
-import { getTodayDigest, getImportantTweets } from "@/lib/digest-data"
+import {
+  getTodayDigest,
+  getImportantTweets,
+  getTopTweetsByDate,
+  getTodayDate,
+} from "@/lib/digest-data"
 import Image from "next/image"
 import { NewsTimeline, type TimelineEvent } from "@/components/news-timeline"
 import { Share2 } from "lucide-react"
@@ -66,7 +71,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BugunPage() {
   const digest = await getTodayDigest()
-  const tweets = await getImportantTweets()
+  const tweetDate = digest?.digest_date || getTodayDate()
+
+  const tweetsForDay = await getTopTweetsByDate(tweetDate, 20)
+  const tweets = tweetsForDay.length > 0 ? tweetsForDay : await getImportantTweets()
 
   if (!digest) {
     return (
