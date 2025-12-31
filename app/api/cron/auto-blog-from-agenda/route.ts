@@ -73,7 +73,15 @@ export async function POST(request: Request) {
         const aiResult = await model.generateContent(finalPrompt);
         const textResponse = aiResult.response.text();
         const jsonString = textResponse.replace(/^```json\s*|\s*```$/g, "").trim();
-        const analysis = JSON.parse(jsonString);
+
+        let analysis: any;
+        try {
+            analysis = JSON.parse(jsonString);
+        } catch (e) {
+            console.error("JSON Parse Error in Auto-Blog Route:", e);
+            console.error("Raw AI Response:", textResponse);
+            throw new Error("Failed to parse AI response for topic extraction.");
+        }
 
         const candidate = analysis.best_pick;
 
@@ -129,8 +137,25 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("Auto-Blog Cron Error:", error);
+
+        // DIAGNOSTICS: Check DB connection details
+        let dbDiagnostics = {};
+        try {
+            const tables = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table';`);
+            dbDiagnostics = {
+                connected_db_url: process.env.TURSO_DATABASE_URL ? "Defined (starts with " + process.env.TURSO_DATABASE_URL.substring(0, 10) + ")" : "UNDEFINED (Using local.db?)",
+                visible_tables: tables.rows.map((r: any) => r.name)
+            };
+        } catch (diagError: any) {
+            dbDiagnostics = { error: diagError.message };
+        }
+
+        // FORCE 200 OK to see error in GitHub Actions (curl --fail suppresses 500 body)
         return NextResponse.json({
-            error: error.message || "Unknown error"
-        }, { status: 500 });
+            success: false,
+            error: error.message || "Unknown error",
+            stack: error.stack,
+            diagnostics: dbDiagnostics
+        }, { status: 200 });
     }
 }

@@ -14,11 +14,14 @@ function getGenAI() {
 }
 
 function getJsonModel() {
-    return getGenAI().getGenerativeModel({ model: "gemini-2.5-flash" });
+    return getGenAI().getGenerativeModel({
+        model: "gemini-2.0-flash", // Explicit version or fallback to "gemini-pro" if flash persists
+        generationConfig: { responseMimeType: "application/json" }
+    });
 }
 
 function getTextModel() {
-    return getGenAI().getGenerativeModel({ model: "gemini-2.5-flash" });
+    return getGenAI().getGenerativeModel({ model: "gemini-2.0-flash" });
 }
 
 async function loadPrompt(role: string): Promise<string> {
@@ -40,7 +43,26 @@ interface BlogPostGenerationResult {
 
 // Helper to clean JSON
 function cleanJson(text: string): string {
-    return text.replace(/^```json\s*|\s*```$/g, "").trim();
+    // Remove markdown code blocks
+    let cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    // Find first { and last }
+    const firstOpen = cleaned.indexOf("{");
+    const lastClose = cleaned.lastIndexOf("}");
+    if (firstOpen !== -1 && lastClose !== -1) {
+        cleaned = cleaned.substring(firstOpen, lastClose + 1);
+    }
+    return cleaned;
+}
+
+function safeJsonParse(text: string, context: string): any {
+    try {
+        const cleaned = cleanJson(text);
+        return JSON.parse(cleaned);
+    } catch (e) {
+        console.error(`JSON Parse Error in ${context}:`, e);
+        console.error(`Raw AI Response (${context}):`, text);
+        throw new Error(`Failed to parse AI response for ${context}`);
+    }
 }
 
 export async function generateBlogPostFromTopic(topicName: string, topicId?: number): Promise<BlogPostGenerationResult> {
@@ -54,7 +76,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
             .replace("{topic}", topicName)
             .replace("{trends_context}", "Current high inflation in Turkey, Minimum wage discussions, Election aftermath") // Context can be dynamic later
     );
-    const strategy = JSON.parse(cleanJson(strategyResult.response.text()));
+    const strategy = safeJsonParse(strategyResult.response.text(), "SEO Strategist");
     console.log("✅ Strategy defined:", strategy.content_angle);
 
     // 2. KEYWORD RESEARCHER
@@ -65,7 +87,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
             .replace("{primary_keyword}", strategy.primary_keyword)
             .replace("{content_angle}", strategy.content_angle)
     );
-    const keywords = JSON.parse(cleanJson(researchResult.response.text()));
+    const keywords = safeJsonParse(researchResult.response.text(), "Keyword Researcher");
     console.log("✅ Keywords found:", keywords.clustered_keywords.length, "clusters");
 
     // 3. CONTENT BRIEF CREATOR
@@ -94,7 +116,7 @@ export async function generateBlogPostFromTopic(topicName: string, topicId?: num
     const editResult = await getJsonModel().generateContent(
         editorPrompt.replace("{draft_content}", draftContent)
     );
-    const critique = JSON.parse(cleanJson(editResult.response.text()));
+    const critique = safeJsonParse(editResult.response.text(), "Editorial Checker");
     console.log(`✅ Editorial Score: ${critique.score}/100`);
 
     // 6. SCHEMA ARCHITECT
