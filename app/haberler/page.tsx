@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { processedArticles } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 
 async function getAllNews() {
@@ -45,10 +46,12 @@ export default async function NewsPage() {
                             <Link href={`/haber/${item.id}`} className="flex flex-col h-full">
                                 {item.image_url && (
                                     <div className="relative h-48 w-full overflow-hidden bg-muted">
-                                        <img
+                                        <Image
                                             src={item.image_url}
                                             alt={item.title}
-                                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                                             loading="lazy"
                                         />
                                         <div className="absolute top-3 left-3">
