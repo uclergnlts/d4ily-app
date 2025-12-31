@@ -137,11 +137,25 @@ export async function POST(request: Request) {
 
     } catch (error: any) {
         console.error("Auto-Blog Cron Error:", error);
+
+        // DIAGNOSTICS: Check DB connection details
+        let dbDiagnostics = {};
+        try {
+            const tables = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table';`);
+            dbDiagnostics = {
+                connected_db_url: process.env.TURSO_DATABASE_URL ? "Defined (starts with " + process.env.TURSO_DATABASE_URL.substring(0, 10) + ")" : "UNDEFINED (Using local.db?)",
+                visible_tables: tables.rows.map((r: any) => r.name)
+            };
+        } catch (diagError: any) {
+            dbDiagnostics = { error: diagError.message };
+        }
+
         // FORCE 200 OK to see error in GitHub Actions (curl --fail suppresses 500 body)
         return NextResponse.json({
             success: false,
             error: error.message || "Unknown error",
-            stack: error.stack
+            stack: error.stack,
+            diagnostics: dbDiagnostics
         }, { status: 200 });
     }
 }
