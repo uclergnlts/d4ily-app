@@ -10,7 +10,7 @@ export default function Footer() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const footerLinks = {
+  const footerLinks: Record<string, { name: string; href: string; external?: boolean }[]> = {
     İçerik: [
       { name: "Ana Sayfa", href: "/" },
       { name: "Günlük Özet", href: "/arsiv" },
