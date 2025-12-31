@@ -14,11 +14,14 @@ function getGenAI() {
 }
 
 function getJsonModel() {
-    return getGenAI().getGenerativeModel({ model: "gemini-2.5-flash" });
+    return getGenAI().getGenerativeModel({
+        model: "gemini-1.5-flash", // Revert to stable model if 2.5 is experimental/beta
+        generationConfig: { responseMimeType: "application/json" }
+    });
 }
 
 function getTextModel() {
-    return getGenAI().getGenerativeModel({ model: "gemini-2.5-flash" });
+    return getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
 }
 
 async function loadPrompt(role: string): Promise<string> {
@@ -40,7 +43,15 @@ interface BlogPostGenerationResult {
 
 // Helper to clean JSON
 function cleanJson(text: string): string {
-    return text.replace(/^```json\s*|\s*```$/g, "").trim();
+    // Remove markdown code blocks
+    let cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    // Find first { and last }
+    const firstOpen = cleaned.indexOf("{");
+    const lastClose = cleaned.lastIndexOf("}");
+    if (firstOpen !== -1 && lastClose !== -1) {
+        cleaned = cleaned.substring(firstOpen, lastClose + 1);
+    }
+    return cleaned;
 }
 
 function safeJsonParse(text: string, context: string): any {
