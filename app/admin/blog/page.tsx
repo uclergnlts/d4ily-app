@@ -32,6 +32,27 @@ export default function BlogAdminPage() {
         }
     };
 
+    const handleDelete = async (slug: string) => {
+        if (!confirm("Bu yazıyı silmek istediğinize emin misiniz?")) return;
+
+        try {
+            const res = await fetch(`/api/blog/posts/${slug}`, {
+                method: "DELETE",
+            });
+
+            if (res.ok) {
+                alert("Yazı başarıyla silindi.");
+                fetchPosts(); // Refresh list
+            } else {
+                const err = await res.json();
+                alert("Silme başarısız: " + (err.error || "Bilinmeyen hata"));
+            }
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Silme işlemi sırasında bir hata oluştu.");
+        }
+    };
+
     const filteredPosts = posts.filter(post =>
         post.title.toLowerCase().includes(search.toLowerCase())
     );
@@ -142,10 +163,16 @@ export default function BlogAdminPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+                                            <Link
+                                                href={`/admin/blog/edit/${post.slug}`}
+                                                className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                                            >
                                                 <Edit className="w-4 h-4" />
-                                            </button>
-                                            <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(post.slug)}
+                                                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>

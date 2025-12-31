@@ -393,17 +393,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ===== NEWSLETTER - MINIMAL ===== */}
-        <section className="py-12 md:py-16 bg-background border-t border-border">
-          <div className="container mx-auto px-4 max-w-md text-center">
-            <h2 className="text-xl font-bold font-serif mb-2">Günü Kaçırmayın</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Her sabah 07:00&apos;de gündem cebinizde.
-            </p>
-            <NewsletterForm />
-          </div>
-        </section>
-
       </main>
       <Footer />
     </div>
