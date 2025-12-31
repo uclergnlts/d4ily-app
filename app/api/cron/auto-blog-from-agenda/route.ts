@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { dailyDigests, blogGenerationLogs, blogPosts } from "@/lib/db/schema";
-import { desc, sql, inArray, eq, and, gt } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateBlogPostFromTopic } from "@/lib/services/blog-generator";
 import path from "path";
@@ -98,15 +98,38 @@ export async function POST(request: Request) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const duplicateCheck = await db.select()
-            .from(blogGenerationLogs)
-            .where(and(
-                eq(blogGenerationLogs.selected_topic, candidate.topic_title),
-                gt(blogGenerationLogs.run_date, thirtyDaysAgo.toISOString())
-            ))
-            .limit(1);
+        // Keep the duplicate check resilient even if date formats differ in the DB.
+        let duplicateCheck = [] as { selected_topic: string; run_date: string }[];
+        try {
+            duplicateCheck = await db.select({
+                selected_topic: blogGenerationLogs.selected_topic,
+                run_date: blogGenerationLogs.run_date
+            })
+                .from(blogGenerationLogs)
+                .where(eq(blogGenerationLogs.selected_topic, candidate.topic_title))
+                .orderBy(desc(blogGenerationLogs.run_date))
+                .limit(1);
+        } catch (error) {
+            console.error("Duplicate check failed, proceeding without skip:", error);
+        }
 
-        if (duplicateCheck.length > 0) {
+        const lastRunDate = duplicateCheck[0]?.run_date;
+
+        let seenWithinThirtyDays = false;
+        if (lastRunDate) {
+            try {
+                const parsedLastRun = new Date(`${lastRunDate.replace(" ", "T")}Z`);
+                if (!Number.isNaN(parsedLastRun.getTime())) {
+                    seenWithinThirtyDays = parsedLastRun.getTime() > thirtyDaysAgo.getTime();
+                } else {
+                    console.warn("Duplicate check: Unable to parse last run date", { lastRunDate });
+                }
+            } catch (error) {
+                console.error("Duplicate check: Date parse failed, proceeding without skip:", error);
+            }
+        }
+
+        if (seenWithinThirtyDays) {
             await db.insert(blogGenerationLogs).values({
                 selected_topic: candidate.topic_title,
                 evergreen_score: candidate.scores.evergreen_score,
