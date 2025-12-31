@@ -15,13 +15,13 @@ function getGenAI() {
 
 function getJsonModel() {
     return getGenAI().getGenerativeModel({
-        model: "gemini-1.5-flash", // Explicit version or fallback to "gemini-pro" if flash persists
+        model: "gemini-2.0-flash", // Explicit version or fallback to "gemini-pro" if flash persists
         generationConfig: { responseMimeType: "application/json" }
     });
 }
 
 function getTextModel() {
-    return getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
+    return getGenAI().getGenerativeModel({ model: "gemini-2.0-flash" });
 }
 
 async function loadPrompt(role: string): Promise<string> {

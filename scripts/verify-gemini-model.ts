@@ -8,16 +8,19 @@ dotenv.config({ path: ".env.local" });
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-    console.error("❌ GEMINI_API_KEY is missing in .env.local");
-    process.exit(1);
+    // Allow passing via env if .env.local fails
+    if (!process.env.GEMINI_API_KEY) {
+        console.error("❌ GEMINI_API_KEY is missing");
+        process.exit(1);
+    }
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 async function run() {
     try {
-        console.log("🚀 Testing Gemini 1.5 Flash connection...");
+        console.log("🚀 Testing Gemini 2.0 Flash connection...");
         const result = await model.generateContent("Hello, are you online?");
         const response = await result.response;
         const text = response.text();
