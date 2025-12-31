@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Metadata } from "next";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
@@ -132,7 +133,14 @@ export default async function BlogPostPage({ params }: PageProps) {
                     {/* Cover Image */}
                     {post.cover_image_url && (
                         <div className="rounded-xl overflow-hidden mb-10 aspect-video relative bg-muted">
-                            <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover" />
+                            <Image
+                                src={post.cover_image_url}
+                                alt={post.title}
+                                fill
+                                priority
+                                sizes="(min-width: 1024px) 960px, 100vw"
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                     )}
 

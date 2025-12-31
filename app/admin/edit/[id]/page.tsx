@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -356,14 +357,18 @@ export default function EditDigestPage() {
                         {coverImageUrl && (
                             <div className="mt-4">
                                 <p className="text-xs text-gray-500 mb-2">Önizleme:</p>
-                                <img
-                                    src={coverImageUrl}
-                                    alt="Cover preview"
-                                    className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                                    }}
-                                />
+                                <div className="relative w-full max-w-md h-48">
+                                    <Image
+                                        src={coverImageUrl || "/placeholder.svg"}
+                                        alt="Cover preview"
+                                        fill
+                                        sizes="(min-width: 768px) 400px, 100vw"
+                                        className="rounded-lg border border-gray-200 object-cover"
+                                        onError={(event) => {
+                                            event.currentTarget.src = "/placeholder.svg";
+                                        }}
+                                    />
+                                </div>
                             </div>
                         )}
                     </div>

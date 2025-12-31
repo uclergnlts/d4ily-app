@@ -2,6 +2,7 @@
 import { db } from "@/lib/db";
 import { newsRaw, processedArticles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -109,9 +110,11 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 {/* Cover Image */}
                 {article.image_url && (
                     <div className="relative aspect-video w-full overflow-hidden rounded-2xl mb-10 border border-border/50 shadow-sm">
-                        <img
+                        <Image
                             src={article.image_url}
                             alt={article.title}
+                            fill
+                            sizes="(min-width: 1024px) 960px, 100vw"
                             className="object-cover w-full h-full"
                         />
                     </div>
