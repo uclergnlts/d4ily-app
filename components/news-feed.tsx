@@ -5,6 +5,7 @@ import { desc, eq } from "drizzle-orm";
 // @ts-ignore - drizzle-orm type issue
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
+import Image from "next/image";
 
 async function getLatestNews() {
     // 1. Fetch a larger pool of latest news (e.g., 60) to ensure we have enough diversity
@@ -79,10 +80,12 @@ export default async function NewsFeed() {
                             <Link href={`/haber/${item.id}`} className="flex flex-col h-full">
                                 {item.image_url && (
                                     <div className="relative h-48 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-900">
-                                        <img
+                                        <Image
                                             src={item.image_url}
                                             alt={item.title}
-                                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                            sizes="(max-width: 768px) 100vw, 25vw"
                                             loading="lazy"
                                         />
                                         <div className="absolute top-3 left-3">

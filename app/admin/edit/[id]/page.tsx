@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Loader2, Upload, Link as LinkIcon,
@@ -29,6 +30,7 @@ export default function EditDigestPage() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [previewError, setPreviewError] = useState(false);
 
     // Form state
     const [title, setTitle] = useState("");
@@ -41,6 +43,10 @@ export default function EditDigestPage() {
 
     // Image upload mode
     const [imageMode, setImageMode] = useState<'url' | 'upload'>('url');
+
+    useEffect(() => {
+        setPreviewError(false);
+    }, [coverImageUrl]);
 
     const fetchDigest = useCallback(async () => {
         try {
@@ -353,19 +359,22 @@ export default function EditDigestPage() {
                         )}
 
                         {/* Image Preview */}
-                        {coverImageUrl && (
-                            <div className="mt-4">
-                                <p className="text-xs text-gray-500 mb-2">Önizleme:</p>
-                                <img
-                                    src={coverImageUrl}
-                                    alt="Cover preview"
-                                    className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                                    }}
-                                />
-                            </div>
-                        )}
+                            {coverImageUrl && (
+                                <div className="mt-4">
+                                    <p className="text-xs text-gray-500 mb-2">Önizleme:</p>
+                                    <div className="relative w-full max-w-md h-48">
+                                        <Image
+                                            src={previewError ? "/placeholder.svg" : coverImageUrl}
+                                            alt="Cover preview"
+                                            fill
+                                            className="object-cover rounded-lg border border-gray-200"
+                                            sizes="(max-width: 768px) 100vw, 400px"
+                                            onError={() => setPreviewError(true)}
+                                            onLoadingComplete={() => setPreviewError(false)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                     </div>
 
                     {/* Intro */}

@@ -1,4 +1,5 @@
 import type React from "react"
+import Image from "next/image"
 import { type Digest, formatDateTR, countWords } from "@/lib/digest-data"
 import SectionDivider from "@/components/section-divider"
 import ShareButtons from "@/components/share-buttons"
@@ -307,19 +308,21 @@ export default function DigestCard({ digest, showHeader = true }: DigestCardProp
   return (
     <article className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft transition-all duration-300 hover:shadow-2xl">
       <div
-        className={`relative aspect-[2/1] w-full overflow-hidden ${useCustomCover ? "bg-gradient-to-br from-primary/10 to-accent/10" : gradientClass}`}
-      >
-        {useCustomCover ? (
-          <>
-            <img
-              src={digest.cover_image_url || "/placeholder.svg"}
-              alt={`${digest.title || "Gündem"} kapak görseli`}
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-          </>
-        ) : (
+          className={`relative aspect-[2/1] w-full overflow-hidden ${useCustomCover ? "bg-gradient-to-br from-primary/10 to-accent/10" : gradientClass}`}
+        >
+          {useCustomCover ? (
+            <>
+              <Image
+                src={digest.cover_image_url || "/placeholder.svg"}
+                alt={`${digest.title || "Gündem"} kapak görseli`}
+                fill
+                className="object-cover transition-transform duration-300 hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 960px"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </>
+          ) : (
           <div className="flex h-full w-full items-center justify-center p-8">
             <div className="text-center">
               <div className="mb-4 text-6xl font-bold text-white/90 drop-shadow-lg">
