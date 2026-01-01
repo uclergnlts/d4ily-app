@@ -1,0 +1,45 @@
+﻿[dotenv@17.2.3] injecting env (7) from .env.local -- tip: ­şöÉ prevent committing .env to code: https://dotenvx.com/precommit
+[
+  {
+    "url": "https://www.birgun.net/rss/kategori/siyaset-8",
+    "status": "WORKING",
+    "title": "Siyaset",
+    "itemCount": 157,
+    "latestItem": "├ûzg├╝r ├ûzelÔÇÖden Ayval─▒k BelediyesiÔÇÖne ziyaret"
+  },
+  {
+    "url": "http://rss.dw-world.de/rdf/rss-tur-all",
+    "status": "WORKING",
+    "title": "DW-WORLD┬┤s Turkish Homepage",
+    "itemCount": 15,
+    "latestItem": "─░svi├ğre'de y─▒lba┼ş─▒ e─şlencesi s─▒ras─▒nda yang─▒n: Onlarca ├Âl├╝"
+  },
+  {
+    "url": "https://www.aa.com.tr/tr/rss/default?cat=guncel",
+    "status": "WORKING",
+    "title": "Anadolu Ajans─▒ G├╝ncel Haberler",
+    "itemCount": 30,
+    "latestItem": "Sudan Egemenlik Konseyi Ba┼şkan─▒ Burhan'dan T├╝rkiye'ye te┼şekk├╝r"
+  },
+  {
+    "url": "https://tr.sputniknews.com/export/rss2/archive/index.xml",
+    "status": "WORKING",
+    "title": "Sputnik Haberler - D├╝nya ve T├╝rkiye G├╝ndemi, Son Dakika Haberler",
+    "itemCount": 100,
+    "latestItem": "─░stanbul Valili─şi: Ana arterler ba┼şta olmak ├╝zere t├╝m yollar a├ğ─▒kt─▒r"
+  },
+  {
+    "url": "http://feeds.bbci.co.uk/turkce/rss.xml",
+    "status": "WORKING",
+    "title": "BBC Turkish",
+    "itemCount": 20,
+    "latestItem": "─░svi├ğre'de kayak merkezindeki bar yang─▒n─▒nda yakla┼ş─▒k 40 ki┼şi ├Âld├╝"
+  },
+  {
+    "url": "https://www.ntv.com.tr/gundem.rss",
+    "status": "WORKING",
+    "title": "ntv.com.tr",
+    "itemCount": 20,
+    "latestItem": "Bitlis'te ├ğevre yolunda ├ğ─▒─ş d├╝┼şt├╝. Tanker s├╝r├╝c├╝s├╝ alt─▒nda kald─▒"
+  }
+]

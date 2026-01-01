@@ -379,3 +379,72 @@ export async function summarizeArticle(
         throw error;
     }
 }
+
+/**
+ * Check if a new article is duplicate or very similar to existing articles
+ * @param newTitle - Title of the new article to check
+ * @param newSummary - Summary/content of the new article
+ * @param existingArticles - Array of recent article titles to compare against
+ * @returns Promise<boolean> - true if duplicate/very similar, false if unique
+ */
+export async function checkDuplicateArticle(
+    newTitle: string,
+    newSummary: string,
+    existingArticles: string[]
+): Promise<boolean> {
+    // If no existing articles to compare, it's unique
+    if (!existingArticles || existingArticles.length === 0) {
+        return false;
+    }
+
+    const existingTitles = existingArticles.slice(0, 50); // Limit to last 50 for performance
+
+    const prompt = `
+    You are a news deduplication expert.
+    
+    TASK:
+    Determine if the NEW article is a duplicate or very similar to any of the EXISTING articles.
+    
+    NEW ARTICLE:
+    Title: ${newTitle}
+    Summary: ${newSummary.substring(0, 300)}
+    
+    EXISTING ARTICLES (Recent):
+    ${existingTitles.map((title, idx) => `${idx + 1}. ${title}`).join('\n')}
+    
+    CRITERIA FOR DUPLICATE:
+    - Same event/news (e.g., both about "Erdoğan met with Biden")
+    - Same person doing the same thing (e.g., both about "Mehmet Şimşek announced inflation data")
+    - Same sports match result (e.g., both about "Galatasaray 2-1 Fenerbahçe")
+    - Only minor wording differences
+    
+    NOT DUPLICATE if:
+    - Different aspect of the same general topic (e.g., one about "inflation rising", another about "central bank's response to inflation")
+    - Different people or events, even if in same category
+    - Update/follow-up to a previous story with NEW information
+    
+    OUTPUT JSON:
+    {
+      "is_duplicate": true/false,
+      "reason": "Brief explanation why it is or isn't a duplicate"
+    }
+    `;
+
+    try {
+        const result = await getJsonModel().generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        const data = JSON.parse(text) as { is_duplicate: boolean; reason: string };
+
+        if (data.is_duplicate) {
+            console.log(`  [DUPLICATE] ${data.reason}`);
+        }
+
+        return data.is_duplicate;
+    } catch (error) {
+        console.error("Error checking duplicate with AI:", error);
+        // On error, assume not duplicate to avoid blocking legitimate news
+        return false;
+    }
+}
+

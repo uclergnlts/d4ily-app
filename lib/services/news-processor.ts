@@ -1,7 +1,7 @@
 
 import { db } from "../db";
 import { newsRaw, processedArticles } from "../db/schema";
-import { summarizeArticle } from "../ai";
+import { summarizeArticle, checkDuplicateArticle } from "../ai";
 import { desc, notInArray, eq, sql } from "drizzle-orm";
 
 export async function processLatestNews(limit = 10) {
@@ -33,6 +33,16 @@ export async function processLatestNews(limit = 10) {
 
     console.log(`Found ${candidates.length} news items to process.`);
 
+    // Get recent article titles for duplicate checking (last 24 hours)
+    const recentArticles = await db.select({ title: processedArticles.title })
+        .from(processedArticles)
+        .where(sql`processed_at >= datetime('now', '-1 day')`)
+        .orderBy(desc(processedArticles.processed_at))
+        .limit(100);
+
+    const recentTitles = recentArticles.map(a => a.title);
+    console.log(`Checking against ${recentTitles.length} recent articles for duplicates.`);
+
     for (const news of candidates) {
         try {
             console.log(`Processing: ${news.title}`);
@@ -41,6 +51,24 @@ export async function processLatestNews(limit = 10) {
             const processedTitle = news.title || "Untitled News";
 
             const result = await summarizeArticle(processedTitle, textToProcess, sourceName);
+
+            // CHECK: Skip if AI filtered it out as spam/clickbait/advertisement
+            if (result.title === "SKIP" || result.title.includes("SKIP")) {
+                console.log(`⊘ Skipped (filtered by AI): ${news.title}`);
+                continue; // Move to next article
+            }
+
+            // CHECK: Skip if duplicate or very similar to recent articles
+            const isDuplicate = await checkDuplicateArticle(
+                result.title,
+                result.summary,
+                recentTitles
+            );
+
+            if (isDuplicate) {
+                console.log(`⊘ Skipped (duplicate detected): ${result.title}`);
+                continue; // Move to next article
+            }
 
             // Extract image from raw payload safely
             const payload = news.raw_payload as any;
