@@ -10,14 +10,12 @@ interface NewsItem {
     id: number;
     title: string;
     summary: string;
-    url: string;
     image_url: string | null;
-    source_name: string;
-    category: string;
-    published_at: string;
+    source_name: string | null; // Allow null as per schema
+    category: string | null;    // Allow null as per schema
+    published_at: string | null; // Allow null
     processed_at: string;
-    created_at: string;
-    is_published: boolean | null;
+    is_published: boolean;
 }
 
 interface NewsFeedProps {
