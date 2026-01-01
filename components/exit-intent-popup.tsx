@@ -58,13 +58,39 @@ export function ExitIntentPopup() {
                         Her sabah Türkiye gündemini 5 dakikada, reklamsız ve tarafsız bir şekilde e-postana getirelim.
                     </p>
 
-                    <form className="space-y-4" onSubmit={(e) => {
+                    <form className="space-y-4" onSubmit={async (e) => {
                         e.preventDefault()
-                        // Here you would integrate with your newsletter API
-                        setIsVisible(false)
-                        alert("Teşekkürler! Listeye eklendin.")
+
+                        const formData = new FormData(e.currentTarget)
+                        const email = formData.get("email") as string
+                        if (!email) return
+
+                        const submitBtn = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement
+                        if (submitBtn) submitBtn.disabled = true;
+
+                        try {
+                            const res = await fetch("/api/subscribe", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ email }),
+                            })
+
+                            const data = await res.json()
+
+                            if (res.ok && data.success) {
+                                setIsVisible(false)
+                                alert("Teşekkürler! Listeye eklendin. 🎉")
+                            } else {
+                                alert(data.message || "Bir hata oluştu.")
+                            }
+                        } catch (error) {
+                            alert("Bir bağlantı hatası oluştu.")
+                        } finally {
+                            if (submitBtn) submitBtn.disabled = false;
+                        }
                     }}>
                         <Input
+                            name="email"
                             type="email"
                             placeholder="E-posta adresin..."
                             className="h-11 border-muted bg-muted/30"

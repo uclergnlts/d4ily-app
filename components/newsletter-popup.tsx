@@ -30,13 +30,30 @@ export default function NewsletterPopup() {
     if (!email) return
 
     setStatus("loading")
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setStatus("success")
-    localStorage.setItem("d4ily-popup-seen", "true")
 
-    setTimeout(() => {
-      setIsOpen(false)
-    }, 2000)
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        setStatus("success")
+        localStorage.setItem("d4ily-popup-seen", "true")
+
+        setTimeout(() => {
+          setIsOpen(false)
+        }, 2000)
+      } else {
+        setStatus("error")
+        // Optionally show error message
+      }
+    } catch (error) {
+      setStatus("error")
+    }
   }
 
   if (!isOpen) return null
