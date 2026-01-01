@@ -109,10 +109,11 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 {/* Cover Image */}
                 {article.image_url && (
                     <div className="relative aspect-video w-full overflow-hidden rounded-2xl mb-10 border border-border/50 shadow-sm">
-                        <img
+                        <Image
                             src={article.image_url}
                             alt={article.title}
-                            className="object-cover w-full h-full"
+                            fill
+                            className="object-cover"
                         />
                     </div>
                 )}

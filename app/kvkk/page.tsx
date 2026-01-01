@@ -27,7 +27,7 @@ export default function KVKKPage() {
 
                     <div className="prose prose-neutral dark:prose-invert max-w-none">
                         <p className="lead">
-                            D4ily olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca,
+                            D4ily olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca,
                             kişisel verilerinizin güvenliği ve gizliliğine önem veriyoruz.
                         </p>
 
@@ -55,7 +55,7 @@ export default function KVKKPage() {
                             <h2>3. Kişisel Verilerin Toplanma Yöntemi ve Hukuki Sebebi</h2>
                             <p>
                                 Kişisel verileriniz, web sitemiz, mobil uygulamalarımız, e-posta ve iletişim formları aracılığıyla
-                                elektronik ortamda toplanmaktadır. Bu veriler, KVKK'nın 5. ve 6. maddelerinde belirtilen
+                                elektronik ortamda toplanmaktadır. Bu veriler, KVKK&apos;nın 5. ve 6. maddelerinde belirtilen
                                 hukuki sebeplere dayanarak işlenmektedir.
                             </p>
                         </section>
@@ -70,7 +70,7 @@ export default function KVKKPage() {
 
                         <section className="mb-8">
                             <h2>5. Veri Sahibi Olarak Haklarınız</h2>
-                            <p>KVKK'nın 11. maddesi uyarınca aşağıdaki haklara sahipsiniz:</p>
+                            <p>KVKK&apos;nın 11. maddesi uyarınca aşağıdaki haklara sahipsiniz:</p>
                             <ul>
                                 <li>Kişisel veri işlenip işlenmediğini öğrenme</li>
                                 <li>Kişisel verileri işlenmişse buna ilişkin bilgi talep etme</li>

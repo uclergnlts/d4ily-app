@@ -50,7 +50,7 @@ export function ResmiGazete() {
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-border">
               <Button variant="outline" className="w-full sm:w-auto group bg-transparent" asChild>
                 <a href="#" className="flex items-center gap-2">
-                  Resmi Gazete'yi İncele
+                  Resmi Gazete&apos;yi İncele
                   <ExternalLink className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </a>
               </Button>

@@ -41,7 +41,7 @@ export default function PartnershipPage() {
                             Güçlerimizi <span className="text-primary italic">Birleştirelim</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                            D4ily'nin gelişmiş yapay zeka altyapısı ve geniş veri havuzu ile işletmenize veya platformunuza değer katın.
+                            D4ily&apos;nin gelişmiş yapay zeka altyapısı ve geniş veri havuzu ile işletmenize veya platformunuza değer katın.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
                             <Link href="/iletisim?subject=partnership" className="px-8 py-4 bg-primary text-primary-foreground rounded-full font-bold hover:scale-105 transition-transform shadow-lg shadow-primary/25 flex items-center justify-center gap-2">

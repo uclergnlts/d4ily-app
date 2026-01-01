@@ -84,7 +84,7 @@ export default function ReportIssuePage() {
                             </div>
                             <h3 className="text-xl font-bold mb-3">Öneri & Fikir</h3>
                             <p className="text-muted-foreground leading-relaxed mb-8 flex-grow">
-                                "Şöyle bir özellik olsa harika olurdu" dediğiniz ne varsa, duymak istiyoruz. D4ily'yi birlikte şekillendirelim.
+                                &quot;Şöyle bir özellik olsa harika olurdu&quot; dediğiniz ne varsa, duymak istiyoruz. D4ily&apos;yi birlikte şekillendirelim.
                             </p>
                             <Link href="/iletisim?subject=oneri" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-blue-50 text-blue-600 font-medium hover:bg-blue-100 transition-colors group-hover:shadow-sm">
                                 Fikir Paylaş <ArrowRight className="h-4 w-4" />

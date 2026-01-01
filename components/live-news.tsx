@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 import { Clock, Sparkles } from "lucide-react"
 
 const newsItems = [
@@ -61,10 +62,11 @@ export function LiveNews() {
           <Card key={item.id} className="overflow-hidden hover:shadow-md transition-all duration-300 group">
             <div className="grid sm:grid-cols-[200px_1fr] lg:grid-cols-[240px_1fr] gap-0">
               <div className="relative h-48 sm:h-full bg-muted overflow-hidden">
-                <img
+                <Image
                   src={item.image || "/placeholder.svg"}
                   alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <Badge className="absolute top-3 left-3 text-xs bg-background/90 backdrop-blur-sm">
                   {item.category}

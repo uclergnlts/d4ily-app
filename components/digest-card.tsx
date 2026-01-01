@@ -1,4 +1,5 @@
 import type React from "react"
+import Image from "next/image"
 import { type Digest, formatDateTR, countWords } from "@/lib/digest-data"
 import SectionDivider from "@/components/section-divider"
 import ShareButtons from "@/components/share-buttons"
@@ -311,10 +312,11 @@ export default function DigestCard({ digest, showHeader = true }: DigestCardProp
       >
         {useCustomCover ? (
           <>
-            <img
+            <Image
               src={digest.cover_image_url || "/placeholder.svg"}
               alt={`${digest.title || "Gündem"} kapak görseli`}
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-300 hover:scale-105"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

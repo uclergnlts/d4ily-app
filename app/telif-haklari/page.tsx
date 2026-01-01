@@ -29,9 +29,9 @@ export default function CopyrightPage() {
                         <section className="mb-8">
                             <h2>İçerik Mülkiyeti</h2>
                             <p>
-                                D4ily ("Platform") üzerinde yayınlanan tüm metinler, grafikler, kullanıcı arayüzleri, görsel arayüzler,
+                                D4ily (&quot;Platform&quot;) üzerinde yayınlanan tüm metinler, grafikler, kullanıcı arayüzleri, görsel arayüzler,
                                 fotoğraflar, ticari markalar, logolar, sesler, müzikler, sanat eserleri ve bilgisayar kodları
-                                (topluca "İçerik"), D4ily'ye aittir, denetlenmektedir veya lisanslanmıştır.
+                                (topluca &quot;İçerik&quot;), D4ily&apos;ye aittir, denetlenmektedir veya lisanslanmıştır.
                                 Bu içerikler, telif hakkı, patent ve ticari marka yasaları ile diğer fikri mülkiyet hakları
                                 ve haksız rekabet yasaları tarafından korunmaktadır.
                             </p>
@@ -41,7 +41,7 @@ export default function CopyrightPage() {
                             <h2>Kullanım İzni</h2>
                             <p>
                                 Platformumuzdaki içerikleri yalnızca kişisel ve ticari olmayan amaçlarla görüntüleyebilir,
-                                indirebilir ve yazdırabilirsiniz. Aşağıdaki durumlar haricinde, D4ily'nin açık yazılı izni olmaksızın
+                                indirebilir ve yazdırabilirsiniz. Aşağıdaki durumlar haricinde, D4ily&apos;nin açık yazılı izni olmaksızın
                                 hiçbir içerik kopyalanamaz, çoğaltılamaz, yeniden yayınlanamaz, yüklenemez, gönderilemez,
                                 halka açık olarak sergilenemez, kodlanamaz, tercüme edilemez veya herhangi bir şekilde dağıtılamaz:
                             </p>
@@ -66,7 +66,7 @@ export default function CopyrightPage() {
                             <ul>
                                 <li>Telif hakkı sahibi veya yetkili temsilcisinin iletişim bilgileri</li>
                                 <li>İhlal edildiği iddia edilen eserin tanımı</li>
-                                <li>İhlal eden materyalin URL'si veya konumu</li>
+                                <li>İhlal eden materyalin URL&apos;si veya konumu</li>
                                 <li>İyi niyetli bir hata olduğuna dair beyan</li>
                             </ul>
                         </section>

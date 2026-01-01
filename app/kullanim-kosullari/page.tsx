@@ -42,7 +42,7 @@ export default function TermsPage() {
                         <section className="mb-8">
                             <h2>2. Fikri Mülkiyet Hakları</h2>
                             <p>
-                                Platform üzerindeki tüm metinler, grafikler, logolar ve yazılımlar D4ily'nin mülkiyetindedir ve telif hakkı
+                                Platform üzerindeki tüm metinler, grafikler, logolar ve yazılımlar D4ily&apos;nin mülkiyetindedir ve telif hakkı
                                 kanunları ile korunmaktadır. İçeriklerimiz, kaynak gösterilerek ve ticari olmayan amaçlarla paylaşılabilir.
                                 Ancak, içeriğin izinsiz kopyalanması, değiştirilmesi veya ticari amaçla kullanılması yasaktır.
                             </p>

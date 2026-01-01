@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 import { Calendar, FileText } from "lucide-react"
 import Link from "next/link"
 import { WeeklyDigest } from "@/lib/digest-data"
@@ -35,10 +36,11 @@ export function EditorPick({ digest }: EditorPickProps) {
 
         <Link href={`/haftalik-ozet/${week_id}`}>
           <article className="relative rounded-xl overflow-hidden group cursor-pointer h-[380px] md:h-[420px]">
-            <img
+            <Image
               src={cover_image_url || "/placeholder.jpg"}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-800/60 to-transparent" />
 

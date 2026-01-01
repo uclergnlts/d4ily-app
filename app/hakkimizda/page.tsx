@@ -258,7 +258,7 @@ export default function AboutPage() {
                             Gündemi Yakalamaya<br />Hazır mısınız?
                         </h2>
                         <p className="text-xl text-muted-foreground mb-10 max-w-xl mx-auto">
-                            Her sabah 07:00'de, kahvenizden önce günün özeti e-postanızda ve bu platformda.
+                            Her sabah 07:00&apos;de, kahvenizden önce günün özeti e-postanızda ve bu platformda.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link

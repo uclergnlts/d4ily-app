@@ -1,4 +1,5 @@
 
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { topics, blogPosts } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -91,10 +92,11 @@ export default async function TopicPage({ params }: PageProps) {
                   {/* Image */}
                   <div className="relative aspect-[1.6/1] overflow-hidden bg-gray-100">
                     {post.cover_image_url ? (
-                      <img
+                      <Image
                         src={post.cover_image_url}
                         alt={post.title}
-                        className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        className="object-cover transform group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">

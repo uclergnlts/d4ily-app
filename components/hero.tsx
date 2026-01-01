@@ -14,7 +14,7 @@ export function Hero() {
               Yapay Zeka Destekli Analiz
             </Badge>
             <Badge variant="outline" className="text-xs lg:text-sm px-3 py-1">
-              Haftalık Bülten Pazar 06:00'da
+              Haftalık Bülten Pazar 06:00&apos;da
             </Badge>
           </div>
 

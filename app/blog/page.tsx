@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Image from "next/image";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import Link from "next/link";
@@ -41,7 +42,7 @@ export default async function BlogIndexPage() {
                                     <div className="aspect-video relative bg-muted">
                                         {/* Placeholder or Image */}
                                         {post.cover_image_url ? (
-                                            <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                            <Image src={post.cover_image_url} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center text-muted-foreground">
                                                 D4ily

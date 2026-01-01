@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import Image from "next/image"
 import { NewsItem } from "@/lib/services/news"
 
 interface NewsGridProps {
@@ -60,10 +61,11 @@ export function NewsGrid({ news = [] }: NewsGridProps) {
             <Link key={item.id} href={`/haber/${item.id}`} className="group cursor-pointer">
               <article>
                 <div className="relative aspect-[4/3] mb-3.5 rounded-xl overflow-hidden bg-muted shadow-sm group-hover:shadow-md transition-shadow duration-200">
-                  <img
+                  <Image
                     src={item.image_url || `/placeholder.svg?height=300&width=400&query=${encodeURIComponent(item.title)}`}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
                   <div className="absolute top-2.5 left-2.5">

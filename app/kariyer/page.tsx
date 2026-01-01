@@ -92,8 +92,8 @@ export default function CareerPage() {
                         <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                             <div>
                                 <h2 className="text-3xl md:text-5xl font-bold font-serif mb-6">Burada <br />Neler Var?</h2>
-                                <p className="text-zinc-400 text-lg mb-8 max-w-md">
-                                    D4ily'de çalışırken sadece iş yapmazsınız, kendinizi geliştirir ve harika avantajlardan yararlanırsınız.
+                                <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">
+                                    D4ily&apos;de çalışırken sadece iş yapmazsınız, kendinizi geliştirir ve harika avantajlardan yararlanırsınız.
                                 </p>
                                 <div className="grid gap-4">
                                     <div className="flex items-center gap-3">
@@ -112,7 +112,7 @@ export default function CareerPage() {
                                         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                                             <Zap className="h-4 w-4" />
                                         </div>
-                                        <span className="font-medium">Modern Teknoloji Stack'i</span>
+                                        <span className="font-medium">Modern Teknoloji Stack&apos;i</span>
                                     </div>
                                 </div>
                             </div>

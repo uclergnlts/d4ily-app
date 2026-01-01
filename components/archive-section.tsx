@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { ArrowRight, Calendar } from "lucide-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Digest } from "@/lib/digest-data"
@@ -74,11 +75,12 @@ export function ArchiveSection({ digests = [] }: ArchiveSectionProps) {
           {/* Archive Card */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow max-w-4xl mx-auto">
             <div className="md:flex">
-              <div className="md:w-2/5">
-                <img
+              <div className="md:w-2/5 relative h-64 md:h-full">
+                <Image
                   src={currentDigest.cover_image_url || "/placeholder.svg"}
                   alt={currentDigest.title}
-                  className="w-full h-64 md:h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
               <div className="md:w-3/5 p-6 lg:p-8">

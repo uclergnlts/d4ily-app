@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 
@@ -33,10 +34,11 @@ export function EditorArticles({ articles = [] }: EditorArticlesProps) {
           {articles.map((article, index) => (
             <Link key={article.id || index} href={`/haber/${article.id}`} className="block group">
               <div className="relative h-[280px] rounded-xl overflow-hidden cursor-pointer">
-                <img
+                <Image
                   src={article.image_url || `/placeholder.svg?height=280&width=400&query=${article.title}`}
                   alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">

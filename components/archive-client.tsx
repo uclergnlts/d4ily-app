@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Calendar, Clock } from "lucide-react"
 
 const ITEMS_PER_PAGE = 10
@@ -118,10 +119,11 @@ export default function ArchiveClient({ items, initialCategory = "all" }: { item
               {/* Image Section */}
               <div className="relative w-full sm:w-48 h-48 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                 {item.coverImage ? (
-                  <img
+                  <Image
                     src={item.coverImage}
                     alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-300">

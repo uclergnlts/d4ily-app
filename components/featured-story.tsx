@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { Calendar, Clock, ArrowRight } from "lucide-react"
 
 export function FeaturedStory() {
@@ -19,10 +20,11 @@ export function FeaturedStory() {
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div className="grid lg:grid-cols-2 gap-0">
           <div className="relative h-64 lg:h-full bg-muted overflow-hidden">
-            <img
+            <Image
               src="/turkish-news-abstract-digital.jpg"
               alt="Bugünün ana haberi"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+              fill
+              className="object-cover hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground">GÜNDEM</Badge>

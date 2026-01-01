@@ -2,6 +2,7 @@
 
 import { Digest } from "@/lib/digest-data"
 import Link from "next/link"
+import Image from "next/image"
 
 interface TrendingTopicsCirclesProps {
   digests?: Digest[]
@@ -67,10 +68,11 @@ export function TrendingTopicsCircles({ digests = [] }: TrendingTopicsCirclesPro
               className="flex flex-col items-center gap-3 min-w-[90px] flex-shrink-0 group"
             >
               <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden border-3 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300 transform group-hover:scale-105 relative">
-                <img
+                <Image
                   src={digest.cover_image_url || "/placeholder.jpg"}
                   alt={digest.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
               <span className={`text-xs font-bold text-center transition-colors line-clamp-1 ${index === 0 ? "text-blue-600" : "text-gray-700 group-hover:text-blue-600"}`}>
