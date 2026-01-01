@@ -96,7 +96,7 @@ export function ArchiveSection({ digests = [] }: ArchiveSectionProps) {
                 <h3 className="text-lg lg:text-xl font-bold mb-3 leading-tight line-clamp-2">{currentDigest.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-5 line-clamp-3">{currentDigest.intro}</p>
                 <Button variant="link" asChild className="px-0 text-primary gap-2 hover:gap-3 transition-all font-semibold">
-                  <Link href={`/turkiye-gundemi-${currentDigest.digest_date}`}>
+                  <Link href={`/${currentDigest.digest_date}`}>
                     Özeti Oku
                     <ArrowRight className="w-4 h-4" />
                   </Link>

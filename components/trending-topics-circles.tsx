@@ -64,7 +64,7 @@ export function TrendingTopicsCircles({ digests = [] }: TrendingTopicsCirclesPro
           {displayItems.map((digest, index) => (
             <Link
               key={digest.id}
-              href={`/turkiye-gundemi-${digest.digest_date}`}
+              href={`/${digest.digest_date}`}
               className="flex flex-col items-center gap-3 min-w-[90px] flex-shrink-0 group"
             >
               <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden border-3 border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-300 transform group-hover:scale-105 relative">

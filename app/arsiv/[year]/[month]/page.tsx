@@ -66,7 +66,7 @@ export default async function MonthArchivePage({ params }: { params: { year: str
     summary: digest.intro || digest.content.slice(0, 150) + "...",
     date: formatDateShort(digest.digest_date),
     readingTime: `${Math.max(1, Math.ceil(countWords(digest.content) / 200))} dk`,
-    href: `/turkiye-gundemi-${digest.digest_date}`,
+    href: `/${digest.digest_date}`,
   }))
 
   const breadcrumbJsonLd = {
