@@ -336,9 +336,29 @@ export async function summarizeArticle(
     Content/Excerpt: ${rawContent.substring(0, 1500)}
     
     REQUIREMENTS:
-    1. **Title**: Create a clickable, engaging, but NOT clickbait title in Turkish (Max 80 chars).
-    2. **Summary**: Write a concise, 2-3 sentence summary in Turkish (Max 250 chars). Focus on the "what" and "why".
-    3. **Category**: Choose the best category from: [Gündem, Ekonomi, Spor, Teknoloji, Dünya, Magazin, Sağlık].
+    1. **Title**: 
+       - rewritten in Turkish.
+       - MUST be descriptive and factual (No "Clickbait", No "Şok", No "Son Dakika", No "...Belli Oldu", No "...Açıkladı" without saying WHAT).
+       - If the original title is "Emekliye Müjde", rewrite it as "Emekli Maaşlarına %X Zam Yapıldı".
+       - Max 80 chars.
+    
+    2. **Summary**: 
+       - Concise 2-3 sentences in Turkish.
+       - Focus on the "what" and "why".
+       - No marketing language.
+    
+    3. **Category**: 
+       - Choose ONE from: [Gündem, Ekonomi, Spor, Teknoloji, Dünya, Magazin, Sağlık, Makale, Analiz].
+       - CRITICAL: If the content is a deep dive, opinion piece, or long-form analysis, label it as "Makale" or "Analiz".
+       - If it's a short update, use other categories.
+    
+    4. **Quality Filter (Anti-Spam & Anti-Clickbait)**:
+       - **ADVERTISEMENTS:** If the content is an ad, sponsored post, or purely marketing (e.g. promoting a specific product sale), return "SKIP" as the title.
+       - **CLICKBAIT GARBAGE:** If the content provides NO real information and only teases (e.g. "Ünlü isimden şoke eden paylaşım!", "Bakın kim çıktı!", "Herkes bunu konuşuyor"), return "SKIP".
+       - **IRRELEVANT:** If the content is about horoscope, betting odds, or very local/insignificant events, return "SKIP".
+       
+    5. **Tone Check**:
+       - The title and summary must be journalistic and objective. No excitement exclamation marks (!).
     
     OUTPUT JSON:
     {

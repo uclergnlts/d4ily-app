@@ -243,3 +243,14 @@ export const blogGenerationLogs = sqliteTable("blog_generation_logs", {
     reason: text("reason"), // e.g. "duplicate_found", "low_score"
     generated_post_id: integer("generated_post_id"), // if success
 });
+
+export const contactMessages = sqliteTable("contact_messages", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    surname: text("surname").notNull(),
+    email: text("email").notNull(),
+    subject: text("subject").notNull(),
+    message: text("message").notNull(),
+    is_read: integer("is_read", { mode: "boolean" }).default(false).notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});

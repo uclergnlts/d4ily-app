@@ -522,7 +522,7 @@ export default function AudioSummary({ date, spotifyUrl }: AudioSummaryProps) {
             className="inline-flex items-center gap-2 rounded-full bg-[#1DB954] px-5 py-2 text-sm font-semibold text-black transition-all hover:bg-[#1ed760] hover:scale-105"
           >
             <Music className="h-4 w-4" />
-            &lt;span&gt;Spotify&apos;da Dinle!&lt;/span&gt;
+            <span>Spotify&apos;da Dinle!</span>
           </a>
         </div>
       </div>

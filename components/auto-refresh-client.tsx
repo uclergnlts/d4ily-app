@@ -9,18 +9,33 @@ export function AutoRefreshClient() {
     const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
 
     useEffect(() => {
+        // Interval for active tab
         const interval = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
-                    // Refresh the page data
-                    router.refresh();
-                    return 300; // Reset timer to 5 minutes
+                    router.refresh(); // Soft refresh
+                    return 300;
                 }
                 return prev - 1;
             });
         }, 1000);
 
-        return () => clearInterval(interval);
+        // Visibility change listener (Focus Refresh)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                // Option: Check if X minutes passed since last refresh using a ref timestamp?
+                // For now, let's just trigger a soft refresh to be sure.
+                router.refresh();
+                console.log("Tab focused, refreshing data...");
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
     }, [router]);
 
     // Manual refresh button

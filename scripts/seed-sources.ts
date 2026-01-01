@@ -83,8 +83,12 @@ async function seedSources() {
         { url: RSS_FEEDS[2], name: "Anadolu Ajansı - Güncel", category: "gundem" },
         { url: RSS_FEEDS[3], name: "Sputnik Türkiye", category: "dunya" },
         { url: RSS_FEEDS[4], name: "BBC Türkçe", category: "gundem" },
-        { url: RSS_FEEDS[5], name: "BiaNet", category: "gundem" },
         { url: RSS_FEEDS[6], name: "NTV Gündem", category: "gundem" },
+        // New Additions
+        { url: "https://rss.dw.com/rdf/rss-tur-all", name: "DW Türkçe (Tam Akış)", category: "gundem" },
+        { url: "http://feeds.feedburner.com/euronews/tr/home", name: "Euronews Türkçe", category: "dunya" },
+        { url: "https://www.indyturk.com/rss.xml", name: "Independent Türkçe", category: "gundem" },
+        { url: "https://gazeteoksijen.com/rss", name: "Gazete Oksijen", category: "gundem" },
     ];
 
     let rssInserted = 0;

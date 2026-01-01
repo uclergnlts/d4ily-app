@@ -22,12 +22,18 @@ export async function getMarketData(): Promise<MarketData> {
         // Note: In production, you should cache this response heavily (e.g. 5-10 mins)
         // For now, we will assume standard fetch.
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
         const response = await fetch('https://www.doviz.com/', {
             next: { revalidate: 300 },
+            signal: controller.signal,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
         })
+        clearTimeout(timeoutId);
+
         if (!response.ok) throw new Error('Failed to fetch market data')
 
         const html = await response.text()

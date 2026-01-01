@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests, processedArticles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { generateDailyDigest, generateWeeklyDigest } from "@/lib/ai";
+import { generateDailyDigest, generateWeeklyDigest, generateWithGemini } from "@/lib/ai";
 import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-data";
 import { fetchGoogleImage } from "@/lib/image-search";
 import { TweetProcessor } from '@/lib/processor';
@@ -320,6 +320,80 @@ export async function runCleanupData() {
         };
     } catch (error: any) {
         console.error("Cleanup failed:", error);
+        throw new Error(error.message);
+    }
+}
+
+// --- Official Gazette Fetching Logic ---
+// Re-implementing the logic that was removed from on-demand service
+import { officialGazetteSummaries } from "@/lib/db/schema";
+import * as cheerio from 'cheerio';
+
+export async function runFetchOfficialGazette() {
+    console.log("Starting Official Gazette fetch...");
+    try {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Check if already exists
+        const existing = await db.select().from(officialGazetteSummaries).where(eq(officialGazetteSummaries.date, today)).get();
+        if (existing) {
+            console.log("Official Gazette summary already exists for today.");
+            return { success: true, message: "Already exists", skipped: true };
+        }
+
+        const url = 'https://www.resmigazete.gov.tr/';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch Resmi Gazete website");
+
+        const html = await response.text();
+        const $ = cheerio.load(html);
+
+        // Calculate a simple hash or check content length to ensure it's not empty
+        const mainText = $('.gunluk-akis').text().replace(/\s+/g, ' ').trim().slice(0, 10000);
+        if (!mainText || mainText.length < 50) {
+            return { success: false, message: "Content too short or empty." };
+        }
+
+        // Generate Summary with AI
+        // Using generateWithGemini from same file (AI.ts imports need check)
+        // We can reuse the prompt logic
+        const prompt = `
+        Aşağıda bugünkü T.C. Resmi Gazete'nin içerik metni yer almaktadır.
+        Lütfen bu içeriği analiz et ve halkı/vatandaşı en çok ilgilendiren, en kritik 3 değişikliği veya kararı madde madde özetle.
+        
+        Özeti şu formatta ver (Markdown):
+        - **[Konu Başlığı]**: [Kısa Açıklama]
+        - **[Konu Başlığı]**: [Kısa Açıklama]
+        - **[Konu Başlığı]**: [Kısa Açıklama]
+        
+        Sadece bu 3 maddeyi ver, başka bir şey ekleme.
+        
+        İÇERİK:
+        ${mainText}
+        `;
+
+        // Need to import generateWithGemini if not available in current scope
+        // It is imported in line 4 (generateDailyDigest), need to check imports
+        const summary = await generateWithGemini(prompt) || "Özet oluşturulamadı.";
+
+        await db.insert(officialGazetteSummaries).values({
+            date: today,
+            summary_markdown: summary,
+            gazette_url: url
+        }).onConflictDoUpdate({
+            target: officialGazetteSummaries.date,
+            set: {
+                summary_markdown: summary,
+                gazette_url: url,
+                created_at: sql`CURRENT_TIMESTAMP`
+            }
+        });
+
+        console.log("Official Gazette summary generated and saved.");
+        return { success: true, date: today };
+
+    } catch (error: any) {
+        console.error("Official Gazette Cron Failed:", error);
         throw new Error(error.message);
     }
 }

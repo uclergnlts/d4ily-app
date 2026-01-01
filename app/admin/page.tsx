@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3 mb-2 text-gray-500">
                         <Database className="w-4 h-4" />
@@ -148,21 +148,29 @@ export default function AdminDashboardPage() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3 mb-2 text-gray-500">
                         <FileText className="w-4 h-4" />
-                        <span className="text-xs font-semibold uppercase tracking-wider">Haber Verisi (24s)</span>
+                        <span className="text-xs font-semibold uppercase tracking-wider">Haber (24s)</span>
                     </div>
                     <div className="text-3xl font-bold text-gray-900">{stats?.metrics?.news_24h || 0}</div>
-                    <div className="text-xs text-blue-600 mt-1">RSS kaynaklarından</div>
+                    <div className="text-xs text-blue-600 mt-1">Standart haber akışı</div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 mb-2 text-gray-500">
+                        <Edit className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wider">Makale/Analiz (24s)</span>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900">{stats?.metrics?.articles_24h || 0}</div>
+                    <div className="text-xs text-purple-600 mt-1">Editör seçkisi için</div>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3 mb-2 text-gray-500">
                         <Server className="w-4 h-4" />
-                        <span className="text-xs font-semibold uppercase tracking-wider">Son Bülten</span>
+                        <span className="text-xs font-semibold uppercase tracking-wider">Son Resmi Gazete</span>
                     </div>
-                    <div className="text-lg font-bold text-gray-900 truncate" title={stats?.lastDigest?.title}>
-                        {stats?.lastDigest?.digest_date || "Yok"}
+                    <div className="text-lg font-bold text-gray-900 truncate" title={stats?.lastGazette?.date}>
+                        {stats?.lastGazette?.date || "Yok"}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 truncate">
-                        {new Date(stats?.lastDigest?.updated_at || stats?.lastDigest?.created_at).toLocaleString('tr-TR')}
+                    <div className="text-xs text-red-600 mt-1 truncate">
+                        {stats?.lastGazette ? "Otomatik çekildi" : "Bekleniyor"}
                     </div>
                 </div>
             </div>

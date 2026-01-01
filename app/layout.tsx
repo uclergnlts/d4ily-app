@@ -131,7 +131,19 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const marketData = await getMarketData()
+  let marketData = null
+  try {
+    marketData = await getMarketData()
+  } catch (error) {
+    console.error("Failed to fetch market data:", error)
+    // Fallback or empty data
+    marketData = {
+      usd: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
+      eur: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
+      gold: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
+      bist100: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const }
+    }
+  }
 
   return (
     <html lang="tr" className={`${merriweather.variable} ${playfairDisplay.variable}`}>
@@ -217,7 +229,7 @@ export default async function RootLayout({
       </head>
       <body className="font-serif antialiased bg-background">
         <div className="bg-noise" />
-        <Ticker data={marketData} />
+        {/* <Ticker data={marketData} /> */}
         <ReadingProgress />
         {children}
         <ScrollToTop />

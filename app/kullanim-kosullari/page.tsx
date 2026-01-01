@@ -1,119 +1,93 @@
-import Link from "next/link"
-import { ArrowLeft, FileText } from "lucide-react"
+import { Header } from "@/components/header"
+import Footer from "@/components/footer"
+import { Scale } from "lucide-react"
+import type { Metadata } from "next"
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Kullanım Koşulları - D4ily",
-    description: "D4ily web sitesi kullanım koşulları ve şartları.",
+    description: "D4ily kullanım koşulları ve kullanıcı sözleşmesi.",
 }
 
 export default function TermsPage() {
     return (
-        <div className="min-h-screen bg-background">
-            <div className="container mx-auto px-4 py-12 max-w-3xl">
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Ana Sayfaya Dön
-                </Link>
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 flex flex-col">
+            <Header />
 
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-                        <FileText className="h-6 w-6 text-primary-foreground" />
+            <main className="flex-grow py-12 md:py-20">
+                <div className="container mx-auto px-4 max-w-3xl">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500 text-white">
+                            <Scale className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold font-serif">Kullanım Koşulları</h1>
+                            <p className="text-muted-foreground">Son güncelleme: Ocak 2026</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-3xl font-bold font-serif">Kullanım Koşulları</h1>
-                        <p className="text-muted-foreground">Son güncelleme: Aralık 2024</p>
+
+                    <div className="prose prose-neutral dark:prose-invert max-w-none">
+                        <p className="lead">
+                            D4ily platformunu ziyaret ederek veya kullanarak, aşağıdaki kullanım koşullarını kabul etmiş sayılırsınız.
+                        </p>
+
+                        <section className="mb-8">
+                            <h2>1. Hizmetin Kapsamı</h2>
+                            <p>
+                                D4ily, kullanıcılara günlük haber özetleri, gündem analizleri ve çeşitli içerikler sunan dijital bir platformdur.
+                                Hizmetlerimizden yararlanmak için üye olmanız gerekmemektedir, ancak bazı özellikler (bülten aboneliği gibi)
+                                kayıt gerektirebilir.
+                            </p>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2>2. Fikri Mülkiyet Hakları</h2>
+                            <p>
+                                Platform üzerindeki tüm metinler, grafikler, logolar ve yazılımlar D4ily'nin mülkiyetindedir ve telif hakkı
+                                kanunları ile korunmaktadır. İçeriklerimiz, kaynak gösterilerek ve ticari olmayan amaçlarla paylaşılabilir.
+                                Ancak, içeriğin izinsiz kopyalanması, değiştirilmesi veya ticari amaçla kullanılması yasaktır.
+                            </p>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2>3. Kullanıcı Sorumlulukları</h2>
+                            <ul>
+                                <li>Platformu yasalara uygun şekilde kullanmayı kabul edersiniz.</li>
+                                <li>Sistem güvenliğini tehlikeye atacak herhangi bir girişimde bulunamazsınız.</li>
+                                <li>Diğer kullanıcıların haklarına saygı göstermelisiniz.</li>
+                            </ul>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2>4. Sorumluluk Reddi</h2>
+                            <p>
+                                D4ily, sunulan bilgilerin doğruluğu ve güncelliği konusunda azami özeni gösterir, ancak kesin doğruluk garantisi vermez.
+                                Platformda yer alan içerikler bilgilendirme amaçlıdır ve yatırım, hukuk veya tıbbi tavsiye niteliği taşımaz.
+                                Dış bağlantıların içeriğinden D4ily sorumlu değildir.
+                            </p>
+                        </section>
+
+                        <section className="mb-8">
+                            <h2>5. Değişiklikler</h2>
+                            <p>
+                                D4ily, bu kullanım koşullarını dilediği zaman önceden bildirmeksizin değiştirme hakkını saklı tutar.
+                                Değişiklikler, bu sayfada yayınlandığı tarihte yürürlüğe girer. Düzenli olarak bu sayfayı kontrol etmeniz önerilir.
+                            </p>
+                        </section>
+
+                        <section className="bg-muted/50 rounded-xl p-6 border border-border">
+                            <h3 className="font-bold mb-2 mt-0">İletişim</h3>
+                            <p className="text-sm text-muted-foreground m-0">
+                                Bu koşullarla ilgili sorularınız için:{" "}
+                                <a href="mailto:info@d4ily.com" className="text-primary hover:underline">
+                                    info@d4ily.com
+                                </a>
+                            </p>
+                        </section>
                     </div>
                 </div>
+            </main>
 
-                <div className="prose prose-neutral dark:prose-invert max-w-none">
-                    <section className="mb-8">
-                        <h2>1. Kabul</h2>
-                        <p>
-                            D4ily web sitesini (&quot;Site&quot;) kullanarak bu Kullanım Koşullarını kabul etmiş olursunuz.
-                            Bu koşulları kabul etmiyorsanız, lütfen Siteyi kullanmayınız.
-                        </p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>2. Hizmet Tanımı</h2>
-                        <p>
-                            D4ily, Türkiye gündeminin yapay zeka destekli özetlerini sunan bir haber platformudur.
-                            Hizmetlerimiz:
-                        </p>
-                        <ul>
-                            <li>Günlük ve haftalık haber özetleri</li>
-                            <li>Sesli özet (podcast)</li>
-                            <li>Canlı Twitter akışı</li>
-                            <li>Haber arşivi</li>
-                        </ul>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>3. Fikri Mülkiyet</h2>
-                        <p>
-                            Sitedeki tüm içerikler (metin, görsel, logo, tasarım) D4ily&apos;nin fikri mülkiyetidir.
-                            İçeriklerin izinsiz kopyalanması, dağıtılması veya ticari amaçla kullanılması yasaktır.
-                        </p>
-                        <p>
-                            Haber özetleri, çeşitli kaynaklardan derlenen bilgilerin yapay zeka tarafından
-                            işlenmesiyle oluşturulmaktadır. Orijinal haber kaynakları ilgili içeriklerde belirtilmektedir.
-                        </p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>4. Kullanıcı Yükümlülükleri</h2>
-                        <p>Siteyi kullanırken:</p>
-                        <ul>
-                            <li>Yürürlükteki yasalara uygun davranmayı</li>
-                            <li>Siteye zarar verecek faaliyetlerde bulunmamayı</li>
-                            <li>İçerikleri yasadışı amaçlarla kullanmamayı</li>
-                            <li>Diğer kullanıcıların haklarına saygı göstermeyi</li>
-                        </ul>
-                        <p>kabul edersiniz.</p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>5. Sorumluluk Sınırlaması</h2>
-                        <p>
-                            D4ily, sunulan içeriklerin doğruluğu konusunda güvence vermemektedir.
-                            İçerikler yalnızca bilgilendirme amaçlıdır ve yatırım, hukuki veya tıbbi tavsiye
-                            niteliği taşımamaktadır.
-                        </p>
-                        <p>
-                            Site kullanımından doğabilecek doğrudan veya dolaylı zararlardan D4ily sorumlu tutulamaz.
-                        </p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>6. Hizmet Değişiklikleri</h2>
-                        <p>
-                            D4ily, hizmetlerini önceden haber vermeksizin değiştirme, askıya alma veya
-                            sonlandırma hakkını saklı tutar.
-                        </p>
-                    </section>
-
-                    <section className="mb-8">
-                        <h2>7. Uygulanacak Hukuk</h2>
-                        <p>
-                            Bu Kullanım Koşulları Türkiye Cumhuriyeti yasalarına tabidir.
-                            Uyuşmazlıklarda İstanbul Mahkemeleri ve İcra Daireleri yetkilidir.
-                        </p>
-                    </section>
-
-                    <section className="bg-muted/50 rounded-xl p-6">
-                        <h3 className="font-bold mb-2">İletişim</h3>
-                        <p className="text-sm text-muted-foreground m-0">
-                            Sorularınız için:{" "}
-                            <a href="mailto:info@d4ily.com" className="text-primary hover:underline">
-                                info@d4ily.com
-                            </a>
-                        </p>
-                    </section>
-                </div>
-            </div>
+            <Footer />
         </div>
     )
 }
