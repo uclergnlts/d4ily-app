@@ -1,4 +1,4 @@
-import { Header } from "@/components/header";
+import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import { getWeeklyDigestsArchive, getLatestWeeklyDigest } from "@/lib/digest-data";
@@ -15,7 +15,7 @@ export default async function WeeklyDigestsArchive() {
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <Header />
+            <Navigation />
 
             <main className="flex-1 py-12">
                 <div className="container mx-auto px-4 max-w-6xl">
