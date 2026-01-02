@@ -5,8 +5,6 @@ import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script"
 import ReadingProgress from "@/components/reading-progress"
 import ScrollToTop from "@/components/scroll-to-top"
-import { Ticker } from "@/components/ticker"
-import { getMarketData } from "@/lib/services/market"
 import { CookieBanner } from "@/components/cookie-banner"
 import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
@@ -131,19 +129,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  let marketData = null
-  try {
-    marketData = await getMarketData()
-  } catch (error) {
-    console.error("Failed to fetch market data:", error)
-    // Fallback or empty data
-    marketData = {
-      usd: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
-      eur: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
-      gold: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const },
-      bist100: { value: 'Unavailable', change: '0.00', direction: 'neutral' as const }
-    }
-  }
 
   return (
     <html lang="tr" className={`${merriweather.variable} ${playfairDisplay.variable}`}>

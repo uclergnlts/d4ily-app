@@ -73,6 +73,7 @@ export function TrendingTopicsCircles({ digests = [] }: TrendingTopicsCirclesPro
                   alt={digest.title}
                   fill
                   className="object-cover"
+                  priority={index < 3}
                 />
               </div>
               <span className={`text-xs font-bold text-center transition-colors line-clamp-1 ${index === 0 ? "text-blue-600" : "text-gray-700 group-hover:text-blue-600"}`}>

@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import { unstable_cache } from "next/cache"
 
 export interface MarketData {
     usd: MarketItem
@@ -13,20 +14,12 @@ export interface MarketItem {
     direction: 'up' | 'down' | 'neutral'
 }
 
-export async function getMarketData(): Promise<MarketData> {
+async function fetchMarketDataUncached(): Promise<MarketData> {
     try {
-        // We will mock this data first to ensure UI works, then implement actual scraping if needed.
-        // Or implement a simple scrape from a reliable source like BigPara or Doviz.com
-        // Let's scrape 'doviz.com' as it has a clean DOM.
-
-        // Note: In production, you should cache this response heavily (e.g. 5-10 mins)
-        // For now, we will assume standard fetch.
-
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
 
         const response = await fetch('https://www.doviz.com/', {
-            next: { revalidate: 300 },
             signal: controller.signal,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -38,9 +31,6 @@ export async function getMarketData(): Promise<MarketData> {
 
         const html = await response.text()
         const $ = cheerio.load(html)
-
-        // Selectors might change, this is best effort.
-        // Only grabbing the main text for now.
 
         const getData = (key: string): MarketItem => {
             const elements = $(`[data-socket-key="${key}"]`)
@@ -54,25 +44,17 @@ export async function getMarketData(): Promise<MarketData> {
                 const text = $el.text().trim()
                 const classes = $el.attr('class') || ''
 
-                // Value usually has class 'value' or just is the one without '%'
-                // We prioritize class check
                 if (classes.includes('value')) {
                     value = text
                 }
 
-                // Change rate often contains % or has 'change' class
                 if (classes.includes('change-rate') || text.includes('%')) {
                     change = text.replace('%', '').trim()
 
                     if (classes.includes('up')) direction = 'up'
                     else if (classes.includes('down')) direction = 'down'
-
-                    // Sometimes direction is on parent or sibling, but usually on the change element itself in these frameworks
                 }
             })
-
-            // Fallback: If value found but change not found, try to find a sibling or analyze known structure
-            // But checking all elements with key is usually decent coverage.
 
             return { value, change, direction }
         }
@@ -86,7 +68,6 @@ export async function getMarketData(): Promise<MarketData> {
 
     } catch (error) {
         console.error("Market data fetch failed:", error)
-        // Fallback default data
         return {
             usd: { value: 'Unavailable', change: '0.00', direction: 'neutral' },
             eur: { value: 'Unavailable', change: '0.00', direction: 'neutral' },
@@ -95,3 +76,10 @@ export async function getMarketData(): Promise<MarketData> {
         }
     }
 }
+
+// ⚡ Cached version - revalidates every 5 minutes
+export const getMarketData = unstable_cache(
+    fetchMarketDataUncached,
+    ['market-data'],
+    { revalidate: 300 }
+)
