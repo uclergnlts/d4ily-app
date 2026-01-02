@@ -8,17 +8,26 @@ on:
 jobs:
   digest:
     runs-on: ubuntu-latest
+    env:
+      CRON_TOKEN: ${{ secrets.CRON_SECRET != '' && secrets.CRON_SECRET || secrets.PROD_CRON_SECRET }}
     steps:
+      - name: Validate cron secret
+        run: |
+          if [ -z "$CRON_TOKEN" ]; then
+            echo "CRON_SECRET/PROD_CRON_SECRET not configured; skipping cron trigger to avoid 401."
+            exit 1
+          fi
+
       - name: Trigger Daily Digest Generation
         run: |
           curl -L -sS -X GET "https://d4ily.com/api/cron/generate-digest" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer $CRON_TOKEN" \
             -H "Content-Type: application/json" \
             --fail
 
       - name: Trigger AI News Processing
         run: |
           curl -L -sS -X GET "https://d4ily.com/api/cron/process-news" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Authorization: Bearer $CRON_TOKEN" \
             -H "Content-Type: application/json" \
             --fail
