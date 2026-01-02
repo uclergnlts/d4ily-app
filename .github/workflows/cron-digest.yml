@@ -12,6 +12,12 @@ jobs:
       # Prefer repository secret, but allow repository variable fallback for easier rotation/debugging
       CRON_SECRET: ${{ secrets.CRON_SECRET || vars.CRON_SECRET }}
     steps:
+      - name: Ensure cron secret is configured
+        if: ${{ env.CRON_SECRET == '' }}
+        run: |
+          echo "::error::CRON_SECRET is not configured. Set repository secret or variable." >&2
+          exit 1
+
       - name: Trigger Daily Digest Generation
         run: |
           set -euo pipefail
