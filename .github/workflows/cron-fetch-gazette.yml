@@ -9,7 +9,7 @@ on:
 jobs:
   fetch-gazette:
     runs-on: ubuntu-latest
-    environment: Production – d4ily-app
+    environment: production
 
     steps:
       - name: Fetch Official Gazette

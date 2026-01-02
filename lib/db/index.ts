@@ -4,15 +4,18 @@ import { createClient } from '@libsql/client';
 
 import * as schema from './schema';
 
+// Require TURSO_DATABASE_URL to prevent using ephemeral local.db
+if (!process.env.TURSO_DATABASE_URL) {
+    throw new Error('TURSO_DATABASE_URL environment variable is required. Please set it in Vercel environment variables.');
+}
+
+if (!process.env.TURSO_AUTH_TOKEN) {
+    console.warn('⚠️ WARNING: TURSO_AUTH_TOKEN not set. Connection may fail.');
+}
+
 const client = createClient({
-    url: process.env.TURSO_DATABASE_URL || "file:local.db",
+    url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
-
-// Production'da local.db kullanılmasını engelle
-if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-    console.error('⚠️ CRITICAL: TURSO_DATABASE_URL not set in production! Data will not persist.');
-    console.error('Please set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN in Vercel environment variables.');
-}
 
 export const db = drizzle(client, { schema });

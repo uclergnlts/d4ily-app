@@ -8,18 +8,18 @@ on:
 jobs:
   digest:
     runs-on: ubuntu-latest
-    environment: Production – d4ily-app
+    environment: production
     steps:
       - name: Trigger Daily Digest Generation
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl "$APP_URL/api/cron/generate-digest" -H "Authorization: Bearer $CRON_SECRET"
+          curl -L -sS -X GET "https://d4ily.com/api/cron/generate-digest" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --fail
 
       - name: Trigger AI News Processing
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl "$APP_URL/api/cron/process-news" -H "Authorization: Bearer $CRON_SECRET"
+          curl -L -sS -X GET "https://d4ily.com/api/cron/process-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --fail
