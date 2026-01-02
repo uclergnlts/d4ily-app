@@ -348,8 +348,17 @@ export async function runFetchOfficialGazette() {
         const html = await response.text();
         const $ = cheerio.load(html);
 
-        // Calculate a simple hash or check content length to ensure it's not empty
-        const mainText = $('.gunluk-akis').text().replace(/\s+/g, ' ').trim().slice(0, 10000);
+        // Extract content - looking for links to gazette items
+        // The site structure shows links with URLs like /eskiler/2026/01/...
+        const items: string[] = [];
+        $('a[href*="/eskiler/"]').each((_, el) => {
+            const text = $(el).text().trim();
+            if (text && text.length > 10) {
+                items.push(text);
+            }
+        });
+
+        const mainText = items.join('\n').slice(0, 10000);
         if (!mainText || mainText.length < 50) {
             return { success: false, message: "Content too short or empty." };
         }
