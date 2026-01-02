@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
-import Navigation from "@/components/navigation";
+import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -24,7 +24,7 @@ export default async function BlogIndexPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <Navigation />
+            <Header />
 
             <main className="flex-1 w-full pt-20 md:pt-24 pb-16">
                 <div className="container mx-auto px-4 max-w-5xl">

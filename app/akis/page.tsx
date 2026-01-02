@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { getLatestRawTweets } from "@/lib/digest-data"
 import { Tweet } from "@/lib/digest-data"
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import { MessageSquare, Heart, Repeat2, ExternalLink, RefreshCw } from "lucide-react"
 import { TrendingHashtags } from "@/components/trending-hashtags"
@@ -30,7 +30,7 @@ export default async function LiveFeedPage() {
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <Navigation />
+            <Header />
 
             <main className="flex-1 container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-7xl">
                 <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">

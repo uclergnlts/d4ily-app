@@ -1,4 +1,4 @@
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import { getArchiveDigests } from "@/lib/digest-data"
 import ArchiveClient from "@/components/archive-client"
@@ -76,7 +76,7 @@ export default async function ArsivPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <Navigation />
+      <Header />
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:py-12">
         <header className="mb-8 animate-fade-in">

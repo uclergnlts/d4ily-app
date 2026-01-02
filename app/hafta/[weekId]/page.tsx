@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Navigation from "@/components/navigation";
+import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import { getWeeklyDigestByWeekId } from "@/lib/digest-data";
 import { Calendar, TrendingUp, FileText, MessageSquareText } from "lucide-react";
@@ -56,7 +56,7 @@ export default async function WeeklyDigestPage({ params }: { params: { weekId: s
 
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <Navigation />
+            <Header />
 
             <main className="flex-1">
                 {/* Hero Section */}

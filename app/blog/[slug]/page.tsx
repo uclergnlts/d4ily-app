@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
-import Navigation from "@/components/navigation";
+import { Header } from "@/components/header";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -96,7 +96,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
             />
-            <Navigation />
+            <Header />
 
             <main className="flex-1 w-full pt-20 pb-16">
                 <article className="container mx-auto px-4 max-w-3xl">

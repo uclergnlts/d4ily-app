@@ -1,6 +1,6 @@
 'use client'
 
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import Link from "next/link"
 import { WifiOff, RefreshCw } from "lucide-react"
@@ -8,7 +8,7 @@ import { WifiOff, RefreshCw } from "lucide-react"
 export default function OfflinePage() {
     return (
         <div className="flex min-h-screen flex-col bg-background">
-            <Navigation />
+            <Header />
 
             <main className="flex-1 flex items-center justify-center px-4 py-16">
                 <div className="max-w-md text-center">

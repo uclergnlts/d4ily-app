@@ -1,9 +1,9 @@
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 
 export default function StatisticsLoading() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navigation />
+      <Header />
 
       <main className="flex-1 px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-4xl">

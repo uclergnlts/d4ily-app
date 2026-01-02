@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import DigestCard from "@/components/digest-card"
 import Footer from "@/components/footer"
 import AudioSummary from "@/components/audio-summary"
@@ -242,7 +242,7 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <Navigation />
+      <Header />
       <DayNavigation currentDate={date} prevDate={prevDate} nextDate={nextDate} />
 
       {digest ? (

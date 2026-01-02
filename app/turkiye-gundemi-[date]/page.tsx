@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getDigestByDate, formatDateTR } from "@/lib/digest-data"
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import DigestCard from "@/components/digest-card"
 import AudioSummary from "@/components/audio-summary"
@@ -158,7 +158,7 @@ export default async function TurkiyeGundemiPage({ params }: { params: Promise<{
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <ReadingProgress />
-      <Navigation />
+      <Header />
 
       <main className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
         <header className="mb-10 text-center animate-fade-in">

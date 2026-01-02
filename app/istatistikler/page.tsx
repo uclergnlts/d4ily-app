@@ -1,4 +1,4 @@
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import TrendingTopics from "@/components/trending-topics"
 import { TrendingHashtags } from "@/components/trending-hashtags"
@@ -14,7 +14,7 @@ export default async function StatisticsPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navigation />
+      <Header />
 
       <main className="flex-1 px-4 py-8 sm:py-12">
         {/* Hero Header */}

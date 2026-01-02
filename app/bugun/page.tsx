@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import DigestCard from "@/components/digest-card"
 import AudioSummary from "@/components/audio-summary"
@@ -71,7 +71,7 @@ export default async function BugunPage() {
   if (!digest) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation />
+        <Header />
         <main className="mx-auto max-w-3xl px-4 py-16">
           <div className="text-center">
             <h1 className="mb-4 font-display text-3xl font-bold">Henüz özet yok</h1>
@@ -175,7 +175,7 @@ export default async function BugunPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
       <ReadingProgress />
-      <Navigation />
+      <Header />
 
       <main className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
         {/* Header */}

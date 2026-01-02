@@ -1,12 +1,12 @@
 import Link from "next/link"
-import Navigation from "@/components/navigation"
+import { Header } from "@/components/header"
 import Footer from "@/components/footer"
 import { Home, Archive, AlertCircle } from "lucide-react"
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navigation />
+      <Header />
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
         <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
           <AlertCircle className="h-10 w-10 text-muted-foreground" />
