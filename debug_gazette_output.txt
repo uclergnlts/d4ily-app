@@ -1,0 +1,14 @@
+Debug Output:
+FOUND #html-content
+
+[TITLE] YÜRÜTME VE İDARE BÖLÜMÜ
+[SUBTITLE] YÖNETMELİK
+[ITEM] –– Ostim Teknik Üniversitesi Ahi Evran Anadolu Müteşebbisliği Uygulama ve Araştırma Merkezi Yönetmeliği -> https://www.resmigazete.gov.tr/eskiler/2026/01/20260102-1.htm
+[SUBTITLE] TEBLİĞLER
+[ITEM] –– Milli Emlak Genel Tebliği (Sıra No: 423) -> https://www.resmigazete.gov.tr/eskiler/2026/01/20260102-2.htm
+[ITEM] –– Mal ve Hizmet Tedarikinde Geç Ödemelerde Uygulanacak Temerrüt Faiz Oranı ve Alacağın Tahsili Masrafları İçin Talep Edilebilecek Asgari Giderim Tutarı Hakkında Tebliğ -> https://www.resmigazete.gov.tr/eskiler/2026/01/20260102-3.pdf
+
+[TITLE] İLÂN BÖLÜMÜ
+[ITEM] a - Artırma, Eksiltme ve İhale İlânları -> https://www.resmigazete.gov.tr/ilanlar/eskiilanlar/2026/01/20260102-3.htm
+[ITEM] b - Çeşitli İlânlar -> https://www.resmigazete.gov.tr/ilanlar/eskiilanlar/2026/01/20260102-4.htm
+[ITEM] – T.C. Merkez Bankasınca Belirlenen Döviz Kurları ve Devlet İç Borçlanma Senetlerinin Günlük Değerleri -> https://www.resmigazete.gov.tr/ilanlar/eskiilanlar/2026/01/20260102-5.htm

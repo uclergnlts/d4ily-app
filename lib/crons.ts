@@ -348,17 +348,36 @@ export async function runFetchOfficialGazette() {
         const html = await response.text();
         const $ = cheerio.load(html);
 
-        // Extract content - looking for links to gazette items
-        // The site structure shows links with URLs like /eskiler/2026/01/...
-        const items: string[] = [];
-        $('a[href*="/eskiler/"]').each((_, el) => {
-            const text = $(el).text().trim();
-            if (text && text.length > 10) {
-                items.push(text);
-            }
-        });
+        // Extract content - structure is flattened but ordered in #html-content
+        // Titles are .html-title, Subtitles .html-subtitle, Items .fihrist-item
+        const contentDiv = $('#html-content');
+        let mainText = "";
 
-        const mainText = items.join('\n').slice(0, 10000);
+        if (contentDiv.length > 0) {
+            contentDiv.children().each((_, el) => {
+                const $el = $(el);
+                const text = $el.text().trim();
+                if (!text) return;
+
+                if ($el.hasClass('html-title')) {
+                    mainText += `\n\n### ${text}\n`;
+                } else if ($el.hasClass('html-subtitle')) {
+                    mainText += `\n#### ${text}\n`;
+                } else if ($el.hasClass('fihrist-item')) {
+                    mainText += `- ${text}\n`;
+                }
+            });
+        } else {
+            // Fallback for different structure
+            console.log("Warning: #html-content not found, falling back to link search.");
+            const items: string[] = [];
+            $('a[href*="/eskiler/"]').each((_, el) => {
+                const text = $(el).text().trim();
+                if (text && text.length > 10) items.push(text);
+            });
+            mainText = items.join('\n');
+        }
+
         if (!mainText || mainText.length < 50) {
             return { success: false, message: "Content too short or empty." };
         }
