@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { dailyDigests, blogGenerationLogs, blogPosts } from "@/lib/db/schema";
-import { desc, sql, inArray, eq, and, gt } from "drizzle-orm";
+import { desc, eq, and, gt } from "drizzle-orm";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateBlogPostFromTopic } from "@/lib/services/blog-generator";
 import path from "path";
@@ -20,6 +20,11 @@ async function loadPrompt(role: string): Promise<string> {
         console.error(`Error loading prompt for ${role}:`, error);
         throw new Error(`Subagent prompt not found: ${role}`);
     }
+}
+
+function formatDateForSqlite(date: Date): string {
+    // Align with SQLite CURRENT_TIMESTAMP format (YYYY-MM-DD HH:MM:SS)
+    return date.toISOString().slice(0, 19).replace("T", " ");
 }
 
 export async function POST(request: Request) {
@@ -97,14 +102,19 @@ export async function POST(request: Request) {
         // 4. Verification Check
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysAgoSql = formatDateForSqlite(thirtyDaysAgo);
 
         const duplicateCheck = await db.select()
             .from(blogGenerationLogs)
             .where(and(
                 eq(blogGenerationLogs.selected_topic, candidate.topic_title),
-                gt(blogGenerationLogs.run_date, thirtyDaysAgo.toISOString())
+                gt(blogGenerationLogs.run_date, thirtyDaysAgoSql)
             ))
-            .limit(1);
+            .limit(1)
+            .catch((err) => {
+                console.error("Duplicate check failed, continuing without blocking:", err);
+                return [] as typeof duplicateCheck;
+            });
 
         if (duplicateCheck.length > 0) {
             await db.insert(blogGenerationLogs).values({
