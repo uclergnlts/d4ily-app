@@ -9,7 +9,7 @@ on:
 jobs:
   fetch-tweets:
     runs-on: ubuntu-latest
-    environment: "Production - d4ily-app"
+    environment: Production
 
     steps:
       - name: Fetch Tweets

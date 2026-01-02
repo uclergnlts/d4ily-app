@@ -9,7 +9,7 @@ on:
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
-    environment: "Production - d4ily-app"
+    environment: Production
 
     steps:
       - name: Fetch News
