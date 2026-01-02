@@ -9,7 +9,6 @@ on:
 jobs:
   fetch-gazette:
     runs-on: ubuntu-latest
-    environment: Production
 
     steps:
       - name: Fetch Official Gazette

@@ -9,7 +9,6 @@ on:
 jobs:
   fetch-tweets:
     runs-on: ubuntu-latest
-    environment: Production
 
     steps:
       - name: Fetch Tweets
