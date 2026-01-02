@@ -9,7 +9,7 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    environment: Production
+    environment: "Production - d4ily-app"
     steps:
       - name: Trigger Cleanup Endpoint
         run: |

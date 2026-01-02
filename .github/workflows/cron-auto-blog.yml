@@ -10,7 +10,7 @@ on:
 jobs:
   auto-blog:
     runs-on: ubuntu-latest
-    environment: Production
+    environment: "Production - d4ily-app"
     steps:
       - name: Call Auto Blog API
         run: |

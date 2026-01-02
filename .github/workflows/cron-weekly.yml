@@ -8,7 +8,7 @@ on:
 jobs:
   generate-weekly-digest:
     runs-on: ubuntu-latest
-    environment: Production
+    environment: "Production - d4ily-app"
     steps:
       - name: Generate Digest
         run: |
