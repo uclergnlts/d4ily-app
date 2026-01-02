@@ -13,6 +13,18 @@ export async function GET(request: Request) {
         return NextResponse.json(result);
     } catch (error: any) {
         console.error("Digest generation failed:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Debugging: Logging environment status (masked)
+        const envStatus = {
+            TURSO_DB: !!process.env.TURSO_DATABASE_URL,
+            GEMINI: !!process.env.GEMINI_API_KEY,
+            TWITTER: !!process.env.TWITTER_API_KEY
+        };
+        console.log("Env Check:", envStatus);
+
+        return NextResponse.json({
+            error: error.message,
+            stack: error.stack,
+            envStatus
+        }, { status: 500 });
     }
 }
