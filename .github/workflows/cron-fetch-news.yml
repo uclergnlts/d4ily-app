@@ -9,7 +9,6 @@ on:
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Fetch News

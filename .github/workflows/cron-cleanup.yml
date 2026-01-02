@@ -9,7 +9,6 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - name: Trigger Cleanup Endpoint
         run: |
