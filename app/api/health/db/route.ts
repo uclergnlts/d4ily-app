@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         // Simple DB query to test connection
-        const result = await db.execute(sql`SELECT 1 as test`);
+        const result = await db.run(sql`SELECT 1 as test`);
 
         const dbType = process.env.TURSO_DATABASE_URL ? 'turso' : 'local.db';
         const isProduction = process.env.NODE_ENV === 'production';
