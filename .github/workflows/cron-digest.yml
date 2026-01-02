@@ -1,13 +1,14 @@
-name: Generate Daily Digest
+﻿name: Generate Daily Digest
 on:
   schedule:
-    # Her gün 04:00 UTC'de çalışır (Türkiye saati 07:00)
+    # Her gÃ¼n 04:00 UTC'de Ã§alÄ±ÅŸÄ±r (TÃ¼rkiye saati 07:00)
     - cron: '0 4 * * *'
-  workflow_dispatch: # Manuel tetikleme için
+  workflow_dispatch: # Manuel tetikleme iÃ§in
 
 jobs:
   digest:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Trigger Daily Digest Generation
         run: |
@@ -22,3 +23,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+

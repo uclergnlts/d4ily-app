@@ -1,14 +1,15 @@
-name: Fetch News (Hourly)
+﻿name: Fetch News (Hourly)
 
 on:
   schedule:
-    # Her saat başı çalışır (00:00, 01:00, 02:00... UTC)
+    # Her saat baÅŸÄ± Ã§alÄ±ÅŸÄ±r (00:00, 01:00, 02:00... UTC)
     - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
 
     steps:
       - name: Fetch News
@@ -24,3 +25,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+

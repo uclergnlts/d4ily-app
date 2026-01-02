@@ -1,4 +1,4 @@
-name: CI
+﻿name: CI
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -25,3 +26,4 @@ jobs:
 
       - name: Run Build
         run: npm run build
+

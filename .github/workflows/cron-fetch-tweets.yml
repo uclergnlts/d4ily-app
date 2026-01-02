@@ -1,14 +1,15 @@
-name: Fetch Tweets (Every 2 Hours)
+﻿name: Fetch Tweets (Every 2 Hours)
 
 on:
   schedule:
-    # Her 2 saatte bir çalışır (00:00, 02:00, 04:00... UTC)
+    # Her 2 saatte bir Ã§alÄ±ÅŸÄ±r (00:00, 02:00, 04:00... UTC)
     - cron: "0 */2 * * *"
   workflow_dispatch:
 
 jobs:
   fetch-tweets:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
 
     steps:
       - name: Fetch Tweets
@@ -17,3 +18,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+

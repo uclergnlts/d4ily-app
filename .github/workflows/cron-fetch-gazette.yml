@@ -1,14 +1,15 @@
-name: Fetch Official Gazette (Daily)
+﻿name: Fetch Official Gazette (Daily)
 
 on:
   schedule:
-    # Her gece 03:00 UTC (Türkiye 06:00)
+    # Her gece 03:00 UTC (TÃ¼rkiye 06:00)
     - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
   fetch-gazette:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
 
     steps:
       - name: Fetch Official Gazette
@@ -17,3 +18,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+

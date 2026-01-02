@@ -1,13 +1,14 @@
-name: Generate Weekly Digest
+﻿name: Generate Weekly Digest
 on:
   schedule:
-    # Her Pazar 05:00 UTC'de çalışır (Türkiye saati 08:00)
+    # Her Pazar 05:00 UTC'de Ã§alÄ±ÅŸÄ±r (TÃ¼rkiye saati 08:00)
     - cron: '0 5 * * 0'
-  workflow_dispatch: # Manuel tetikleme için
+  workflow_dispatch: # Manuel tetikleme iÃ§in
 
 jobs:
   generate-weekly-digest:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Generate Digest
         run: |
@@ -15,3 +16,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+

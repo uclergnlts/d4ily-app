@@ -1,4 +1,4 @@
-
+﻿
 name: Cron - Auto Blog Generation
 
 on:
@@ -10,6 +10,7 @@ on:
 jobs:
   auto-blog:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Call Auto Blog API
         run: |
@@ -17,4 +18,5 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             --fail
+
 

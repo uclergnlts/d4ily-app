@@ -1,4 +1,4 @@
-name: Cron Cleanup
+﻿name: Cron Cleanup
 
 on:
   schedule:
@@ -9,8 +9,10 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - name: Trigger Cleanup Endpoint
         run: |
           curl -sS --fail -X GET "${{ secrets.VERCEL_URL }}/api/cron/cleanup" \
           -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+

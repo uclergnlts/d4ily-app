@@ -1,4 +1,4 @@
-name: Deploy DB Migrations
+﻿name: Deploy DB Migrations
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    environment: Production – d4ily-app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,3 +27,4 @@ jobs:
         env:
           TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
           TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+
