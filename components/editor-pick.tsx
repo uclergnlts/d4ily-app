@@ -34,7 +34,7 @@ export function EditorPick({ digest }: EditorPickProps) {
           </Link>
         </div>
 
-        <Link href={`/haftalik-ozet/${week_id}`}>
+        <Link href={`/hafta/${week_id}`}>
           <article className="relative rounded-xl overflow-hidden group cursor-pointer h-[380px] md:h-[420px]">
             <Image
               src={cover_image_url || "/placeholder.jpg"}

@@ -142,29 +142,29 @@ export default function Footer() {
             <h3 className="font-bold text-base text-gray-900">Daha</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Spotify Podcast
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <a href="https://podcasts.apple.com" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Apple Podcast
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/hakkimizda" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Yapımcı
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/iletisim" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Yatırımcılar
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/iletisim" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Reklam
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -174,27 +174,27 @@ export default function Footer() {
             <h3 className="font-bold text-base text-gray-900">Yararlı Linkler</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/hakkimizda" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Takip Edilen Hesaplar
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/hakkimizda" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Takip Edilen Kuruluşlar
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <a href="https://www.resmigazete.gov.tr" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Resmi Gazete
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <Link href="/" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Canlı Döviz
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <a href="https://mgm.gov.tr" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Hava Durumu
                 </a>
               </li>
