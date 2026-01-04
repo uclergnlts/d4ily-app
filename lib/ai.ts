@@ -248,7 +248,8 @@ export async function generateWeeklyDigest(
     2. **Intro**: 3-4 sentences summarizing the week's mood and biggest story
     
     3. **Content** (Markdown, 2000-3500 characters):
-       Structure with these H2 sections:
+       Structure with these H2 sections.
+       IMPORTANT: Use DOUBLE NEWLINES (\n\n) between all sections, headers, and paragraphs for clear spacing.
        
        ## 📊 Haftanın Genel Görünümü
        - 1-2 paragraphs setting the context of the week

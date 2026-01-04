@@ -103,7 +103,14 @@ export default async function WeeklyDigestPage({ params }: { params: { weekId: s
                 <section className="py-16">
                     <div className="container mx-auto px-4 max-w-4xl">
                         <article className="prose prose-lg dark:prose-invert max-w-none">
-                            <ReactMarkdown>{weeklyDigest.content}</ReactMarkdown>
+                            <ReactMarkdown>
+                                {weeklyDigest.content
+                                    // Fix spacing: Ensure double newlines before headers
+                                    .replace(/([^\n])\n(#{1,3} )/g, "$1\n\n$2")
+                                    // Fix spacing: Ensure double newlines between list items and paragraphs if stuck
+                                    .replace(/(\n- .*)(\n)([^-])/g, "$1\n\n$3")
+                                }
+                            </ReactMarkdown>
                         </article>
                     </div>
                 </section>
