@@ -24,6 +24,7 @@ export async function GET(request: Request) {
         return NextResponse.json({
             error: error.message,
             stack: error.stack,
+            stepLogs: error.stepLogs || [],
             envStatus
         }, { status: 500 });
     }

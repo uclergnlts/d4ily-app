@@ -151,42 +151,65 @@ export async function runFetchNews() {
 
 // --- Digest Generation Logic ---
 export async function runGenerateDigest() {
+    const stepLogs: string[] = [];
     try {
+        stepLogs.push("Step 1: Starting digest generation");
         const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        stepLogs.push(`Step 2: Date set to ${todayStr}`);
 
+        stepLogs.push("Step 3: Fetching tweets...");
         const recentTweets = await db.select()
             .from(tweetsRaw)
             .where(sql`fetched_at >= datetime('now', '-1 day')`)
             .limit(200);
+        stepLogs.push(`Step 3 complete: Found ${recentTweets.length} tweets`);
 
         // Use processedArticles instead of newsRaw to get AI summaries and images
+        stepLogs.push("Step 4: Fetching processed articles...");
         const recentNews = await db.select()
             .from(processedArticles)
             .where(sql`processed_at >= datetime('now', '-1 day')`)
             .limit(100);
+        stepLogs.push(`Step 4 complete: Found ${recentNews.length} news items`);
 
         if (recentTweets.length === 0 && recentNews.length === 0) {
-            return { message: "No new data to digest.", skipped: true };
+            return { message: "No new data to digest.", skipped: true, logs: stepLogs };
         }
 
         console.log(`Generating digest for ${todayStr} with ${recentTweets.length} tweets and ${recentNews.length} processed news items (with images).`);
 
+        stepLogs.push("Step 5: Processing tweets...");
         const processedTweets = TweetProcessor.process(recentTweets);
         console.log(`Smart Editor: Reduced ${recentTweets.length} -> ${processedTweets.length} tweets.`);
+        stepLogs.push(`Step 5 complete: Reduced to ${processedTweets.length} tweets`);
 
         // Fetch market data for context
         let marketData = null;
         try {
+            stepLogs.push("Step 6: Fetching market data...");
             marketData = await getMarketData();
             console.log("Market data fetched for digest generation.");
-        } catch (e) {
+            stepLogs.push("Step 6 complete: Market data fetched");
+        } catch (e: any) {
             console.error("Failed to fetch market data for digest:", e);
+            stepLogs.push(`Step 6 warning: Market data failed - ${e.message}`);
         }
 
+        stepLogs.push("Step 7: Generating digest with Gemini AI...");
         const digestData = await generateDailyDigest(todayStr, processedTweets, recentNews, marketData);
+        stepLogs.push("Step 7 complete: Digest generated successfully");
 
-        const coverImageUrl = await fetchGoogleImage(digestData.title);
+        stepLogs.push("Step 8: Fetching cover image...");
+        let coverImageUrl: string | null = null;
+        try {
+            coverImageUrl = await fetchGoogleImage(digestData.title);
+            stepLogs.push("Step 8 complete: Cover image fetched");
+        } catch (imgError: any) {
+            console.error("Cover image fetch failed:", imgError);
+            stepLogs.push(`Step 8 warning: Image fetch failed - ${imgError.message}`);
+        }
 
+        stepLogs.push("Step 9: Saving to database...");
         await db.insert(dailyDigests).values({
             digest_date: todayStr,
             title: digestData.title,
@@ -214,14 +237,21 @@ export async function runGenerateDigest() {
                 model_name: "gemini-2.5-flash (updated)"
             }
         });
+        stepLogs.push("Step 9 complete: Saved to database");
 
         return {
             success: true,
-            digest: digestData
+            digest: digestData,
+            logs: stepLogs
         };
 
     } catch (error: any) {
-        throw new Error(error.message);
+        console.error("Digest generation failed at step:", stepLogs[stepLogs.length - 1]);
+        console.error("Full error:", error);
+        // Re-throw with context
+        const enhancedError = new Error(`${error.message} | Last step: ${stepLogs[stepLogs.length - 1] || 'unknown'}`);
+        (enhancedError as any).stepLogs = stepLogs;
+        throw enhancedError;
     }
 }
 
