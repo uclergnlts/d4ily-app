@@ -12,10 +12,20 @@ jobs:
     steps:
       - name: Trigger Daily Digest Generation
         run: |
-          curl -L -sS -X GET "https://d4ily.com/api/cron/generate-digest" \
+          response=$(curl -L -s -w "%{http_code}" -X GET "https://d4ily.com/api/cron/generate-digest" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -H "Content-Type: application/json" \
-            --fail
+            -H "Content-Type: application/json")
+          
+          http_code=${response: -3}
+          content=${response:0:${#response}-3}
+          
+          echo "HTTP Status: $http_code"
+          echo "Response Content:"
+          echo "$content"
+          
+          if [ "$http_code" -ne 200 ]; then
+            exit 1
+          fi
 
       - name: Trigger AI News Processing
         run: |
