@@ -22,6 +22,7 @@ function getJsonModel() {
             model: "gemini-2.5-flash",
             generationConfig: {
                 responseMimeType: "application/json",
+                maxOutputTokens: 8192,
             }
         });
     }
@@ -77,6 +78,19 @@ function formatTurkishDate(dateString: string): string {
     return `${dayNum} ${monthName} ${dayName}`;
 }
 
+// Helper to clean JSON string from Markdown fences or other artifacts
+function cleanJsonString(text: string): string {
+    // Remove markdown code blocks if present
+    let clean = text.replace(/```json\s*/g, '').replace(/```\s*$/, '');
+    // Remove any text before the first '{' and after the last '}'
+    const startIndex = clean.indexOf('{');
+    const endIndex = clean.lastIndexOf('}');
+    if (startIndex !== -1 && endIndex !== -1) {
+        clean = clean.substring(startIndex, endIndex + 1);
+    }
+    return clean;
+}
+
 export async function generateDailyDigest(
     date: string,
     tweets: any[],
@@ -115,7 +129,6 @@ export async function generateDailyDigest(
     TASK:
     Analyze the provided Tweets, News, and Financial Data to create a comprehensive, long-form daily digest in TURKISH.
     Your goal is not just to summarize, but to provide a deep, narrative-driven analysis of the day's agenda.
-    The output must be detailed, structured, and extensive (comparable to a professional diverse news briefing).
     
     INPUT DATA:
     
@@ -126,13 +139,6 @@ export async function generateDailyDigest(
     
     --- NEWS (AI-Processed Articles with Summaries & Images) ---
     ${newsText.substring(0, 25000)}
-    
-    NOTE: News items are pre-processed with:
-    - AI-generated summaries in Turkish
-    - Category classification (e.g., Gündem, Ekonomi, Politika, Spor)
-    - Image URLs (where available)
-    
-    You can reference these images in your digest content if relevant, but this is optional.
     
     REQUIREMENTS & STRUCTURE (Strictly Follow This):
 
@@ -160,16 +166,11 @@ export async function generateDailyDigest(
     - Select 5-7 MAJOR topics.
     - Format each topic as a main bullet with a **Bold Headline**, followed by a brief summary line.
     - Under each main bullet, add 2-3 sub-bullets (nested) with SPECIFIC details (data, quotes).
-    - **Example Format:**
-      - **Konu Başlığı**: Konunun özeti.
-        - Detay 1: ... (Use citation links here!)
-        - Detay 2: ...
-
+    
     ---
 
     ## Dün Dikkat Çeken Eğilimler
     - Analyze 3-4 broader trends/patterns observed.
-    - Keep this section sharp and insightful.
 
     ---
 
@@ -178,30 +179,32 @@ export async function generateDailyDigest(
 
     **End with a short concluding sentence.**
     
-    ---------------------------------------------------------
-    
-    4. **Trends (JSON Field)**: Extract 5-7 viral hashtags/keywords as an array of strings.
-    
-    5. **Watchlist (JSON Field)**: Return the titles of the items from "Bugün İzlenmesi Gereken Başlıklar" as a generic array.
-    
     OUTPUT FORMAT (JSON):
     {
-      "title": "A catchy, powerful headline (CRITICAL: Max 60 chars, curiosity-inducing but NOT clickbait. Use numbers, specific details, or questions when possible. Examples: 'Merkez Bankası Faizi Sabit Tuttu: Piyasalar Ne Diyor?', '3 Büyükler Arasında Puan Farkı Kapandı', 'Seçim Anketinde Sürpriz Sonuç Çıktı')",
+      "title": "A catchy, powerful headline (Max 60 chars)",
       "intro": "The warm opening sentence + the context paragraph",
       "content": "The full markdown string starting from '---' divider downwards",
-      "trends": ["...", "..."],
-      "watchlist": ["...", "..."]
+      "trends": ["trend1", "trend2", ...],
+      "watchlist": ["item1", "item2", ...]
     }
     `;
 
     try {
+        // Use a model with higher output limit specifically for digest generation if needed,
+        // but here we just ensure we use the configured json model
         const result = await getJsonModel().generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
-        // Parse JSON
-        const data = JSON.parse(text) as DigestData;
-        return data;
+        // Parse JSON safely
+        try {
+            const cleanText = cleanJsonString(text);
+            const data = JSON.parse(cleanText) as DigestData;
+            return data;
+        } catch (parseError) {
+            console.error("JSON PARSE ERROR. Raw Text from Gemini:", text);
+            throw new Error(`Failed to parse Gemini JSON: ${parseError}`);
+        }
     } catch (error) {
         console.error("Error generating digest with Gemini:", error);
         throw error;
