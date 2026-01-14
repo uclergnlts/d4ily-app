@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 // Lazy initialization to ensure env vars are loaded
 let _genAI: GoogleGenerativeAI | null = null;
-let _jsonModel: any = null;
+
 let _textModel: any = null;
 
 function getGenAI() {
@@ -16,17 +16,69 @@ function getGenAI() {
     return _genAI;
 }
 
-function getJsonModel() {
-    if (!_jsonModel) {
-        _jsonModel = getGenAI().getGenerativeModel({
-            model: "gemini-2.5-flash",
-            generationConfig: {
-                responseMimeType: "application/json",
-                maxOutputTokens: 8192,
+const digestSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+        title: { type: SchemaType.STRING },
+        intro: { type: SchemaType.STRING },
+        content: { type: SchemaType.STRING },
+        trends: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        watchlist: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+        quote: { type: SchemaType.STRING, nullable: true }
+    },
+    required: ["title", "intro", "content", "trends", "watchlist"]
+};
+
+const weeklyDigestSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+        title: { type: SchemaType.STRING },
+        intro: { type: SchemaType.STRING },
+        content: { type: SchemaType.STRING },
+        highlights: {
+            type: SchemaType.ARRAY,
+            items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                    category: { type: SchemaType.STRING },
+                    items: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+                },
+                required: ["category", "items"]
             }
-        });
-    }
-    return _jsonModel;
+        },
+        trends: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
+    },
+    required: ["title", "intro", "content", "highlights", "trends"]
+};
+
+const articleSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+        title: { type: SchemaType.STRING },
+        summary: { type: SchemaType.STRING },
+        category: { type: SchemaType.STRING }
+    },
+    required: ["title", "summary", "category"]
+};
+
+const duplicateCheckSchema = {
+    type: SchemaType.OBJECT,
+    properties: {
+        is_duplicate: { type: SchemaType.BOOLEAN },
+        reason: { type: SchemaType.STRING }
+    },
+    required: ["is_duplicate", "reason"]
+};
+
+function getJsonModel(schema?: any) {
+    return getGenAI().getGenerativeModel({
+        model: "gemini-2.5-flash",
+        generationConfig: {
+            responseMimeType: "application/json",
+            maxOutputTokens: 8192,
+            responseSchema: schema
+        }
+    });
 }
 
 function getTextModel() {
@@ -192,7 +244,7 @@ export async function generateDailyDigest(
     try {
         // Use a model with higher output limit specifically for digest generation if needed,
         // but here we just ensure we use the configured json model
-        const result = await getJsonModel().generateContent(prompt);
+        const result = await getJsonModel(digestSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -292,7 +344,7 @@ export async function generateWeeklyDigest(
     `;
 
     try {
-        const result = await getJsonModel().generateContent(prompt);
+        const result = await getJsonModel(weeklyDigestSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
@@ -373,7 +425,7 @@ export async function summarizeArticle(
     `;
 
     try {
-        const result = await getJsonModel().generateContent(prompt);
+        const result = await getJsonModel(articleSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         return JSON.parse(text) as ProcessedArticleData;
@@ -435,7 +487,7 @@ export async function checkDuplicateArticle(
     `;
 
     try {
-        const result = await getJsonModel().generateContent(prompt);
+        const result = await getJsonModel(duplicateCheckSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         const data = JSON.parse(text) as { is_duplicate: boolean; reason: string };
