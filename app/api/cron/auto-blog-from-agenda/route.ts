@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         if (!apiKey) throw new Error("GEMINI_API_KEY Missing");
 
         const genAI = new GoogleGenerativeAI(apiKey.trim());
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const promptTemplate = await loadPrompt("topic-extractor");
         const finalPrompt = promptTemplate

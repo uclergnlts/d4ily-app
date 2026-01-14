@@ -72,7 +72,7 @@ const duplicateCheckSchema = {
 
 function getJsonModel(schema?: any) {
     return getGenAI().getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash",
         generationConfig: {
             responseMimeType: "application/json",
             maxOutputTokens: 8192,
@@ -84,7 +84,7 @@ function getJsonModel(schema?: any) {
 function getTextModel() {
     if (!_textModel) {
         _textModel = getGenAI().getGenerativeModel({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
         });
     }
     return _textModel;

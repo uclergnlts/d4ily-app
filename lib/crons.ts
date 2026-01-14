@@ -234,7 +234,7 @@ export async function runGenerateDigest() {
                 tweets_count: recentTweets.length,
                 news_count: recentNews.length,
                 updated_at: new Date().toISOString(),
-                model_name: "gemini-2.5-flash (updated)"
+                model_name: "gemini-1.5-flash (updated)"
             }
         });
         stepLogs.push("Step 9 complete: Saved to database");
@@ -307,7 +307,7 @@ export async function runGenerateWeeklyDigest() {
                 tweets_count: tweetsCount,
                 news_count: newsCount,
                 updated_at: new Date().toISOString(),
-                model_name: "gemini-2.5-flash (updated)"
+                model_name: "gemini-1.5-flash (updated)"
             }
         });
 
