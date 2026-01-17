@@ -377,42 +377,61 @@ export async function runFetchOfficialGazette() {
         }
         stepLogs.push("Step 2 complete: No existing summary found");
 
-        // Fetch with timeout
+        // Fetch with timeout - try multiple URLs
         stepLogs.push("Step 3: Fetching Resmi Gazete website");
-        const url = 'https://www.resmigazete.gov.tr/';
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
 
         // Add browser-like headers to avoid being blocked
         const headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
-            'Cache-Control': 'no-cache',
+            'Upgrade-Insecure-Requests': '1',
         };
 
-        let response;
-        try {
-            response = await fetch(url, {
-                signal: controller.signal,
-                headers: headers
-            });
-            clearTimeout(timeoutId);
-        } catch (fetchError: any) {
-            clearTimeout(timeoutId);
-            if (fetchError.name === 'AbortError') {
-                throw new Error("Resmi Gazete website timeout after 30 seconds");
+        // Try multiple URLs in case one is blocked
+        const urlsToTry = [
+            'https://www.resmigazete.gov.tr/',
+            'https://resmigazete.gov.tr/',
+            `https://www.resmigazete.gov.tr/fihrist?tarih=${today.split('-').reverse().join('.')}`
+        ];
+
+        let response = null;
+        let usedUrl = '';
+        let lastError = '';
+
+        for (const url of urlsToTry) {
+            try {
+                stepLogs.push(`Trying URL: ${url}`);
+                response = await fetch(url, {
+                    signal: controller.signal,
+                    headers: headers,
+                    redirect: 'follow'
+                });
+                if (response.ok) {
+                    usedUrl = url;
+                    stepLogs.push(`Success with URL: ${url}`);
+                    break;
+                } else {
+                    lastError = `HTTP ${response.status} from ${url}`;
+                    stepLogs.push(`Failed: ${lastError}`);
+                    response = null;
+                }
+            } catch (fetchError: any) {
+                lastError = `${fetchError.name}: ${fetchError.message} from ${url}`;
+                stepLogs.push(`Error: ${lastError}`);
             }
-            throw new Error(`Fetch failed: ${fetchError.message}`);
         }
 
-        if (!response.ok) {
-            throw new Error(`Resmi Gazete website returned ${response.status}`);
+        clearTimeout(timeoutId);
+
+        if (!response) {
+            throw new Error(`All fetch attempts failed. Last error: ${lastError}`);
         }
-        stepLogs.push("Step 3 complete: Website fetched successfully");
+        stepLogs.push(`Step 3 complete: Website fetched successfully from ${usedUrl}`);
 
         stepLogs.push("Step 4: Parsing HTML content");
         const html = await response.text();
@@ -487,12 +506,12 @@ export async function runFetchOfficialGazette() {
         await db.insert(officialGazetteSummaries).values({
             date: today,
             summary_markdown: summary,
-            gazette_url: url
+            gazette_url: usedUrl
         }).onConflictDoUpdate({
             target: officialGazetteSummaries.date,
             set: {
                 summary_markdown: summary,
-                gazette_url: url,
+                gazette_url: usedUrl,
                 created_at: sql`CURRENT_TIMESTAMP`
             }
         });
