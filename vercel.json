@@ -1,1 +1,8 @@
-{}
+{
+    "crons": [
+        {
+            "path": "/api/cron/fetch-gazette",
+            "schedule": "0 7 * * *"
+        }
+    ]
+}
