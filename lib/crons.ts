@@ -362,7 +362,7 @@ import * as cheerio from 'cheerio';
 export async function runFetchOfficialGazette() {
     console.log("Starting Official Gazette fetch...");
     const stepLogs: string[] = [];
-    
+
     try {
         stepLogs.push("Step 1: Getting current date");
         const today = new Date().toISOString().split('T')[0];
@@ -380,13 +380,26 @@ export async function runFetchOfficialGazette() {
         // Fetch with timeout
         stepLogs.push("Step 3: Fetching Resmi Gazete website");
         const url = 'https://www.resmigazete.gov.tr/';
-        
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-        
+
+        // Add browser-like headers to avoid being blocked
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Cache-Control': 'no-cache',
+        };
+
         let response;
         try {
-            response = await fetch(url, { signal: controller.signal });
+            response = await fetch(url, {
+                signal: controller.signal,
+                headers: headers
+            });
             clearTimeout(timeoutId);
         } catch (fetchError: any) {
             clearTimeout(timeoutId);
@@ -395,7 +408,7 @@ export async function runFetchOfficialGazette() {
             }
             throw new Error(`Fetch failed: ${fetchError.message}`);
         }
-        
+
         if (!response.ok) {
             throw new Error(`Resmi Gazete website returned ${response.status}`);
         }
@@ -437,9 +450,9 @@ export async function runFetchOfficialGazette() {
 
         if (!mainText || mainText.length < 50) {
             // No gazette published today (weekend or holiday)
-            return { 
-                success: true, 
-                message: "No gazette content available today (possibly weekend/holiday)", 
+            return {
+                success: true,
+                message: "No gazette content available today (possibly weekend/holiday)",
                 skipped: true,
                 date: today
             };
