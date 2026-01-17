@@ -28,6 +28,7 @@ export const dailyDigests = sqliteTable("daily_digests", {
     published: integer("published", { mode: "boolean" }).default(false).notNull(),
     cover_image_url: text("cover_image_url"),
     greeting_text: text("greeting_text"),
+    content_audio: text("content_audio"), // Podcast-optimized content for TTS
     spotify_url: text("spotify_url"),
 });
 

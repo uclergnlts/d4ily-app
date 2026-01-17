@@ -22,11 +22,12 @@ const digestSchema = {
         title: { type: SchemaType.STRING },
         intro: { type: SchemaType.STRING },
         content: { type: SchemaType.STRING },
+        content_audio: { type: SchemaType.STRING },
         trends: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
         watchlist: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
         quote: { type: SchemaType.STRING, nullable: true }
     },
-    required: ["title", "intro", "content", "trends", "watchlist"]
+    required: ["title", "intro", "content", "content_audio", "trends", "watchlist"]
 };
 
 const weeklyDigestSchema = {
@@ -94,6 +95,7 @@ export interface DigestData {
     title: string;
     intro: string;
     content: string; // Markdown/HTML content
+    content_audio: string; // Podcast-optimized content for TTS
     trends: string[];
     watchlist: string[];
     quote?: string;
@@ -265,9 +267,41 @@ export async function generateDailyDigest(
       "title": "A catchy, powerful headline summarizing the day (Max 70 chars)",
       "intro": "The warm opening + context paragraph (100-150 words)",
       "content": "The full markdown string with ALL sections above (4000-6000 chars minimum)",
+      "content_audio": "PODCAST VERSION - Same content rewritten for AUDIO/TTS (see rules below)",
       "trends": ["trend1", "trend2", "trend3", "trend4", "trend5"],
       "watchlist": ["item1", "item2", "item3", "item4", "item5"]
     }
+
+    *** CONTENT_AUDIO RULES (CRITICAL FOR TTS) ***
+    The content_audio field must be a PODCAST-STYLE version optimized for text-to-speech:
+    
+    1. **KONUŞMA DİLİ**: Yazı dili değil, KONUŞMA dili kullan. Sanki radyo spikeri okuyormuş gibi yaz.
+    
+    2. **KISALTMALARI AÇ**:
+       - "%" → "yüzde" (örn: "yüzde 45" değil "%45")
+       - "TL" → "Türk Lirası"
+       - "USD" → "Amerikan doları"
+       - "TCMB" → "Türkiye Cumhuriyet Merkez Bankası"
+       - Tüm kısaltmaları tam yaz
+    
+    3. **MARKDOWN KULLANMA**: Sadece düz metin. Başlık (#), kalın (**), link yok.
+    
+    4. **DOĞAL DURAKLAMALAR**: 
+       - Önemli bilgilerden önce/sonra "..." kullan
+       - Uzun cümleleri böl
+       - Her konu arasında bir boş satır bırak
+    
+    5. **SAYILARI DOĞAL OKU**:
+       - "32.5" → "otuz iki virgül beş"
+       - "1.500.000" → "bir milyon beş yüz bin"
+    
+    6. **FORMAT**:
+       - Giriş paragrafı ile başla
+       - Her haber konusunu ayrı paragrafta ele al
+       - Sonuç cümlesiyle bitir
+       - Toplam 2000-3000 karakter
+    
+    7. **TON**: Profesyonel ama samimi podcast sunucusu tonu. Enerjik ama sakin.
     `;
 
     try {

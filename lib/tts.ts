@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { preprocessForVoice } from './voice-preprocessing';
 
 // Lazy initialization
 let _openai: OpenAI | null = null;
@@ -83,7 +84,7 @@ export async function generateAudio(
     if (text.length <= maxChars) {
         // Single request
         const response = await openai.audio.speech.create({
-            model: 'tts-1',
+            model: 'tts-1-hd',
             voice: voice,
             input: text,
             response_format: 'mp3',
@@ -106,7 +107,7 @@ export async function generateAudio(
 
     for (const chunk of chunks) {
         const response = await openai.audio.speech.create({
-            model: 'tts-1',
+            model: 'tts-1-hd',
             voice: voice,
             input: chunk,
             response_format: 'mp3',
@@ -155,19 +156,37 @@ function splitTextIntoChunks(text: string, maxLength: number): string[] {
 
 /**
  * Generate a complete digest audio from intro and content
+ * @param intro - Opening text
+ * @param content - Main content (may be pre-optimized or raw)
+ * @param voice - TTS voice to use
+ * @param isOptimized - If true, skip GPT preprocessing (content is already podcast-ready)
  */
 export async function generateDigestAudio(
     intro: string,
     content: string,
-    voice: TTSVoice = 'nova'
+    voice: TTSVoice = 'nova',
+    isOptimized: boolean = false
 ): Promise<TTSResult> {
     // Combine intro and content
     const fullText = `${intro}\n\n${content}`;
 
-    // Clean for TTS
+    // Clean markdown formatting for TTS
     const cleanedText = cleanTextForTTS(fullText);
 
-    console.log(`Generating TTS for ${cleanedText.length} characters...`);
+    let finalText: string;
 
-    return generateAudio(cleanedText, voice);
+    if (isOptimized) {
+        // Content is already podcast-optimized (from content_audio field)
+        // Only apply basic Turkish pronunciation rules, skip GPT
+        console.log(`Content already optimized, applying basic cleanup...`);
+        finalText = cleanedText;
+    } else {
+        // Legacy content - apply full voice preprocessing with GPT
+        console.log(`Preprocessing ${cleanedText.length} characters for voice...`);
+        finalText = await preprocessForVoice(cleanedText);
+    }
+
+    console.log(`Generating TTS for ${finalText.length} characters...`);
+
+    return generateAudio(finalText, voice);
 }

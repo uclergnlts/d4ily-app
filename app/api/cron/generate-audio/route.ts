@@ -61,14 +61,20 @@ export async function GET(request: Request) {
             .set({ audio_status: 'processing' })
             .where(eq(dailyDigests.id, pendingDigest.id));
 
-        // Generate audio
-        stepLogs.push("Step 3: Generating audio with OpenAI TTS");
+        // Generate audio - use content_audio if available (podcast-optimized), otherwise fall back to content
+        stepLogs.push("Step 3: Generating audio with OpenAI TTS-HD");
         const voice: TTSVoice = (pendingDigest.audio_voice as TTSVoice) || 'nova';
+
+        // Prefer content_audio (podcast-optimized) over regular content
+        const audioContent = pendingDigest.content_audio || pendingDigest.content;
+        const isOptimized = !!pendingDigest.content_audio;
+        stepLogs.push(`Using ${isOptimized ? 'podcast-optimized content_audio' : 'regular content (fallback with preprocessing)'}`);
 
         const { audioBuffer, durationSeconds } = await generateDigestAudio(
             pendingDigest.intro,
-            pendingDigest.content,
-            voice
+            audioContent,
+            voice,
+            isOptimized
         );
         stepLogs.push(`Step 3 complete: Generated ${durationSeconds}s of audio`);
 
