@@ -1,0 +1,32 @@
+name: Generate Digest Audio (Daily)
+
+on:
+  schedule:
+    # Her gün 09:30 UTC (Türkiye 12:30) - Digest oluşturulduktan sonra
+    - cron: "30 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate-audio:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: Generate Digest Audio
+        run: |
+          RESPONSE=$(curl -L -sS -X GET "https://d4ily.com/api/cron/generate-audio" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" || true)
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response Body:"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: API returned status $HTTP_CODE"
+            exit 1
+          fi
