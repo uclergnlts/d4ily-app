@@ -179,8 +179,8 @@ export async function generateDailyDigest(
     DATE: ${formattedDate} (${date})
     
     TASK:
-    Analyze the provided Tweets, News, and Financial Data to create a comprehensive, long-form daily digest in TURKISH.
-    Your goal is not just to summarize, but to provide a deep, narrative-driven analysis of the day's agenda.
+    Create a COMPREHENSIVE, DETAILED daily digest in TURKISH. This is a premium newsletter that readers expect to spend 5 MINUTES reading.
+    Provide deep analysis, context, and multiple perspectives on each topic.
     
     INPUT DATA:
     
@@ -192,52 +192,81 @@ export async function generateDailyDigest(
     --- NEWS (AI-Processed Articles with Summaries & Images) ---
     ${newsText.substring(0, 25000)}
     
-    REQUIREMENTS & STRUCTURE (Strictly Follow This):
+    *** CRITICAL REQUIREMENTS ***
 
-    *** CRITICAL CITATION RULE ***
-    - **ALWAYS cite sources explicitly.**
-    - Use Markdown links for citations using this exact format: \`[Kaynak Adı veya Metni](URL "Haber Başlığı")\`
-    - Example: "...bu durum \`[NTV'nin haberine göre](https://ntv.com.tr/... "NTV: Enflasyon Rakamları Açıklandı")\` piyasaları etkiledi."
-    - If citing a tweet: \`[@username](https://x.com/username/status/... "Tweet İçeriği")\` şeklinde belirt.
+    1. **CITATION RULE** - ALWAYS cite sources:
+       - Use Markdown links: \`[Kaynak Adı](URL "Başlık")\`
+       - For tweets: \`[@username](https://x.com/username/status/...)\`
 
-    *** CRITICAL LENGTH & DEPTH CONSTRAINT ***
-    - The 'content' field MUST be concise but detailed (Target: 1500-2000 characters).
-    - Do NOT be overly verbose. Focus on the most critical information.
-    - If a topic is complex, break it down but keep it tight.
-    - Use a professional, objective, yet engaging journalist tone.
-    - **Start with a warm opening:** e.g., "${formattedDate} sabahından herkese merhaba, Türkiye gündemini birlikte gözden geçirelim."
+    2. **LENGTH REQUIREMENT - THIS IS CRITICAL**:
+       - The 'content' field MUST be 4000-6000 characters (approximately 600-900 words)
+       - This is a PREMIUM newsletter - readers expect DETAILED coverage
+       - Do NOT be brief - provide COMPREHENSIVE analysis
+       - Each topic should have MULTIPLE paragraphs of context
 
-    **STRUCTURE FOR 'content' FIELD (Markdown):**
+    3. **TONE**:
+       - Professional journalist, objective, analytical
+       - Start with: "${formattedDate} sabahından herkese merhaba! Bugün Türkiye gündeminde öne çıkan gelişmeleri detaylı şekilde ele alıyoruz."
 
-    [Intro Paragraph]
-    - Write a cohesive paragraph (2-3 sentences) summarizing the general mood of the country.
+    **REQUIRED STRUCTURE FOR 'content' FIELD (Markdown):**
+
+    [Opening Paragraph - 3-4 sentences]
+    Summarize the overall mood and the TOP story of the day. Set the context.
 
     ---
 
-    ## Günün Ana Başlıkları (Maddeli Özet)
-    - Select 5-7 MAJOR topics.
-    - Format each topic as a main bullet with a **Bold Headline**, followed by a brief summary line.
-    - Under each main bullet, add 2-3 sub-bullets (nested) with SPECIFIC details (data, quotes).
+    ## 📊 Piyasa Özeti
+    - Write 2-3 sentences analyzing today's financial data (USD/TRY, EUR/TRY, Gold, BIST100)
+    - Explain what the numbers mean for ordinary citizens
+    - Mention any significant movements and potential causes
+
+    ---
+
+    ## 🔴 Günün Ana Başlıkları
+
+    Select 7-10 MAJOR topics. For EACH topic:
     
+    - **[Bold Topic Title]**: Write 2-3 sentences explaining the situation
+      - First detail bullet with specific data or quotes
+      - Second detail bullet with context or implications
+      - Third detail bullet with expert reaction or what to watch
+      - Fourth detail if there's more important info
+
+    Example format:
+    - **Emekli Maaşlarına Zam Açıklandı**: Hükümet, emekli maaşlarına yüzde 25 oranında zam yapılacağını açıkladı. Bu artış, yaklaşık 16 milyon emekliyi etkileyecek.
+      - En düşük emekli maaşı 12.500 TL'den 15.625 TL'ye yükselecek
+      - Zam oranı enflasyonun altında kaldı, muhalefet eleştirdi
+      - Emekli sendikaları yetersiz buldu, ek düzenleme talep etti
+      - Yeni maaşlar Şubat ayından itibaren ödenmeye başlanacak
+
     ---
 
-    ## Dün Dikkat Çeken Eğilimler
-    - Analyze 3-4 broader trends/patterns observed.
+    ## 📈 Dikkat Çekici Eğilimler
+    Analyze 4-5 broader trends observed today:
+    - For each trend, write 2-3 sentences of analysis
+    - Connect different news items to show patterns
+    - Explain why these trends matter
 
     ---
 
-    ## Bugün İzlenmesi Gereken Başlıklar
-    - List 3-5 specific items/events to watch today.
+    ## 👀 Bugün ve Yarın İzlenmesi Gerekenler
+    List 5-7 specific items to watch:
+    - Include upcoming announcements, meetings, or data releases
+    - Mention potential market-moving events
+    - Note any developing stories
 
-    **End with a short concluding sentence.**
-    
+    ---
+
+    [Closing Paragraph - 2-3 sentences]
+    Wrap up with a forward-looking statement about what to expect.
+
     OUTPUT FORMAT (JSON):
     {
-      "title": "A catchy, powerful headline (Max 60 chars)",
-      "intro": "The warm opening sentence + the context paragraph",
-      "content": "The full markdown string starting from '---' divider downwards",
-      "trends": ["trend1", "trend2", ...],
-      "watchlist": ["item1", "item2", ...]
+      "title": "A catchy, powerful headline summarizing the day (Max 70 chars)",
+      "intro": "The warm opening + context paragraph (100-150 words)",
+      "content": "The full markdown string with ALL sections above (4000-6000 chars minimum)",
+      "trends": ["trend1", "trend2", "trend3", "trend4", "trend5"],
+      "watchlist": ["item1", "item2", "item3", "item4", "item5"]
     }
     `;
 
