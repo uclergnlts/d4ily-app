@@ -2,7 +2,7 @@
 
 on:
   schedule:
-    # Her gece 03:00 UTC (TÃ¼rkiye 06:00)
+    # Her gece 03:00 UTC (Türkiye 06:00)
     - cron: "0 3 * * *"
   workflow_dispatch:
 
@@ -14,8 +14,19 @@ jobs:
     steps:
       - name: Fetch Official Gazette
         run: |
-          curl -L -sS -X GET "https://d4ily.com/api/cron/fetch-gazette" \
+          RESPONSE=$(curl -L -sS -X GET "https://d4ily.com/api/cron/fetch-gazette" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
-            --fail
-
+            -w "\n%{http_code}" || true)
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response Body:"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Error: API returned status $HTTP_CODE"
+            exit 1
+          fi
