@@ -361,25 +361,51 @@ import * as cheerio from 'cheerio';
 
 export async function runFetchOfficialGazette() {
     console.log("Starting Official Gazette fetch...");
+    const stepLogs: string[] = [];
+    
     try {
+        stepLogs.push("Step 1: Getting current date");
         const today = new Date().toISOString().split('T')[0];
+        stepLogs.push(`Step 1 complete: Date is ${today}`);
 
         // Check if already exists
+        stepLogs.push("Step 2: Checking if summary already exists");
         const existing = await db.select().from(officialGazetteSummaries).where(eq(officialGazetteSummaries.date, today)).get();
         if (existing) {
             console.log("Official Gazette summary already exists for today.");
-            return { success: true, message: "Already exists", skipped: true };
+            return { success: true, message: "Already exists", skipped: true, date: today };
         }
+        stepLogs.push("Step 2 complete: No existing summary found");
 
+        // Fetch with timeout
+        stepLogs.push("Step 3: Fetching Resmi Gazete website");
         const url = 'https://www.resmigazete.gov.tr/';
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch Resmi Gazete website");
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
+        let response;
+        try {
+            response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+        } catch (fetchError: any) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+                throw new Error("Resmi Gazete website timeout after 30 seconds");
+            }
+            throw new Error(`Fetch failed: ${fetchError.message}`);
+        }
+        
+        if (!response.ok) {
+            throw new Error(`Resmi Gazete website returned ${response.status}`);
+        }
+        stepLogs.push("Step 3 complete: Website fetched successfully");
 
+        stepLogs.push("Step 4: Parsing HTML content");
         const html = await response.text();
         const $ = cheerio.load(html);
 
         // Extract content - structure is flattened but ordered in #html-content
-        // Titles are .html-title, Subtitles .html-subtitle, Items .fihrist-item
         const contentDiv = $('#html-content');
         let mainText = "";
 
@@ -407,14 +433,20 @@ export async function runFetchOfficialGazette() {
             });
             mainText = items.join('\n');
         }
+        stepLogs.push(`Step 4 complete: Extracted ${mainText.length} characters of content`);
 
         if (!mainText || mainText.length < 50) {
-            return { success: false, message: "Content too short or empty." };
+            // No gazette published today (weekend or holiday)
+            return { 
+                success: true, 
+                message: "No gazette content available today (possibly weekend/holiday)", 
+                skipped: true,
+                date: today
+            };
         }
 
         // Generate Summary with AI
-        // Using generateWithGemini from same file (AI.ts imports need check)
-        // We can reuse the prompt logic
+        stepLogs.push("Step 5: Generating AI summary");
         const prompt = `
         Aşağıda bugünkü T.C. Resmi Gazete'nin içerik metni yer almaktadır.
         Lütfen bu içeriği analiz et ve halkı/vatandaşı en çok ilgilendiren, en kritik 3 değişikliği veya kararı madde madde özetle.
@@ -430,10 +462,15 @@ export async function runFetchOfficialGazette() {
         ${mainText}
         `;
 
-        // Need to import generateWithGemini if not available in current scope
-        // It is imported in line 4 (generateDailyDigest), need to check imports
-        const summary = await generateWithGemini(prompt) || "Özet oluşturulamadı.";
+        let summary: string;
+        try {
+            summary = await generateWithGemini(prompt) || "Özet oluşturulamadı.";
+        } catch (aiError: any) {
+            throw new Error(`AI summary generation failed: ${aiError.message}`);
+        }
+        stepLogs.push("Step 5 complete: AI summary generated");
 
+        stepLogs.push("Step 6: Saving to database");
         await db.insert(officialGazetteSummaries).values({
             date: today,
             summary_markdown: summary,
@@ -446,12 +483,16 @@ export async function runFetchOfficialGazette() {
                 created_at: sql`CURRENT_TIMESTAMP`
             }
         });
+        stepLogs.push("Step 6 complete: Saved to database");
 
         console.log("Official Gazette summary generated and saved.");
-        return { success: true, date: today };
+        return { success: true, date: today, logs: stepLogs };
 
     } catch (error: any) {
-        console.error("Official Gazette Cron Failed:", error);
-        throw new Error(error.message);
+        console.error("Official Gazette Cron Failed at step:", stepLogs[stepLogs.length - 1]);
+        console.error("Full error:", error);
+        const enhancedError = new Error(`${error.message} | Last step: ${stepLogs[stepLogs.length - 1] || 'unknown'}`);
+        (enhancedError as any).stepLogs = stepLogs;
+        throw enhancedError;
     }
 }
