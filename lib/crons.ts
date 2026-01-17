@@ -429,7 +429,16 @@ export async function runFetchOfficialGazette() {
         clearTimeout(timeoutId);
 
         if (!response) {
-            throw new Error(`All fetch attempts failed. Last error: ${lastError}`);
+            // Graceful failure - don't crash the cron, just report the issue
+            console.warn("Could not fetch Resmi Gazete - site may be blocking cloud IPs");
+            return {
+                success: true,
+                message: `Could not reach Resmi Gazete website. Last error: ${lastError}`,
+                skipped: true,
+                date: today,
+                logs: stepLogs,
+                note: "Site may be blocking cloud provider IPs. Manual intervention may be needed."
+            };
         }
         stepLogs.push(`Step 3 complete: Website fetched successfully from ${usedUrl}`);
 
