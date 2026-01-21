@@ -145,6 +145,160 @@ function cleanJsonString(text: string): string {
     return clean;
 }
 
+// Repair truncated or malformed JSON from AI responses
+function repairJson(text: string): string {
+    let json = cleanJsonString(text);
+    
+    // Try parsing as-is first
+    try {
+        JSON.parse(json);
+        return json;
+    } catch {
+        // Continue with repairs
+    }
+    
+    // Count brackets to detect imbalance
+    let braceCount = 0;
+    let bracketCount = 0;
+    let inString = false;
+    let escape = false;
+    let lastStringStart = -1;
+    let truncatedStringPos = -1;
+    
+    for (let i = 0; i < json.length; i++) {
+        const char = json[i];
+        
+        if (escape) {
+            escape = false;
+            continue;
+        }
+        
+        if (char === '\\') {
+            escape = true;
+            continue;
+        }
+        
+        if (char === '"') {
+            if (!inString) {
+                inString = true;
+                lastStringStart = i;
+            } else {
+                inString = false;
+            }
+            continue;
+        }
+        
+        if (!inString) {
+            if (char === '{') braceCount++;
+            else if (char === '}') braceCount--;
+            else if (char === '[') bracketCount++;
+            else if (char === ']') bracketCount--;
+        }
+    }
+    
+    // If we ended inside a string, the string was truncated
+    if (inString) {
+        // Find the last complete key-value pair by looking for the pattern ": " or ":" after the last string start
+        // Try to close the string at a reasonable point
+        
+        // Look for the last newline or comma before end to find a good cutoff point
+        let cutoffPoint = json.length;
+        for (let i = json.length - 1; i > lastStringStart; i--) {
+            const char = json[i];
+            // Look for patterns that might indicate a good breaking point
+            if (char === '.' || char === '!' || char === '?' || char === '。') {
+                cutoffPoint = i + 1;
+                break;
+            }
+            if (char === ',' || char === '\n') {
+                cutoffPoint = i;
+                break;
+            }
+        }
+        
+        // If we found a better cutoff, use it; otherwise just close at end
+        if (cutoffPoint < json.length) {
+            json = json.substring(0, cutoffPoint);
+        }
+        
+        // Close the unterminated string
+        json += '"';
+        
+        // Re-count brackets after repair
+        braceCount = 0;
+        bracketCount = 0;
+        inString = false;
+        escape = false;
+        
+        for (let i = 0; i < json.length; i++) {
+            const char = json[i];
+            if (escape) { escape = false; continue; }
+            if (char === '\\') { escape = true; continue; }
+            if (char === '"') { inString = !inString; continue; }
+            if (!inString) {
+                if (char === '{') braceCount++;
+                else if (char === '}') braceCount--;
+                else if (char === '[') bracketCount++;
+                else if (char === ']') bracketCount--;
+            }
+        }
+    }
+    
+    // Close any unclosed brackets and braces
+    while (bracketCount > 0) {
+        json += ']';
+        bracketCount--;
+    }
+    while (braceCount > 0) {
+        json += '}';
+        braceCount--;
+    }
+    
+    // Remove trailing commas before closing brackets/braces
+    json = json.replace(/,(\s*[\]}])/g, '$1');
+    
+    // Try to parse the repaired JSON
+    try {
+        JSON.parse(json);
+        return json;
+    } catch (e) {
+        // If still failing, try a more aggressive repair
+        // Remove the last incomplete property if any
+        const lastCommaIndex = json.lastIndexOf(',');
+        const lastBraceIndex = json.lastIndexOf('}');
+        const lastBracketIndex = json.lastIndexOf(']');
+        
+        if (lastCommaIndex > Math.max(lastBraceIndex, lastBracketIndex)) {
+            // There's a trailing comma after all closers - truncate there
+            json = json.substring(0, lastCommaIndex);
+            
+            // Re-close brackets
+            braceCount = 0;
+            bracketCount = 0;
+            inString = false;
+            escape = false;
+            
+            for (let i = 0; i < json.length; i++) {
+                const char = json[i];
+                if (escape) { escape = false; continue; }
+                if (char === '\\') { escape = true; continue; }
+                if (char === '"') { inString = !inString; continue; }
+                if (!inString) {
+                    if (char === '{') braceCount++;
+                    else if (char === '}') braceCount--;
+                    else if (char === '[') bracketCount++;
+                    else if (char === ']') bracketCount--;
+                }
+            }
+            
+            while (bracketCount > 0) { json += ']'; bracketCount--; }
+            while (braceCount > 0) { json += '}'; braceCount--; }
+        }
+        
+        return json;
+    }
+}
+
 export async function generateDailyDigest(
     date: string,
     tweets: any[],
@@ -304,26 +458,59 @@ export async function generateDailyDigest(
     7. **TON**: Profesyonel ama samimi podcast sunucusu tonu. Enerjik ama sakin.
     `;
 
-    try {
-        // Use a model with higher output limit specifically for digest generation if needed,
-        // but here we just ensure we use the configured json model
-        const result = await getJsonModel(digestSchema).generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-
-        // Parse JSON safely
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            const cleanText = cleanJsonString(text);
-            const data = JSON.parse(cleanText) as DigestData;
-            return data;
-        } catch (parseError) {
-            console.error("JSON PARSE ERROR. Raw Text from Gemini:", text);
-            throw new Error(`Failed to parse Gemini JSON: ${parseError}`);
+            // Use a model with higher output limit specifically for digest generation if needed,
+            // but here we just ensure we use the configured json model
+            const result = await getJsonModel(digestSchema).generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+
+            // Parse JSON safely with repair
+            try {
+                const repairedJson = repairJson(text);
+                const data = JSON.parse(repairedJson) as DigestData;
+                
+                // Validate required fields exist
+                if (!data.title || !data.intro || !data.content || !data.content_audio) {
+                    throw new Error("Missing required fields in digest response");
+                }
+                
+                // Ensure arrays are present
+                data.trends = data.trends || [];
+                data.watchlist = data.watchlist || [];
+                
+                return data;
+            } catch (parseError) {
+                console.error(`JSON PARSE ERROR (attempt ${attempt}/${maxRetries}). Raw Text from Gemini:`, text.substring(0, 500) + "...");
+                console.error("Parse error details:", parseError);
+                lastError = new Error(`Failed to parse Gemini JSON: ${parseError}`);
+                
+                // If this is not the last attempt, wait and retry
+                if (attempt < maxRetries) {
+                    console.log(`Retrying digest generation (attempt ${attempt + 1}/${maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+                    continue;
+                }
+            }
+        } catch (error) {
+            console.error(`Error generating digest with Gemini (attempt ${attempt}/${maxRetries}):`, error);
+            lastError = error as Error;
+            
+            // If this is not the last attempt, wait and retry
+            if (attempt < maxRetries) {
+                console.log(`Retrying digest generation (attempt ${attempt + 1}/${maxRetries})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                continue;
+            }
         }
-    } catch (error) {
-        console.error("Error generating digest with Gemini:", error);
-        throw error;
     }
+    
+    // All retries exhausted
+    throw lastError || new Error("Failed to generate digest after all retries");
 }
 
 export interface WeeklyDigestData {
@@ -406,17 +593,39 @@ export async function generateWeeklyDigest(
     }
     `;
 
-    try {
-        const result = await getJsonModel(weeklyDigestSchema).generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+    const maxRetries = 3;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const result = await getJsonModel(weeklyDigestSchema).generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
 
-        const data = JSON.parse(text) as WeeklyDigestData;
-        return data;
-    } catch (error) {
-        console.error("Error generating weekly digest with Gemini:", error);
-        throw error;
+            const repairedJson = repairJson(text);
+            const data = JSON.parse(repairedJson) as WeeklyDigestData;
+            
+            // Validate and ensure defaults
+            if (!data.title || !data.intro || !data.content) {
+                throw new Error("Missing required fields in weekly digest response");
+            }
+            data.highlights = data.highlights || [];
+            data.trends = data.trends || [];
+            
+            return data;
+        } catch (error) {
+            console.error(`Error generating weekly digest with Gemini (attempt ${attempt}/${maxRetries}):`, error);
+            lastError = error as Error;
+            
+            if (attempt < maxRetries) {
+                console.log(`Retrying weekly digest generation (attempt ${attempt + 1}/${maxRetries})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                continue;
+            }
+        }
     }
+    
+    throw lastError || new Error("Failed to generate weekly digest after all retries");
 }
 
 export async function generateWithGemini(prompt: string): Promise<string | null> {
@@ -491,7 +700,8 @@ export async function summarizeArticle(
         const result = await getJsonModel(articleSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
-        return JSON.parse(text) as ProcessedArticleData;
+        const repairedJson = repairJson(text);
+        return JSON.parse(repairedJson) as ProcessedArticleData;
     } catch (error) {
         console.error("Error summarizing article with Gemini:", error);
         // Fallback or rethrow
@@ -553,7 +763,8 @@ export async function checkDuplicateArticle(
         const result = await getJsonModel(duplicateCheckSchema).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
-        const data = JSON.parse(text) as { is_duplicate: boolean; reason: string };
+        const repairedJson = repairJson(text);
+        const data = JSON.parse(repairedJson) as { is_duplicate: boolean; reason: string };
 
         if (data.is_duplicate) {
             console.log(`  [DUPLICATE] ${data.reason}`);
