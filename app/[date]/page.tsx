@@ -7,7 +7,7 @@ import AudioSummary from "@/components/audio-summary"
 import ImportantTweets from "@/components/important-tweets"
 import DayNavigation from "@/components/day-navigation"
 import ReactionButtons from "@/components/reaction-buttons"
-import { getDigestByDate, getTopTweetsByDate, getArchiveDigests } from "@/lib/digest-data"
+import { getDigestByDate, getTopTweetsByDate, getAdjacentDigestDates } from "@/lib/digest-data"
 import Link from "next/link"
 import { ArrowLeft, Search } from "lucide-react"
 import { SocialShareDialog } from "@/components/social-share-dialog"
@@ -117,17 +117,6 @@ export async function generateMetadata({
   }
 }
 
-async function getAdjacentDates(currentDate: string) {
-  const digests = await getArchiveDigests()
-  const dates = digests.map((d) => d.digest_date).sort()
-  const currentIndex = dates.indexOf(currentDate)
-
-  return {
-    prevDate: currentIndex > 0 ? dates[currentIndex - 1] : undefined,
-    nextDate: currentIndex < dates.length - 1 ? dates[currentIndex + 1] : undefined,
-  }
-}
-
 import { injectInternalLinks } from "@/lib/services/internal-linker"
 
 export default async function DatePage({ params }: { params: Promise<{ date: string }> }) {
@@ -146,7 +135,7 @@ export default async function DatePage({ params }: { params: Promise<{ date: str
   const [digest, tweets, adjacentDates] = await Promise.all([
     getDigestByDate(date),
     getTopTweetsByDate(date, 20),
-    getAdjacentDates(date)
+    getAdjacentDigestDates(date)
   ])
 
   // Inject internal links if digest exists
