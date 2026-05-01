@@ -54,6 +54,23 @@ export const tweetsRaw = sqliteTable("tweets_raw", {
     };
 });
 
+export const trTweets = sqliteTable("tr_tweets", {
+    id: text("id").primaryKey(),
+    account_id: integer("account_id"),
+    user_name: text("user_name"),
+    display_name: text("display_name"),
+    text: text("text"),
+    lang: text("lang"),
+    like_count: integer("like_count"),
+    retweet_count: integer("retweet_count"),
+    reply_count: integer("reply_count"),
+    view_count: integer("view_count"),
+    tweeted_at: integer("tweeted_at"),
+    fetched_at: integer("fetched_at"),
+    used_in_digest: integer("used_in_digest", { mode: "boolean" }),
+    profile_image_url: text("profile_image_url"),
+});
+
 export const newsRaw = sqliteTable("news_raw", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     source_id: text("source_id"),
@@ -140,7 +157,21 @@ export const twitterAccounts = sqliteTable("twitter_accounts", {
     username: text("username").notNull().unique(),
     display_name: text("display_name"),
     category: text("category").default("genel"), // siyaset, ekonomi, spor, medya, etc.
-    priority: integer("priority").default(0).notNull(), // 0-10, fetch priority
+    priority: integer("priority").default(3).notNull(), // 1-5, fetch priority
+    trust_score: integer("trust_score").default(3).notNull(), // 1-5, verification weight
+    is_official: integer("is_official", { mode: "boolean" }).default(false).notNull(),
+    fetch_interval: integer("fetch_interval").default(20).notNull(), // Minutes
+    last_fetched_at: text("last_fetched_at"),
+    last_fetch_started_at: text("last_fetch_started_at"),
+    last_fetch_completed_at: text("last_fetch_completed_at"),
+    last_success_at: text("last_success_at"),
+    last_error_at: text("last_error_at"),
+    last_error_message: text("last_error_message"),
+    last_seen_tweet_id: text("last_seen_tweet_id"),
+    last_seen_tweet_published_at: text("last_seen_tweet_published_at"),
+    consecutive_error_count: integer("consecutive_error_count").default(0).notNull(),
+    total_fetch_count: integer("total_fetch_count").default(0).notNull(),
+    total_error_count: integer("total_error_count").default(0).notNull(),
     is_active: integer("is_active", { mode: "boolean" }).default(true).notNull(),
     show_in_live_feed: integer("show_in_live_feed", { mode: "boolean" }).default(false).notNull(), // Show in /akis live feed
     notes: text("notes"),
@@ -154,6 +185,9 @@ export const rssSources = sqliteTable("rss_sources", {
     url: text("url").notNull().unique(),
     name: text("name").notNull(),
     category: text("category").default("gundem"),
+    priority: integer("priority").default(3).notNull(), // 1-5, fetch priority
+    trust_score: integer("trust_score").default(3).notNull(), // 1-5, verification weight
+    is_official: integer("is_official", { mode: "boolean" }).default(false).notNull(),
     is_active: integer("is_active", { mode: "boolean" }).default(true).notNull(),
     fetch_interval: integer("fetch_interval").default(240), // Minutes (4 hours)
     last_fetched_at: text("last_fetched_at"),
