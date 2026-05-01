@@ -1,4 +1,4 @@
-import { getAgendaTopics } from "@/lib/api/agenda"
+import { getAgendaTopics, getMissedAgendaAlerts } from "@/lib/api/agenda"
 import { getCoverageReport } from "@/lib/api/coverage"
 import { apiError, apiSuccess, parseLimit } from "@/lib/api/response"
 
@@ -16,9 +16,10 @@ export async function GET(request: Request) {
     const firehoseLimit = parseLimit(searchParams.get("firehoseLimit"), 200, 1000)
     const featuredLimit = parseLimit(searchParams.get("featuredLimit"), 30, 100)
     const pendingLimit = parseLimit(searchParams.get("pendingLimit"), 100, 500)
-    const [allSignals, featuredAgenda, coverage] = await Promise.all([
+    const [allSignals, featuredAgenda, missedAgendaAlerts, coverage] = await Promise.all([
       getAgendaTopics(1000, "all"),
       getAgendaTopics(featuredLimit, "featured"),
+      getMissedAgendaAlerts(pendingLimit),
       getCoverageReport(),
     ])
     const pendingConfirmation = sortByNewest(
@@ -38,12 +39,14 @@ export async function GET(request: Request) {
         firehose: firehose.length,
         featuredAgenda: featuredAgenda.length,
         pendingConfirmation: pendingConfirmation.length,
+        missedAgendaAlerts: missedAgendaAlerts.length,
         singleSignal: allSignals.filter((item) => item.signalCount === 1).length,
         needsConfirmation: allSignals.filter((item) => item.needsConfirmation).length,
       },
       firehose,
       featuredAgenda,
       pendingConfirmation,
+      missedAgendaAlerts,
     })
   } catch (error) {
     console.error("Failed to build API package:", error)

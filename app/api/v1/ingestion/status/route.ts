@@ -23,6 +23,7 @@ export async function GET() {
         scannedWithin24h: summary.activeTwitterAccounts - summary.notScannedWithin24h,
         notScannedWithin24h: summary.notScannedWithin24h,
         targetMissedAccounts: 0,
+        sourceCoverageScore: summary.sourceCoverageScore,
       },
       fetchState: {
         dueAccounts: summary.dueAccounts,
@@ -38,6 +39,7 @@ export async function GET() {
         stuckFetchAccounts: coverage.attention.stuckFetchAccounts,
         neverFetchedAccounts: coverage.attention.neverFetchedAccounts,
       },
+      sourceCoverage: coverage.sourceCoverage,
     })
   } catch (error) {
     console.error("Failed to fetch ingestion status:", error)

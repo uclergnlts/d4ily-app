@@ -26,6 +26,11 @@ export function getTwitterFetchLimit() {
     return Number.isNaN(fetchLimit) ? 50 : Math.max(15, Math.min(fetchLimit, 100));
 }
 
+export function getTwitterFreshWindowHours() {
+    const hours = Number.parseInt(process.env.TWITTER_FRESH_WINDOW_HOURS || "24", 10);
+    return Number.isNaN(hours) ? 24 : Math.max(1, Math.min(hours, 48));
+}
+
 export function getTwitterApiTimeoutMs() {
     const timeoutMs = Number.parseInt(process.env.TWITTER_API_TIMEOUT_MS || "15000", 10);
     return Number.isNaN(timeoutMs) ? 15000 : Math.max(3000, timeoutMs);
@@ -81,7 +86,7 @@ export async function fetchUserTweets(username: string): Promise<TwitterApiTweet
             rawTweets = [data];
         }
 
-        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const freshCutoff = new Date(Date.now() - getTwitterFreshWindowHours() * 60 * 60 * 1000);
 
         // Map, normalize AND filter for 24h
         return rawTweets.map(t => {
@@ -102,7 +107,7 @@ export async function fetchUserTweets(username: string): Promise<TwitterApiTweet
             .filter(t => t.id) // Filter out tweets without ID
             .filter(t => {
                 if (!t.createdAt) return false;
-                return new Date(t.createdAt) > oneDayAgo; // STRICT 24H FILTER
+                return new Date(t.createdAt) > freshCutoff; // STRICT FRESHNESS FILTER
             });
 
     } catch (error: any) {

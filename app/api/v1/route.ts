@@ -9,6 +9,7 @@ const endpoints = [
   { method: "GET", path: "/api/v1/signals?singleSource=true&sort=newest", description: "Single-source signals in newest-first order" },
   { method: "GET", path: "/api/v1/signals?needsConfirmation=true&sort=newest", description: "Signals that need confirmation" },
   { method: "GET", path: "/api/v1/signals/pending?limit=100", description: "Single-source or low-confidence signals for editorial review" },
+  { method: "GET", path: "/api/v1/alerts/missed?limit=50", description: "Missed-agenda alarm: single-source, high-impact, or confirmation-needed stories that must not disappear" },
   { method: "GET", path: "/api/v1/coverage", description: "24-hour Twitter source coverage and missed-account diagnostics" },
   { method: "GET", path: "/api/v1/package", description: "Frontend-ready 24-hour data package: firehose, featured agenda, pending signals, coverage summary" },
   { method: "GET", path: "/api/v1/feed", description: "Final frontend feed: AI news stories, latest signals, developing stories, alerts and coverage" },

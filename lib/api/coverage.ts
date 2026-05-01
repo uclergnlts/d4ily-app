@@ -7,6 +7,8 @@ type TwitterAccountRow = {
   display_name: string | null
   category: string | null
   priority: number
+  trust_score: number
+  is_official: number | boolean
   fetch_interval: number
   last_fetched_at: string | null
   last_fetch_started_at: string | null
@@ -52,6 +54,8 @@ export async function getCoverageReport() {
 	      display_name,
 	      category,
 	      priority,
+	      trust_score,
+	      is_official,
 	      fetch_interval,
 	      last_fetched_at,
 	      last_fetch_started_at,
@@ -115,7 +119,7 @@ export async function getCoverageReport() {
     const stats = tweetStats.get(key)
     const lastFetchAgeMinutes = minutesSince(account.last_fetched_at)
     const fetchInterval = account.fetch_interval || 20
-	    const isDue = lastFetchAgeMinutes === null || lastFetchAgeMinutes >= fetchInterval
+    const isDue = lastFetchAgeMinutes === null || lastFetchAgeMinutes >= fetchInterval
 	    const lastSuccessAgeMinutes = minutesSince(account.last_success_at)
 	    const lastStartedAt = parseDate(account.last_fetch_started_at)
 	    const lastCompletedAt = parseDate(account.last_fetch_completed_at)
@@ -132,6 +136,8 @@ export async function getCoverageReport() {
       displayName: account.display_name,
       category: account.category,
       priority: account.priority,
+      trustScore: account.trust_score,
+      isOfficial: Boolean(account.is_official),
       fetchIntervalMinutes: fetchInterval,
 	      lastFetchedAt: parseDate(account.last_fetched_at)?.toISOString() ?? account.last_fetched_at,
 	      lastFetchStartedAt: parseDate(account.last_fetch_started_at)?.toISOString() ?? account.last_fetch_started_at,
@@ -167,6 +173,56 @@ export async function getCoverageReport() {
   const defaultAccountsPerRun = Number.parseInt(process.env.TWITTER_ACCOUNTS_PER_RUN || "75", 10)
   const accountsPerRun = Number.isNaN(defaultAccountsPerRun) ? 75 : Math.max(1, defaultAccountsPerRun)
   const estimatedRunsForFullSweep = Math.ceil(accountCoverage.length / accountsPerRun)
+  const categoryCoverage = [...accountCoverage.reduce((acc, account) => {
+    const category = account.category || "uncategorized"
+    const current = acc.get(category) || {
+      category,
+      activeAccounts: 0,
+      accountsWithTweets24h: 0,
+      notScannedWithin24h: 0,
+      accountsWithRecentErrors: 0,
+      averageTrustScore: 0,
+      officialAccounts: 0,
+      coverageScore: 0,
+    }
+
+    current.activeAccounts += 1
+    current.accountsWithTweets24h += account.hasTweets24h ? 1 : 0
+    current.notScannedWithin24h += account.notScannedWithin24h ? 1 : 0
+    current.accountsWithRecentErrors += account.hasRecentErrors ? 1 : 0
+    current.averageTrustScore += account.trustScore
+    current.officialAccounts += account.isOfficial ? 1 : 0
+    acc.set(category, current)
+    return acc
+  }, new Map<string, {
+    category: string
+    activeAccounts: number
+    accountsWithTweets24h: number
+    notScannedWithin24h: number
+    accountsWithRecentErrors: number
+    averageTrustScore: number
+    officialAccounts: number
+    coverageScore: number
+  }>()).values()].map((item) => {
+    const activeRatio = item.activeAccounts > 0 ? item.accountsWithTweets24h / item.activeAccounts : 0
+    const scannedRatio = item.activeAccounts > 0 ? (item.activeAccounts - item.notScannedWithin24h) / item.activeAccounts : 0
+    const errorPenalty = item.activeAccounts > 0 ? item.accountsWithRecentErrors / item.activeAccounts : 0
+    const averageTrustScore = item.activeAccounts > 0 ? item.averageTrustScore / item.activeAccounts : 0
+
+    return {
+      ...item,
+      averageTrustScore: Math.round(averageTrustScore * 10) / 10,
+      coverageScore: Math.max(0, Math.min(100, Math.round(activeRatio * 35 + scannedRatio * 45 + (averageTrustScore / 5) * 20 - errorPenalty * 20))),
+    }
+  }).sort((left, right) => right.coverageScore - left.coverageScore)
+  const overallCoverageScore = accountCoverage.length > 0
+    ? Math.round(
+        ((accountsWithTweets24h.length / accountCoverage.length) * 35) +
+        (((accountCoverage.length - notScannedWithin24h.length) / accountCoverage.length) * 45) +
+        ((accountCoverage.reduce((sum, account) => sum + account.trustScore, 0) / accountCoverage.length / 5) * 20) -
+        ((accountsWithRecentErrors.length / accountCoverage.length) * 20),
+      )
+    : 0
 
   return {
     windowHours: 24,
@@ -182,6 +238,13 @@ export async function getCoverageReport() {
 	      stuckFetchAccounts: stuckFetchAccounts.length,
 	      accountsPerRun,
       estimatedRunsForFullSweep,
+      sourceCoverageScore: Math.max(0, Math.min(100, overallCoverageScore)),
+      categoryCount: categoryCoverage.length,
+    },
+    sourceCoverage: {
+      overallScore: Math.max(0, Math.min(100, overallCoverageScore)),
+      categories: categoryCoverage,
+      weakCategories: categoryCoverage.filter((item) => item.coverageScore < 55 || item.notScannedWithin24h > 0).slice(0, 30),
     },
     attention: {
 	      zeroTweetAccounts24h: zeroTweetAccounts24h.slice(0, 50),

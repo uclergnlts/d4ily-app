@@ -7,7 +7,7 @@ import { TweetProcessor } from '@/lib/processor';
 import { sql } from 'drizzle-orm';
 import { getRSSSourcesDueForFetch, getTwitterAccountsDueForFetch } from "@/lib/sources";
 import { fetchRssFeed } from "@/lib/rss";
-import { fetchUserTweets, getTwitterFetchLimit } from "@/lib/twitter";
+import { fetchUserTweets, getTwitterFetchLimit, getTwitterFreshWindowHours } from "@/lib/twitter";
 import { getMarketData } from "@/lib/services/market";
 
 // --- Tweet Fetching Logic ---
@@ -17,9 +17,15 @@ export async function runFetchTweets(options: {
     limit?: number;
 } = {}) {
     console.log("Starting scheduled tweet fetch...");
+    const runStartedAt = Date.now();
+    const runStartedIso = new Date(runStartedAt).toISOString();
+    const maxRuntimeMs = Number.parseInt(process.env.TWITTER_FETCH_BUDGET_MS || "240000", 10);
+    const runtimeBudgetMs = Number.isNaN(maxRuntimeMs) ? 240000 : Math.max(30000, maxRuntimeMs);
+    const freshWindowHours = getTwitterFreshWindowHours();
 
     let totalFetched = 0;
     let totalInserted = 0;
+    let stoppedEarly = false;
     const errors: string[] = [];
     const accountResults: Array<{
         username: string;
@@ -55,8 +61,16 @@ export async function runFetchTweets(options: {
     console.log(`Processing ${usersToProcess.length} Twitter accounts${options.force ? " (forced)" : " by priority/fetch interval"}`);
 
     const BATCH_SIZE = 5;
+    let processedBatches = 0;
     for (let i = 0; i < usersToProcess.length; i += BATCH_SIZE) {
+        if (Date.now() - runStartedAt > runtimeBudgetMs) {
+            stoppedEarly = true;
+            console.warn(`Stopping tweet fetch early after ${Date.now() - runStartedAt}ms runtime budget`);
+            break;
+        }
+
         const batch = accountsToProcess.slice(i, i + BATCH_SIZE);
+        processedBatches += 1;
 
         await Promise.all(batch.map(async (account) => {
             const username = account.username;
@@ -96,6 +110,11 @@ export async function runFetchTweets(options: {
                     }
 
                     const publishedAt = tweet.createdAt || new Date().toISOString();
+                    const publishedMs = new Date(publishedAt).getTime();
+                    const freshCutoffMs = Date.now() - freshWindowHours * 60 * 60 * 1000;
+                    if (!Number.isFinite(publishedMs) || publishedMs < freshCutoffMs) {
+                        continue;
+                    }
                     if (!accountResult.latestPublishedAt || new Date(publishedAt).getTime() > new Date(accountResult.latestPublishedAt).getTime()) {
                         accountResult.latestPublishedAt = publishedAt;
                         accountResult.latestTweetId = tweetId;
@@ -186,6 +205,22 @@ export async function runFetchTweets(options: {
         accounts_with_new_tweets: accountResults.filter((account) => account.inserted > 0).length,
         accounts_with_errors: accountResults.filter((account) => account.error).length,
         accounts_with_possible_cursor_gap: accountResults.filter((account) => account.possibleCursorGap).length,
+        fail_safe: {
+            run_started_at: runStartedIso,
+            run_completed_at: new Date().toISOString(),
+            runtime_ms: Date.now() - runStartedAt,
+            runtime_budget_ms: runtimeBudgetMs,
+            stopped_early: stoppedEarly,
+            processed_batches: processedBatches,
+            batch_size: BATCH_SIZE,
+            remaining_accounts: Math.max(0, usersToProcess.length - accountResults.length),
+            can_continue_next_run: stoppedEarly || accountResults.length < usersToProcess.length,
+        },
+        freshness: {
+            window_hours: freshWindowHours,
+            oldest_allowed_at: new Date(Date.now() - freshWindowHours * 60 * 60 * 1000).toISOString(),
+            rule: "Tweets older than the freshness window are ignored even if the provider returns them.",
+        },
         errors: errors.length > 0 ? errors : undefined,
         timestamp: new Date().toISOString()
     };

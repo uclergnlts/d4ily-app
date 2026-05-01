@@ -51,12 +51,16 @@ export type AppFeedStory = {
   updatedAt: string | null
   primaryTweet: AppFeedTweet | null
   supportingTweets: AppFeedTweet[]
+  newsFormat: AgendaTopicDetail["newsFormat"]
+  evidencePackage: AgendaTopicDetail["evidencePackage"]
   metadata: {
     agendaTier: AgendaTopicDetail["agendaTier"]
     storyStatus: AgendaTopicDetail["storyStatus"]
     agendaScore: number
     displayScore: number
     freshnessScore: number
+    sourceCoverageScore: number
+    sourceCoverageLevel: AgendaTopicDetail["sourceCoverageLevel"]
     publicImpactScore: number
     sourceCount: number
     tweetCount: number
@@ -705,12 +709,16 @@ function makeStory(topic: AgendaTopicDetail, profiles: Map<string, SourceProfile
     updatedAt: getUpdatedAt(topic),
     primaryTweet: mappedTweets[0] ?? null,
     supportingTweets: mappedTweets,
+    newsFormat: topic.newsFormat,
+    evidencePackage: topic.evidencePackage,
     metadata: {
       agendaTier: topic.agendaTier,
       storyStatus: topic.storyStatus,
       agendaScore: topic.agendaScore,
       displayScore: getTopicDisplayScore(topic),
       freshnessScore: topic.freshnessScore,
+      sourceCoverageScore: topic.sourceCoverageScore,
+      sourceCoverageLevel: topic.sourceCoverageLevel,
       publicImpactScore: topic.publicImpactScore,
       sourceCount: topic.sourceCount,
       tweetCount: topic.tweetCount,

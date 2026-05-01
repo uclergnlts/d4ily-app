@@ -19,6 +19,7 @@ type ConfidenceLevel = "low" | "medium" | "high"
 type AgendaTier = "lead" | "major" | "watch" | "single_source" | "routine"
 type StoryStatus = "confirmed" | "developing" | "needs_confirmation"
 type SingleSourcePriority = "none" | "low" | "medium" | "high" | "critical"
+type SourceCoverageLevel = "narrow" | "balanced" | "broad"
 
 type AgendaSourceMeta = {
   trustScore: number
@@ -62,6 +63,8 @@ export type AgendaTopic = {
   sourceDiversityScore: number
   publicImpactScore: number
   momentumScore: number
+  sourceCoverageScore: number
+  sourceCoverageLevel: SourceCoverageLevel
   agendaTier: AgendaTier
   storyStatus: StoryStatus
   singleSourcePriority: SingleSourcePriority
@@ -85,6 +88,26 @@ export type AgendaTopic = {
     sourceName: string | null
     publishedAt: string | null
   }>
+  newsFormat: {
+    headline: string
+    spot: string
+    body: string
+    latest: string
+    context: string
+    sourceLine: string
+  }
+  evidencePackage: {
+    firstSeenAt: string | null
+    lastUpdatedAt: string | null
+    sourceCount: number
+    officialSourceCount: number
+    tweetCount: number
+    newsCount: number
+    sourceCoverageScore: number
+    sourceCategories: string[]
+    topTweets: AgendaRelatedTweet[]
+    topArticles: AgendaRelatedArticle[]
+  }
 }
 
 export type AgendaTopicDetail = AgendaTopic & {
@@ -845,6 +868,21 @@ function getSourceDiversityScore(cluster: AgendaCluster) {
   return Math.min(100, sourceScore + categoryScore + officialScore)
 }
 
+function getSourceCoverageLevel(score: number): SourceCoverageLevel {
+  if (score >= 72) return "broad"
+  if (score >= 42) return "balanced"
+  return "narrow"
+}
+
+function getSourceCoverageScore(cluster: AgendaCluster) {
+  const sourceScore = Math.min(cluster.sourceNames.size * 18, 54)
+  const categoryScore = Math.min(cluster.sourceCategories.size * 12, 24)
+  const officialScore = Math.min(cluster.officialSourceNames.size * 10, 12)
+  const highTrustScore = Math.min(cluster.highTrustSourceNames.size * 5, 10)
+
+  return Math.min(100, sourceScore + categoryScore + officialScore + highTrustScore)
+}
+
 function getPublicImpactScore(cluster: AgendaCluster, signalType: AgendaDetectionType, isRoutine: boolean) {
   if (isRoutine) return 20
 
@@ -1049,6 +1087,62 @@ function getAgendaTier(score: number, signalCount: number, needsConfirmation: bo
   if (score >= 80) return "lead"
   if (score >= 60) return "major"
   return "watch"
+}
+
+function buildSourceLine(cluster: AgendaCluster) {
+  const sourceNames = [...cluster.sourceNames].filter(Boolean).slice(0, 4)
+  if (sourceNames.length === 0) {
+    return "Bu başlık son 24 saatteki açık kaynak paylaşımlarından derlendi."
+  }
+
+  const suffix = cluster.sourceNames.size > sourceNames.length ? ` ve ${cluster.sourceNames.size - sourceNames.length} kaynak daha` : ""
+  return `${sourceNames.join(", ")}${suffix} üzerinden takip edildi.`
+}
+
+function buildNewsFormat(cluster: AgendaCluster, topic: {
+  title: string
+  summary: string
+  whyItMatters: string
+  watchNext: string
+}) {
+  const latestSignal = [...cluster.relatedTweets]
+    .sort((left, right) => new Date(right.publishedAt ?? right.fetchedAt ?? 0).getTime() - new Date(left.publishedAt ?? left.fetchedAt ?? 0).getTime())[0]
+  const latestArticle = [...cluster.relatedArticles]
+    .sort((left, right) => new Date(right.publishedAt ?? right.processedAt ?? 0).getTime() - new Date(left.publishedAt ?? left.processedAt ?? 0).getTime())[0]
+  const latestText = latestSignal
+    ? `${latestSignal.authorDisplayName ?? latestSignal.authorUsername ?? "Bir kaynak"} konuyla ilgili yeni bir paylaşım yaptı.`
+    : latestArticle
+      ? `${latestArticle.sourceName ?? "Bir kaynak"} başlığı haberleştirdi.`
+      : "Başlık son 24 saat içinde gündeme girdi."
+
+  return {
+    headline: topic.title,
+    spot: topic.summary,
+    body: `${topic.summary} ${topic.whyItMatters}`.replace(/\s+/g, " ").trim(),
+    latest: latestText,
+    context: topic.watchNext,
+    sourceLine: buildSourceLine(cluster),
+  }
+}
+
+function buildEvidencePackage(cluster: AgendaCluster, sourceCoverageScore: number) {
+  const topTweets = [...cluster.relatedTweets]
+    .sort((left, right) => right.engagementScore - left.engagementScore)
+    .slice(0, 8)
+  const topArticles = [...cluster.relatedArticles].slice(0, 8)
+
+  return {
+    firstSeenAt: cluster.firstSeenAt,
+    lastUpdatedAt: cluster.lastUpdatedAt,
+    sourceCount: cluster.sourceNames.size,
+    officialSourceCount: cluster.officialSourceNames.size,
+    tweetCount: cluster.relatedTweets.length,
+    newsCount: cluster.relatedArticles.length,
+    sourceCategories: [...cluster.sourceCategories].sort(),
+    sourceCoverageScore,
+    topTweets,
+    topArticles,
+  }
 }
 
 function countTokenMatches(tokens: string[], lookup: Set<string>) {
@@ -1481,6 +1575,7 @@ function toAgendaTopic(cluster: AgendaCluster): AgendaTopicDetail {
   const signalCount = cluster.relatedArticles.length + cluster.relatedTweets.length
   const freshnessScore = getFreshnessScore(cluster)
   const sourceDiversityScore = getSourceDiversityScore(cluster)
+  const sourceCoverageScore = getSourceCoverageScore(cluster)
   const publicImpactScore = getPublicImpactScore(cluster, classification.signalType, classification.isRoutine)
   const momentumScore = getMomentumScore(cluster)
   const agendaScore = getAgendaScore({
@@ -1505,17 +1600,27 @@ function toAgendaTopic(cluster: AgendaCluster): AgendaTopicDetail {
     isRoutine: classification.isRoutine,
   })
 
-  return {
-    id: cluster.slug,
-    slug: cluster.slug,
+  const watchNext = buildWatchNext(cluster, verification.status)
+  const baseTopicText = {
     title: cluster.title,
     summary: cluster.summary,
     whyItMatters: buildWhyItMatters(cluster),
+    watchNext,
+  }
+
+  return {
+    id: cluster.slug,
+    slug: cluster.slug,
+    title: baseTopicText.title,
+    summary: baseTopicText.summary,
+    whyItMatters: baseTopicText.whyItMatters,
     category: cluster.category,
     importanceScore,
     agendaScore,
     freshnessScore,
     sourceDiversityScore,
+    sourceCoverageScore,
+    sourceCoverageLevel: getSourceCoverageLevel(sourceCoverageScore),
     publicImpactScore,
     momentumScore,
     agendaTier,
@@ -1537,12 +1642,14 @@ function toAgendaTopic(cluster: AgendaCluster): AgendaTopicDetail {
     firstSeenAt: cluster.firstSeenAt,
     lastUpdatedAt: cluster.lastUpdatedAt,
     representativeSignals: cluster.representativeSignals,
-    watchNext: buildWatchNext(cluster, verification.status),
+    watchNext,
     relatedArticles: cluster.relatedArticles.slice(0, 10),
     relatedTweets: cluster.relatedTweets
       .sort((left, right) => right.engagementScore - left.engagementScore)
       .slice(0, 10),
     keywords: cluster.keywords,
+    newsFormat: buildNewsFormat(cluster, baseTopicText),
+    evidencePackage: buildEvidencePackage(cluster, sourceCoverageScore),
   }
 }
 
@@ -1581,4 +1688,59 @@ export async function getAgendaTopics(limit: number, mode: "all" | "featured" = 
 export async function getAgendaTopicBySlug(slug: string) {
   const topics = await buildAgendaTopicCollection()
   return topics.find((topic) => topic.slug === slug) ?? null
+}
+
+const missedAgendaPriorityRank = {
+  critical: 5,
+  high: 4,
+  medium: 3,
+  low: 2,
+  none: 1,
+}
+
+export async function getMissedAgendaAlerts(limit: number) {
+  const topics = await buildAgendaTopicCollection()
+
+  return topics
+    .filter((topic) => (
+      topic.singleSourcePriority === "critical" ||
+      topic.singleSourcePriority === "high" ||
+      topic.needsConfirmation ||
+      topic.signalCount === 1
+    ))
+    .sort((left, right) => {
+      const priorityDelta = missedAgendaPriorityRank[right.singleSourcePriority] - missedAgendaPriorityRank[left.singleSourcePriority]
+      if (priorityDelta !== 0) return priorityDelta
+
+      const freshnessDelta = right.freshnessScore - left.freshnessScore
+      if (freshnessDelta !== 0) return freshnessDelta
+
+      const impactDelta = right.publicImpactScore - left.publicImpactScore
+      if (impactDelta !== 0) return impactDelta
+
+      return right.agendaScore - left.agendaScore
+    })
+    .slice(0, limit)
+    .map((topic) => ({
+      id: topic.id,
+      slug: topic.slug,
+      title: topic.title,
+      summary: topic.summary,
+      alertLevel: topic.singleSourcePriority === "critical" ? "critical" : topic.singleSourcePriority === "high" ? "high" : "watch",
+      reason: topic.singleSourceReason ?? (
+        topic.needsConfirmation
+          ? "Teyit bekleyen ama kaybolmaması gereken başlık."
+          : "Tek kaynaklı olduğu için kaçan gündem alarmında tutuluyor."
+      ),
+      signalType: topic.signalType,
+      confidenceLevel: topic.confidenceLevel,
+      singleSourcePriority: topic.singleSourcePriority,
+      sourceCoverageScore: topic.sourceCoverageScore,
+      freshnessScore: topic.freshnessScore,
+      publicImpactScore: topic.publicImpactScore,
+      firstSeenAt: topic.firstSeenAt,
+      lastUpdatedAt: topic.lastUpdatedAt,
+      evidencePackage: topic.evidencePackage,
+      newsFormat: topic.newsFormat,
+    }))
 }

@@ -1,4 +1,4 @@
-import { getAgendaTopics } from "@/lib/api/agenda"
+import { getAgendaTopics, getMissedAgendaAlerts } from "@/lib/api/agenda"
 import { generateAiBriefing } from "@/lib/api/ai-briefing"
 import { getCoverageReport } from "@/lib/api/coverage"
 import { apiError, apiSuccess, parseLimit } from "@/lib/api/response"
@@ -48,9 +48,10 @@ export async function GET(request: Request) {
     const developingLimit = parseLimit(searchParams.get("developingLimit"), 20, 60)
     const pendingLimit = parseLimit(searchParams.get("pendingLimit"), 20, 60)
 
-    const [briefingTopics, allTopics, coverage] = await Promise.all([
+    const [briefingTopics, allTopics, missedAgendaAlerts, coverage] = await Promise.all([
       getAgendaTopics(topicLimit, "all"),
       getAgendaTopics(1000, "all"),
+      getMissedAgendaAlerts(pendingLimit),
       getCoverageReport(),
     ])
     const briefing = await generateAiBriefing({
@@ -90,6 +91,7 @@ export async function GET(request: Request) {
                 : "Tek kaynaklı olduğu için görünür tutuluyor."
             ),
           })),
+      missedAgendaAlerts,
       watchlist: briefing.watchlist,
       coverage: {
         summary: coverage.summary,

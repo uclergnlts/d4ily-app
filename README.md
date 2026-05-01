@@ -33,6 +33,12 @@ Yeni istemci entegrasyonları için versiyonlu endpointler:
 - `GET /api/v1/topics`
 - `GET /api/v1/market`
 - `GET /api/v1/tweets`
+- `GET /api/v1/signals`
+- `GET /api/v1/signals/pending`
+- `GET /api/v1/alerts/missed`
+- `GET /api/v1/coverage`
+- `GET /api/v1/package`
+- `GET /api/v1/app-feed`
 
 ## Kurulum
 
