@@ -17,6 +17,7 @@ const endpoints = [
   { method: "POST", path: "/api/v1/agenda/snapshots", description: "Create or refresh the current hourly agenda snapshot" },
   { method: "GET", path: "/api/v1/quality/evaluate?limit=25", description: "Recent quality evaluations" },
   { method: "POST", path: "/api/v1/quality/evaluate", description: "Evaluate expected agenda items against detected topics" },
+  { method: "GET", path: "/api/v1/email/preview", description: "Preview the daily test agenda email payload" },
   { method: "GET", path: "/api/v1/package", description: "Frontend-ready 24-hour data package: firehose, featured agenda, pending signals, coverage summary" },
   { method: "GET", path: "/api/v1/feed", description: "Final frontend feed: AI news stories, latest signals, developing stories, alerts and coverage" },
   { method: "GET", path: "/api/v1/app-feed", description: "App-ready agenda feed: today agenda, live stream, actor reactions, developing and local agenda" },

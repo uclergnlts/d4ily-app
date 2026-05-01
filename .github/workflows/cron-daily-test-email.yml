@@ -1,0 +1,30 @@
+name: Send Daily Test Email
+
+on:
+  schedule:
+    # Every day at 06:30 UTC / 09:30 Türkiye
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-daily-test-email:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: Trigger Daily Test Email
+        run: |
+          RESPONSE=$(curl -L -sS -X GET "https://d4ily.com/api/cron/send-daily-test-email" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" || true)
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response Body:"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            exit 1
+          fi

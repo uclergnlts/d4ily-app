@@ -41,6 +41,7 @@ Yeni istemci entegrasyonları için versiyonlu endpointler:
 - `GET /api/v1/ingestion/runs`
 - `GET|POST /api/v1/agenda/snapshots`
 - `GET|POST /api/v1/quality/evaluate`
+- `GET /api/v1/email/preview`
 - `GET /api/v1/package`
 - `GET /api/v1/app-feed`
 
@@ -72,6 +73,9 @@ Yeni istemci entegrasyonları için versiyonlu endpointler:
    GEMINI_API_KEY=your-gemini-key
    TWITTER_API_KEY=your-twitter-api-key
    CRON_SECRET=your-cron-secret
+   RESEND_API_KEY=your-resend-key
+   DAILY_TEST_EMAIL_TO=you@example.com
+   EMAIL_FROM=D4ily <agenda@your-domain.com>
    ```
 
 4. **Veritabanını Hazırlayın:**
