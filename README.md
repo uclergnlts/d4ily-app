@@ -1,22 +1,38 @@
-# D4ily - Türkiye Gündem Özeti
+# D4ily Backend API
 
-Yapay zeka destekli günlük Türkiye gündem özeti platformu. Haber gürültüsünden uzak, sadece önemli gelişmeleri sunar.
+Yapay zeka destekli gündem işleme ve içerik dağıtım backend'i. Bu servis mobil uygulamalar, admin araçları ve harici istemciler için API sağlar.
+
+## Hedef
+
+- `backend-first` mimari
+- mobil istemciler için stabil JSON API
+- cron tabanlı veri toplama ve içerik işleme
+- admin ve ingest araçlarını aynı kod tabanında koruma
 
 ## Özellikler
 
 - **Günlük Gündem Özeti (AI):** Son 24 saatteki tweet ve haberlerden oluşturulan tarafsız özet.
-- **Canlı Akış (X/Twitter):** Politikacılar ve gazetecilerin tweetleri (Saatlik güncellenir).
+- **Canlı Akış (X/Twitter):** Politikacılar ve gazetecilerin tweetleri.
 - **Resmi Gazete Özeti:** Her gece 00:00'da yayınlanan kararların AI özeti.
 - **Piyasa Verileri:** BIST100, Dolar, Altın verileri ile zenginleştirilmiş içerik.
 - **Sesli Okuma:** Günlük özetlerin sesli versiyonu (OpenAI TTS).
 - **Haftalık Bülten:** Haftanın öne çıkan olayları.
 
-## Yeni Özellikler (v1.1) 🚀
+## API Yüzeyi
 
-- **Canlı Akış İyileştirmesi:** Veriler artık **saatlik** olarak güncelleniyor (önceki: 2 saat).
-- **Kapsamlı Kaynaklar:** 20+ yeni politikacı ve yerel yönetici hesabı eklendi.
-- **Tam Metin:** Tweetler artık kısaltılmadan, tam metin olarak gösteriliyor.
-- **Turso DB:** Veritabanı altyapısı Supabase'den Turso (LibSQL)'a taşındı.
+Yeni istemci entegrasyonları için versiyonlu endpointler:
+
+- `GET /api/v1`
+- `GET /api/v1/health`
+- `GET /api/v1/agenda`
+- `GET /api/v1/agenda/:slug`
+- `GET /api/v1/digests/today`
+- `GET /api/v1/digests/:date`
+- `GET /api/v1/news`
+- `GET /api/v1/articles`
+- `GET /api/v1/topics`
+- `GET /api/v1/market`
+- `GET /api/v1/tweets`
 
 ## Kurulum
 
@@ -29,8 +45,8 @@ Yapay zeka destekli günlük Türkiye gündem özeti platformu. Haber gürültü
 
 1. **Depoyu klonlayın:**
    ```bash
-   git clone https://github.com/uclergnlts/d4ily.git
-   cd d4ily
+   git clone https://github.com/uclergnlts/d4ily-app.git
+   cd d4ily-app
    ```
 
 2. **Bağımlılıkları yükleyin:**
@@ -60,35 +76,37 @@ Yapay zeka destekli günlük Türkiye gündem özeti platformu. Haber gürültü
 
 ## Proje Yapısı
 
+```text
+d4ily-app/
+├── app/
+│   ├── api/               # Route handlers and versioned API
+│   │   └── v1/            # Mobile-facing API surface
+├── lib/
+│   ├── api/               # API response helpers and shared queries
+│   ├── db/                # Turso/Drizzle schema and connection
+│   ├── services/          # Domain services
+│   └── crons.ts           # Scheduled ingestion jobs
+├── scripts/               # Source seeding, schema repair, and cron runners
+├── migrations/            # Database migrations
+└── .github/workflows/     # Scheduled automation and deploy jobs
 ```
-d4ily/
-├── app/                    # Next.js App Router
-│   ├── api/               # Cron jobs & API endpoints
-│   ├── akis/              # Canlı Akış sayfası
-│   ├── istatistikler/     # İstatistik paneli
-│   └── ...
-├── components/            # UI Bileşenleri
-├── lib/                   # Arka plan iş mantığı
-│   ├── db/               # Turso/Drizzle şeması
-│   ├── crons.ts          # Haber/Tweet çekme botları
-│   └── ai.ts             # Gemini AI entegrasyonu
-└── ...
-```
 
-## Komutlar
+## Geçiş Notu
 
-| Komut | Açıklama |
-|-------|----------|
-| `pnpm dev` | Geliştirme sunucusunu başlat |
-| `pnpm build` | Production build oluştur |
-| `pnpm db:push` | Veritabanı şemasını güncelle |
-| `pnpm db:studio` | Veritabanı yönetim paneli |
+Eski route'lar geriye dönük uyumluluk için korunabilir. Yeni mobil istemciler yalnızca `/api/v1` endpointlerini kullanmalıdır.
 
-## Deployment
+## Gündem Dedektörü Planı
 
-Vercel üzerinde barındırılmaktadır. `git push` yapıldığında otomatik deploy olur.
-Cron joblar GitHub Actions tarafından tetiklenir (`.github/workflows`).
+Bu backend artık klasik bir haber listesi değil, `gündem dedektörü` olarak evriliyor.
 
-## Lisans
+Ana hedef:
 
-MIT License
+- kritik kaynakları izlemek
+- ham sinyalleri tek havuzda toplamak
+- aynı olayı tek başlık altında birleştirmek
+- teyit seviyesini belirlemek
+- AI ile kısa ve güvenilir özet üretmek
+
+Detaylı mimari plan için:
+
+- [docs/agenda-detector-architecture.md](docs/agenda-detector-architecture.md)

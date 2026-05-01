@@ -2,10 +2,196 @@
 import { db } from "../db";
 import { newsRaw, processedArticles } from "../db/schema";
 import { summarizeArticle, checkDuplicateArticle } from "../ai";
-import { desc, notInArray, eq, sql } from "drizzle-orm";
+import { desc, notInArray, sql } from "drizzle-orm";
+
+type ProcessedNewsResult = {
+    title: string;
+    summary: string;
+    category: string;
+};
+
+type ProcessNewsStats = {
+    success: true;
+    candidates: number;
+    processed: number;
+    skipped: number;
+    failed: number;
+    sourceCount: number;
+};
+
+const FALLBACK_STOPWORDS = new Set([
+    "ama", "ancak", "bile", "bir", "çok", "daha", "de", "da", "diye", "gibi",
+    "için", "ile", "olan", "olarak", "son", "ve", "veya", "yeni", "sonra",
+]);
+
+function cleanText(value: string | null | undefined) {
+    return (value || "")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function normalizeForCompare(value: string) {
+    return cleanText(value)
+        .toLocaleLowerCase("tr-TR")
+        .normalize("NFKD")
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function tokensForCompare(value: string) {
+    return normalizeForCompare(value)
+        .split(" ")
+        .filter((token) => token.length >= 4 && !FALLBACK_STOPWORDS.has(token));
+}
+
+function titleCaseFallback(title: string) {
+    return cleanText(title)
+        .replace(/^\s*(son dakika|flash|flaş)\s*[:|-]\s*/i, "")
+        .replace(/\s*\|\s*.*$/, "")
+        .replace(/\s+-\s+son dakika.*$/i, "")
+        .trim();
+}
+
+function buildFallbackSummary(title: string, rawContent: string) {
+    const cleaned = cleanText(rawContent);
+    if (!cleaned) {
+        return title;
+    }
+
+    const sentences = cleaned
+        .split(/(?<=[.!?])\s+/)
+        .map((sentence) => sentence.trim())
+        .filter((sentence) => sentence.length > 20);
+
+    const summary = sentences.slice(0, 2).join(" ");
+    return (summary || cleaned).slice(0, 420).trim();
+}
+
+function inferCategory(title: string, rawContent: string, source: string) {
+    const text = normalizeForCompare(`${title} ${rawContent} ${source}`);
+
+    if (/\b(dolar|euro|borsa|enflasyon|faiz|merkez bankasi|tcmb|ekonomi|petrol|altin|altın)\b/.test(text)) {
+        return "Ekonomi";
+    }
+
+    if (/\b(futbol|basketbol|spor|galatasaray|fenerbahce|fenerbahçe|besiktas|beşiktaş|trabzonspor)\b/.test(text)) {
+        return "Spor";
+    }
+
+    if (/\b(teknoloji|yapay zeka|ai|apple|google|microsoft|siber|uzay)\b/.test(text)) {
+        return "Teknoloji";
+    }
+
+    if (/\b(saglik|sağlık|hastane|doktor|bakanligi|bakanlığı|virus|virüs|asi|aşı)\b/.test(text)) {
+        return "Sağlık";
+    }
+
+    if (/\b(abd|avrupa|rusya|ukrayna|israil|gazze|iran|suriye|almanya|fransa|ingiltere|dunya|dünya)\b/.test(text)) {
+        return "Dünya";
+    }
+
+    return "Gündem";
+}
+
+function shouldSkipFallback(title: string, rawContent: string) {
+    const text = normalizeForCompare(`${title} ${rawContent}`);
+    const weakPatterns = [
+        "burc",
+        "burç",
+        "iddaa",
+        "bahis",
+        "kampanya",
+        "indirim",
+        "sponsorlu",
+        "reklam",
+    ];
+
+    return weakPatterns.some((pattern) => text.includes(pattern));
+}
+
+function processArticleFallback(title: string, rawContent: string, source: string): ProcessedNewsResult {
+    const fallbackTitle = titleCaseFallback(title) || "Haber sinyali";
+
+    if (shouldSkipFallback(fallbackTitle, rawContent)) {
+        return { title: "SKIP", summary: "", category: "Gündem" };
+    }
+
+    return {
+        title: fallbackTitle.slice(0, 140),
+        summary: buildFallbackSummary(fallbackTitle, rawContent),
+        category: inferCategory(fallbackTitle, rawContent, source),
+    };
+}
+
+function isDuplicateFallback(title: string, existingTitles: string[]) {
+    const newTokens = new Set(tokensForCompare(title));
+    if (newTokens.size === 0) {
+        return false;
+    }
+
+    return existingTitles.some((existingTitle) => {
+        const existingTokens = new Set(tokensForCompare(existingTitle));
+        if (existingTokens.size === 0) {
+            return false;
+        }
+
+        let matches = 0;
+        for (const token of newTokens) {
+            if (existingTokens.has(token)) matches += 1;
+        }
+
+        return matches / Math.min(newTokens.size, existingTokens.size) >= 0.72;
+    });
+}
+
+function sourceKey(value: string | null) {
+    return (value || "Unknown Source").toLocaleLowerCase("tr-TR").trim();
+}
+
+function getSourceBalancedCandidates<T extends { source_name: string | null }>(rows: T[], limit: number) {
+    const buckets = new Map<string, T[]>();
+
+    for (const row of rows) {
+        const key = sourceKey(row.source_name);
+        const bucket = buckets.get(key) || [];
+        bucket.push(row);
+        buckets.set(key, bucket);
+    }
+
+    const selected: T[] = [];
+    while (selected.length < limit) {
+        let addedInRound = false;
+        for (const bucket of buckets.values()) {
+            const next = bucket.shift();
+            if (!next) continue;
+
+            selected.push(next);
+            addedInRound = true;
+
+            if (selected.length >= limit) break;
+        }
+
+        if (!addedInRound) break;
+    }
+
+    return selected;
+}
 
 export async function processLatestNews(limit = 10) {
     console.log("Starting news processing...");
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    const stats: ProcessNewsStats = {
+        success: true,
+        candidates: 0,
+        processed: 0,
+        skipped: 0,
+        failed: 0,
+        sourceCount: 0,
+    };
 
     // 1. Find news that hasn't been processed yet
     // We get the IDs of already processed articles
@@ -16,19 +202,17 @@ export async function processLatestNews(limit = 10) {
 
     const existingIds = processedIds.map(p => p.id).filter(id => id !== null) as number[];
 
-    // Fetch candidate news
-    let query = db.select().from(newsRaw).orderBy(desc(newsRaw.fetched_at)).limit(limit);
-
-    if (existingIds.length > 0) {
-        // @ts-ignore - 'notInArray' typings can be tricky with complex queries, but this is valid
-        query = db.select().from(newsRaw).where(notInArray(newsRaw.id, existingIds)).orderBy(desc(newsRaw.fetched_at)).limit(limit);
-    }
-
-    const candidates = await query;
+    const candidatePoolLimit = Math.max(limit * 8, 50);
+    const candidatePool = existingIds.length > 0
+        ? await db.select().from(newsRaw).where(notInArray(newsRaw.id, existingIds)).orderBy(desc(newsRaw.fetched_at)).limit(candidatePoolLimit)
+        : await db.select().from(newsRaw).orderBy(desc(newsRaw.fetched_at)).limit(candidatePoolLimit);
+    const candidates = getSourceBalancedCandidates(candidatePool, limit);
+    stats.candidates = candidates.length;
+    stats.sourceCount = new Set(candidates.map((candidate) => sourceKey(candidate.source_name))).size;
 
     if (candidates.length === 0) {
         console.log("No new news to process.");
-        return;
+        return stats;
     }
 
     console.log(`Found ${candidates.length} news items to process.`);
@@ -50,23 +234,33 @@ export async function processLatestNews(limit = 10) {
             const sourceName = news.source_name || "Unknown Source";
             const processedTitle = news.title || "Untitled News";
 
-            const result = await summarizeArticle(processedTitle, textToProcess, sourceName);
+            let result: ProcessedNewsResult;
+            if (hasGemini) {
+                try {
+                    result = await summarizeArticle(processedTitle, textToProcess, sourceName);
+                } catch (error) {
+                    console.warn(`AI processing failed, using fallback for news ID ${news.id}:`, error);
+                    result = processArticleFallback(processedTitle, textToProcess, sourceName);
+                }
+            } else {
+                result = processArticleFallback(processedTitle, textToProcess, sourceName);
+            }
 
             // CHECK: Skip if AI filtered it out as spam/clickbait/advertisement
             if (result.title === "SKIP" || result.title.includes("SKIP")) {
                 console.log(`⊘ Skipped (filtered by AI): ${news.title}`);
+                stats.skipped++;
                 continue; // Move to next article
             }
 
             // CHECK: Skip if duplicate or very similar to recent articles
-            const isDuplicate = await checkDuplicateArticle(
-                result.title,
-                result.summary,
-                recentTitles
-            );
+            const isDuplicate = hasGemini
+                ? await checkDuplicateArticle(result.title, result.summary, recentTitles)
+                : isDuplicateFallback(result.title, recentTitles);
 
             if (isDuplicate) {
                 console.log(`⊘ Skipped (duplicate detected): ${result.title}`);
+                stats.skipped++;
                 continue; // Move to next article
             }
 
@@ -135,15 +329,15 @@ export async function processLatestNews(limit = 10) {
                 is_published: true
             });
 
-            // IMMEDIATE VERIFICATION
-            const verification = await db.select().from(processedArticles).limit(1);
-            console.log(`  [DEBUG] Immediate check: ${verification.length} records in DB`);
-
+            recentTitles.push(result.title);
+            stats.processed++;
             console.log(`✓ Processed: ${result.title} ${imageUrl ? '(With Image)' : '(No Image)'}`);
         } catch (error) {
+            stats.failed++;
             console.error(`❌ Failed to process news ID ${news.id}:`, error);
         }
     }
 
-    console.log("News processing completed.");
+    console.log("News processing completed.", stats);
+    return stats;
 }

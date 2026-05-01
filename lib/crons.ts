@@ -1,52 +1,111 @@
 import { db } from "@/lib/db";
-import { dailyDigests, newsRaw, tweetsRaw, weeklyDigests, processedArticles } from "@/lib/db/schema";
+import { dailyDigests, newsRaw, processedArticles, rssSources, tweetsRaw, twitterAccounts, weeklyDigests } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { generateDailyDigest, generateWeeklyDigest, generateWithGemini } from "@/lib/ai";
 import { getCurrentWeekInfo, getDailyDigestsByDateRange } from "@/lib/digest-data";
-import { fetchGoogleImage } from "@/lib/image-search";
 import { TweetProcessor } from '@/lib/processor';
 import { sql } from 'drizzle-orm';
-import { getActiveTwitterAccounts, getActiveRSSSources } from "@/lib/sources";
+import { getRSSSourcesDueForFetch, getTwitterAccountsDueForFetch } from "@/lib/sources";
 import { fetchRssFeed } from "@/lib/rss";
-import { fetchUserTweets } from "@/lib/twitter";
+import { fetchUserTweets, getTwitterFetchLimit } from "@/lib/twitter";
 import { getMarketData } from "@/lib/services/market";
 
 // --- Tweet Fetching Logic ---
-export async function runFetchTweets() {
+export async function runFetchTweets(options: {
+    force?: boolean;
+    username?: string;
+    limit?: number;
+} = {}) {
     console.log("Starting scheduled tweet fetch...");
 
     let totalFetched = 0;
     let totalInserted = 0;
     const errors: string[] = [];
+    const accountResults: Array<{
+        username: string;
+        fetched: number;
+        inserted: number;
+        latestPublishedAt: string | null;
+        latestTweetId: string | null;
+        reachedPreviousCursor: boolean | null;
+        possibleCursorGap: boolean;
+        error: string | null;
+    }> = [];
 
-    // Get active Twitter accounts from database
-    const activeTwitterUsers = await getActiveTwitterAccounts();
+    const accountLimit = Number.parseInt(process.env.TWITTER_ACCOUNTS_PER_RUN || "75", 10);
+    const accountsToProcess = await getTwitterAccountsDueForFetch(
+        options.limit ?? (Number.isNaN(accountLimit) ? 500 : Math.max(1, accountLimit)),
+        {
+            force: options.force,
+            username: options.username,
+        },
+    );
+    const usersToProcess = accountsToProcess.map((account) => account.username);
+    const selectedByPriority = accountsToProcess.reduce<Record<string, number>>((acc, account) => {
+        const key = String(account.priority);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
+    const selectedByInterval = accountsToProcess.reduce<Record<string, number>>((acc, account) => {
+        const key = `${account.fetchInterval}m`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
 
-    // OPTIMIZATION: Process a random subset of users per run to ensure coverage over time
-    const shuffled = [...activeTwitterUsers].sort(() => 0.5 - Math.random());
-    const usersToProcess = shuffled.slice(0, Math.min(20, activeTwitterUsers.length));
-
-    console.log(`Processing ${usersToProcess.length} users (random selection) out of ${activeTwitterUsers.length} total`);
+    console.log(`Processing ${usersToProcess.length} Twitter accounts${options.force ? " (forced)" : " by priority/fetch interval"}`);
 
     const BATCH_SIZE = 5;
     for (let i = 0; i < usersToProcess.length; i += BATCH_SIZE) {
-        const batch = usersToProcess.slice(i, i + BATCH_SIZE);
+        const batch = accountsToProcess.slice(i, i + BATCH_SIZE);
 
-        await Promise.all(batch.map(async (username) => {
+        await Promise.all(batch.map(async (account) => {
+            const username = account.username;
+            const accountResult = {
+                username,
+                fetched: 0,
+                inserted: 0,
+                latestPublishedAt: null as string | null,
+                latestTweetId: null as string | null,
+                reachedPreviousCursor: account.lastSeenTweetId ? false : null as boolean | null,
+                possibleCursorGap: false,
+                error: null as string | null,
+            };
+
             try {
                 console.log(`Fetching ${username}...`);
+                const fetchStartedAt = new Date().toISOString();
+                await db.update(twitterAccounts)
+                    .set({
+                        last_fetch_started_at: fetchStartedAt,
+                        updated_at: fetchStartedAt,
+                    })
+                    .where(eq(twitterAccounts.username, username));
+
                 const tweets = await fetchUserTweets(username);
                 totalFetched += tweets.length;
+                accountResult.fetched = tweets.length;
+                const previousSeenTweetId = account.lastSeenTweetId;
+                const fetchLimit = getTwitterFetchLimit();
 
                 for (const tweet of tweets) {
                     const tweetId = tweet.id || tweet.conversationId;
                     if (!tweetId) continue;
 
+                    if (previousSeenTweetId && tweetId === previousSeenTweetId) {
+                        accountResult.reachedPreviousCursor = true;
+                    }
+
+                    const publishedAt = tweet.createdAt || new Date().toISOString();
+                    if (!accountResult.latestPublishedAt || new Date(publishedAt).getTime() > new Date(accountResult.latestPublishedAt).getTime()) {
+                        accountResult.latestPublishedAt = publishedAt;
+                        accountResult.latestTweetId = tweetId;
+                    }
+
                     try {
-                        await db.insert(tweetsRaw).values({
+                        const inserted = await db.insert(tweetsRaw).values({
                             tweet_id: tweetId,
                             source: 'apify/x',
-                            published_at: tweet.createdAt || new Date().toISOString(),
+                            published_at: publishedAt,
                             lang: tweet.lang,
                             author_username: username,
                             retweet_count: tweet.retweetCount || 0,
@@ -56,16 +115,52 @@ export async function runFetchTweets() {
                             view_count: tweet.viewCount || 0,
                             bookmark_count: tweet.bookmarkCount || 0,
                             raw_payload: tweet
-                        }).onConflictDoNothing();
+                        }).onConflictDoNothing().returning({ id: tweetsRaw.id });
 
-                        totalInserted++;
+                        totalInserted += inserted.length;
+                        accountResult.inserted += inserted.length;
                     } catch (dbError: any) {
                         console.error(`DB Error for tweet ${tweetId}:`, dbError.message);
                     }
                 }
+
+                accountResult.possibleCursorGap = Boolean(
+                    previousSeenTweetId &&
+                    accountResult.reachedPreviousCursor === false &&
+                    tweets.length >= fetchLimit,
+                );
+                const completedAt = new Date().toISOString();
+                await db.update(twitterAccounts)
+                    .set({
+                        last_fetched_at: completedAt,
+                        last_fetch_completed_at: completedAt,
+                        last_success_at: completedAt,
+                        last_error_at: null,
+                        last_error_message: null,
+                        last_seen_tweet_id: accountResult.latestTweetId ?? account.lastSeenTweetId,
+                        last_seen_tweet_published_at: accountResult.latestPublishedAt ?? account.lastSeenTweetPublishedAt,
+                        consecutive_error_count: 0,
+                        total_fetch_count: sql`${twitterAccounts.total_fetch_count} + 1`,
+                        updated_at: completedAt,
+                    })
+                    .where(eq(twitterAccounts.username, username));
             } catch (error: any) {
                 console.error(`Failed to fetch for ${username}:`, error.message);
+                accountResult.error = error.message;
                 errors.push(`${username}: ${error.message}`);
+                const failedAt = new Date().toISOString();
+                await db.update(twitterAccounts)
+                    .set({
+                        last_fetch_completed_at: failedAt,
+                        last_error_at: failedAt,
+                        last_error_message: error.message,
+                        consecutive_error_count: sql`${twitterAccounts.consecutive_error_count} + 1`,
+                        total_error_count: sql`${twitterAccounts.total_error_count} + 1`,
+                        updated_at: failedAt,
+                    })
+                    .where(eq(twitterAccounts.username, username));
+            } finally {
+                accountResults.push(accountResult);
             }
         }));
 
@@ -77,8 +172,20 @@ export async function runFetchTweets() {
     return {
         success: true,
         message: `Fetched ${totalFetched} tweets, inserted ${totalInserted} new ones.`,
+        force: options.force ?? false,
+        username: options.username ?? null,
         processed: usersToProcess.length,
-        total_users: activeTwitterUsers.length,
+        total_users: accountsToProcess.length,
+        selection: {
+            requested_limit: options.limit ?? (Number.isNaN(accountLimit) ? 75 : Math.max(1, accountLimit)),
+            by_priority: selectedByPriority,
+            by_interval: selectedByInterval,
+        },
+        accounts: accountResults.sort((left, right) => left.username.localeCompare(right.username)),
+        accounts_with_tweets: accountResults.filter((account) => account.fetched > 0).length,
+        accounts_with_new_tweets: accountResults.filter((account) => account.inserted > 0).length,
+        accounts_with_errors: accountResults.filter((account) => account.error).length,
+        accounts_with_possible_cursor_gap: accountResults.filter((account) => account.possibleCursorGap).length,
         errors: errors.length > 0 ? errors : undefined,
         timestamp: new Date().toISOString()
     };
@@ -89,12 +196,11 @@ export async function runFetchNews() {
     try {
         const results = [];
 
-        // Get active RSS sources from database
-        const activeRSSFeeds = await getActiveRSSSources();
+        const activeRSSFeeds = await getRSSSourcesDueForFetch();
 
-        for (const url of activeRSSFeeds) {
-            console.log(`Fetching RSS: ${url}...`);
-            const feed = await fetchRssFeed(url);
+        for (const source of activeRSSFeeds) {
+            console.log(`Fetching RSS: ${source.url}...`);
+            const feed = await fetchRssFeed(source.url);
 
             let newCount = 0;
             for (const item of feed.items) {
@@ -104,9 +210,10 @@ export async function runFetchNews() {
                 if (item.enclosure) console.log(`[DEBUG] Found enclosure for ${item.title}:`, item.enclosure);
 
                 try {
-                    await db.insert(newsRaw).values({
+                    const inserted = await db.insert(newsRaw).values({
                         url: item.link,
-                        source_name: feed.title || "Unknown RSS",
+                        source_id: source.id > 0 ? String(source.id) : null,
+                        source_name: source.name || feed.title || "Unknown RSS",
                         title: item.title,
                         published_at: item.isoDate || item.pubDate,
                         fetched_at: new Date().toISOString(),
@@ -134,13 +241,19 @@ export async function runFetchNews() {
                                 itunes: item.itunes
                             }),
                         }
-                    });
-                    newCount++;
+                    }).returning({ id: newsRaw.id });
+                    newCount += inserted.length;
                 } catch (e: any) {
                     console.error(`Failed to insert news ${item.link}:`, e.message);
                 }
             }
-            results.push({ url, fetched: feed.items.length, title: feed.title });
+            if (source.id > 0) {
+                await db.update(rssSources)
+                    .set({ last_fetched_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+                    .where(eq(rssSources.id, source.id));
+            }
+
+            results.push({ url: source.url, fetched: feed.items.length, insertedOrUpdated: newCount, title: feed.title, priority: source.priority });
         }
 
         return { success: true, details: results };
@@ -199,15 +312,8 @@ export async function runGenerateDigest() {
         const digestData = await generateDailyDigest(todayStr, processedTweets, recentNews, marketData);
         stepLogs.push("Step 7 complete: Digest generated successfully");
 
-        stepLogs.push("Step 8: Fetching cover image...");
-        let coverImageUrl: string | null = null;
-        try {
-            coverImageUrl = await fetchGoogleImage(digestData.title);
-            stepLogs.push("Step 8 complete: Cover image fetched");
-        } catch (imgError: any) {
-            console.error("Cover image fetch failed:", imgError);
-            stepLogs.push(`Step 8 warning: Image fetch failed - ${imgError.message}`);
-        }
+        stepLogs.push("Step 8: Skipping cover image fetch in backend-only mode");
+        const coverImageUrl: string | null = null;
 
         stepLogs.push("Step 9: Saving to database...");
         await db.insert(dailyDigests).values({

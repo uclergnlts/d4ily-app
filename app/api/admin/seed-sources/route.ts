@@ -1,152 +1,145 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { twitterAccounts, rssSources } from "@/lib/db/schema";
-import { PERSONAL_ACCOUNTS, CORPORATE_ACCOUNTS, RSS_FEEDS } from "@/lib/config/sources";
+import { twitterAccounts } from "@/lib/db/schema";
+import { CORPORATE_ACCOUNTS, PERSONAL_ACCOUNTS } from "@/lib/config/sources";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
+type TwitterSeed = {
+    username: string;
+    category: string;
+    priority: number;
+    trust_score: number;
+    is_official: boolean;
+    fetch_interval: number;
+    show_in_live_feed: boolean;
+};
+
+const VERIFIED_CORE_TWITTER: TwitterSeed[] = [
+    { username: "Merkez_Bankasi", category: "ekonomi", priority: 5, trust_score: 5, is_official: true, fetch_interval: 5, show_in_live_feed: false },
+    { username: "CentralBank_TR", category: "ekonomi", priority: 3, trust_score: 5, is_official: true, fetch_interval: 30, show_in_live_feed: false },
+    { username: "TCMBBlog", category: "ekonomi", priority: 2, trust_score: 5, is_official: true, fetch_interval: 60, show_in_live_feed: false },
+    { username: "TCMB_Arastirma", category: "ekonomi", priority: 3, trust_score: 5, is_official: true, fetch_interval: 30, show_in_live_feed: false },
+    { username: "AFADBaskanlik", category: "afet", priority: 5, trust_score: 5, is_official: true, fetch_interval: 5, show_in_live_feed: false },
+    { username: "adalet_bakanlik", category: "hukuk", priority: 4, trust_score: 5, is_official: true, fetch_interval: 10, show_in_live_feed: false },
+    { username: "AliYerlikaya", category: "guvenlik", priority: 5, trust_score: 5, is_official: true, fetch_interval: 5, show_in_live_feed: true },
+];
+
+const categoryByUsername: Record<string, string> = {
+    RTErdogan: "siyasi_lider",
+    dbdevletbahceli: "siyasi_lider",
+    HakanFidan: "diplomasi",
+    kilicdarogluk: "siyasi_lider",
+    eczozgurozel: "siyasi_lider",
+    ekrem_imamoglu: "belediye",
+    mansuryavas06: "belediye",
+    meral_aksener: "siyasi_lider",
+    alibabacan: "siyasi_lider",
+    AliYerlikaya: "guvenlik",
+    memetsimsek: "ekonomi",
+    mahfiegilmez: "ekonomi",
+    OzgrDemirtas: "ekonomi",
+    ugurses: "ekonomi",
+    cigdemtoker: "ekonomi",
+    ismailsaymaz: "gazeteci",
+    nevsinmengu: "gazeteci",
+    muratyetkin2: "gazeteci",
+    fatihaltayli: "gazeteci",
+    t24comtr: "medya",
+    gazeteduvar: "medya",
+    medyascope: "medya",
+    trthaber: "ajans",
+    anadoluajansi: "ajans",
+    AFADBaskanlik: "afet",
+    TC_Icisleri: "guvenlik",
+};
+
+function buildFallbackTwitterSeed(username: string, showInLiveFeed: boolean): TwitterSeed {
+    const category = categoryByUsername[username] || (showInLiveFeed ? "gazeteci" : "medya");
+    const isOfficial = ["AFADBaskanlik", "TC_Icisleri", "adalet_bakanlik", "Merkez_Bankasi"].includes(username);
+    const isAgency = ["trthaber", "anadoluajansi"].includes(username);
+    const isHighSignalPerson = ["RTErdogan", "AliYerlikaya", "memetsimsek", "HakanFidan"].includes(username);
+
+    return {
+        username,
+        category,
+        priority: isOfficial || isHighSignalPerson ? 5 : isAgency ? 4 : showInLiveFeed ? 3 : 2,
+        trust_score: isOfficial ? 5 : isAgency ? 4 : showInLiveFeed ? 3 : 2,
+        is_official: isOfficial,
+        fetch_interval: isOfficial || isHighSignalPerson ? 5 : isAgency ? 10 : showInLiveFeed ? 20 : 60,
+        show_in_live_feed: showInLiveFeed,
+    };
+}
 
 export async function POST() {
     try {
-        console.log("Starting source seeding...");
-        console.log("PERSONAL_ACCOUNTS length:", PERSONAL_ACCOUNTS.length);
-        console.log("CORPORATE_ACCOUNTS length:", CORPORATE_ACCOUNTS.length);
-        console.log("RSS_FEEDS length:", RSS_FEEDS.length);
-
-        // Twitter kategorileri (Varsayılan kategori haritası)
-        const twitterCategories: Record<string, string> = {
-            "RTErdogan": "siyaset", "dbdevletbahceli": "siyaset", "HakanFidan": "siyaset",
-            "kilicdarogluk": "siyaset", "ekrem_imamoglu": "siyaset", "mansuryavas06": "siyaset",
-            "meral_aksener": "siyaset", "umitozdag": "siyaset", "MuharremInce": "siyaset",
-            "mahfiegilmez": "ekonomi", "OzgrDemirtas": "ekonomi", "emrealkin1969": "ekonomi",
-            "iriscibre": "ekonomi", "mustafasonmez": "ekonomi", "ugurses": "ekonomi",
-            "Fenerbahce": "spor", "GalatasaraySK": "spor", "Besiktas": "spor", "Trabzonspor": "spor",
-            "pusholder": "medya", "t24comtr": "medya", "gazeteduvar": "medya", "medyascope": "medya",
-            "hakki_alkan": "teknoloji", "BarisOzcan": "teknoloji", "Webtekno": "teknoloji",
-            "evrimagaci": "bilim",
-        };
+        const twitterSeeds = new Map<string, TwitterSeed>();
+        for (const source of VERIFIED_CORE_TWITTER) {
+            twitterSeeds.set(source.username, source);
+        }
+        for (const username of PERSONAL_ACCOUNTS) {
+            if (!twitterSeeds.has(username)) {
+                twitterSeeds.set(username, buildFallbackTwitterSeed(username, true));
+            }
+        }
+        for (const username of CORPORATE_ACCOUNTS) {
+            if (!twitterSeeds.has(username)) {
+                twitterSeeds.set(username, buildFallbackTwitterSeed(username, false));
+            }
+        }
 
         let twitterInserted = 0;
-        let twitterErrors: string[] = [];
+        const twitterErrors: string[] = [];
 
-        // 1. Kişisel Hesaplar (Canlı Akışta GÖRÜNECEK)
-        for (const username of PERSONAL_ACCOUNTS) {
+        for (const source of twitterSeeds.values()) {
             try {
                 const result = await db.insert(twitterAccounts).values({
-                    username,
-                    category: twitterCategories[username] || "genel",
-                    priority: 8, // Kişisel hesaplar yüksek öncelikli
+                    username: source.username,
+                    category: source.category,
+                    priority: source.priority,
+                    trust_score: source.trust_score,
+                    is_official: source.is_official,
+                    fetch_interval: source.fetch_interval,
                     is_active: true,
-                    show_in_live_feed: true, // EVET
+                    show_in_live_feed: source.show_in_live_feed,
                     added_by: "seed_api",
                 }).onConflictDoUpdate({
                     target: [twitterAccounts.username],
                     set: {
                         updated_at: new Date().toISOString(),
-                        show_in_live_feed: true // Güncellemede de aç
-                    }
-                }).returning();
-                if (result && result.length > 0) twitterInserted++;
-            } catch (error: any) {
-                twitterErrors.push(`${username}: ${error.message}`);
-                console.error(`Failed to insert personal ${username}:`, error.message);
-            }
-        }
-
-        // 2. Kurumsal Hesaplar (Canlı Akışta GİZLİ)
-        for (const username of CORPORATE_ACCOUNTS) {
-            try {
-                const result = await db.insert(twitterAccounts).values({
-                    username,
-                    category: twitterCategories[username] || "medya",
-                    priority: 5,
-                    is_active: true,
-                    show_in_live_feed: false, // HAYIR
-                    added_by: "seed_api",
-                }).onConflictDoUpdate({
-                    target: [twitterAccounts.username],
-                    set: {
-                        updated_at: new Date().toISOString(),
-                        show_in_live_feed: false // Güncellemede kapat
-                    }
-                }).returning();
-                if (result && result.length > 0) twitterInserted++;
-            } catch (error: any) {
-                twitterErrors.push(`${username}: ${error.message}`);
-                console.error(`Failed to insert corporate ${username}:`, error.message);
-            }
-        }
-
-        // RSS kaynakları
-        let rssInserted = 0;
-        let rssErrors: string[] = [];
-
-        for (const source of RSS_FEEDS) {
-            // RSS feed yapısı source.url olmalı, array string ise maplememiz gerek.
-            // lib/config/sources.ts'deki RSS_FEEDS string array ise burada obje bekliyor kod.
-            // Orijinal kodda RSS_FEEDS maplenmişti. 
-            // Ancak RSS_FEEDS import edilirken string[] geliyor olabilir.
-            // Kontrol etmem lazım.
-            // Önceki 'view_file' çıktısında RSS_FEEDS bir string array'di: ["url1", "url2"]
-            // Fakat seed route kodunda `const rssData = [...]` hardcoded idi.
-            // import edilen RSS_FEEDS ile hardcoded listeyi birleştirmeliyiz ya da sadece hardcoded olanı kullanmalıyız.
-            // Kullanıcı RSS_FEEDS config dosyasını değiştirdiyse onu kullanmak en doğrusu.
-        }
-
-        // Config dosyasındaki RSS_FEEDS sadece URL listesi. İsim ve kategori bilgisi yok.
-        // Bu yüzden burada hardcoded listeyi koruyacağım ama import edilen RSS_FEEDS varsa onları da eklemeye çalışabilirim.
-        // Şimdilik sadece hardcoded listeyi kullanıyorum (çünkü isim bilgisi gerekiyor).
-
-        const rssData = [
-            { url: "https://www.birgun.net/rss/kategori/siyaset-8", name: "BirGün - Siyaset", category: "siyaset" },
-            { url: "http://rss.dw-world.de/rdf/rss-tur-all", name: "DW Türkçe", category: "gundem" },
-            { url: "https://www.aa.com.tr/tr/rss/default?cat=guncel", name: "Anadolu Ajansı", category: "gundem" },
-            { url: "https://tr.sputniknews.com/export/rss2/archive/index.xml", name: "Sputnik", category: "dunya" },
-            { url: "http://feeds.bbci.co.uk/turkce/rss.xml", name: "BBC Türkçe", category: "gundem" },
-            { url: "https://bianet.org/rss/bianet", name: "BiaNet", category: "gundem" },
-            { url: "https://www.ntv.com.tr/gundem.rss", name: "NTV Gündem", category: "gundem" },
-        ];
-
-        for (const source of rssData) {
-            try {
-                const result = await db.insert(rssSources).values({
-                    ...source,
-                    is_active: true,
-                    fetch_interval: 240,
-                    added_by: "seed_api",
-                }).onConflictDoUpdate({
-                    target: [rssSources.url],
-                    set: { updated_at: new Date().toISOString() }
+                        category: source.category,
+                        priority: source.priority,
+                        trust_score: source.trust_score,
+                        is_official: source.is_official,
+                        fetch_interval: source.fetch_interval,
+                        show_in_live_feed: source.show_in_live_feed,
+                    },
                 }).returning();
 
-                if (result && result.length > 0) {
-                    rssInserted++;
-                }
+                if (result.length > 0) twitterInserted++;
             } catch (error: any) {
-                rssErrors.push(`${source.name}: ${error.message}`);
-                console.error(`Failed to insert ${source.name}:`, error.message);
+                twitterErrors.push(`${source.username}: ${error.message}`);
             }
         }
-
-        const totalAccounts = PERSONAL_ACCOUNTS.length + CORPORATE_ACCOUNTS.length;
-
-        console.log(`✓ Twitter Updated: ${twitterInserted}/${totalAccounts}`);
-        console.log(`✓ RSS Updated: ${rssInserted}/${rssData.length}`);
 
         return NextResponse.json({
-            success: true,
-            message: "Kaynaklar Live Feed kurallarına göre güncellendi!",
+            success: twitterErrors.length === 0,
+            message: "X kaynakları priority/trustScore modeline göre güncellendi. RSS seed şimdilik kapalı.",
             twitter: twitterInserted,
-            twitterTotal: totalAccounts,
-            rss: rssInserted,
-            total: twitterInserted + rssInserted
+            twitterTotal: twitterSeeds.size,
+            rss: 0,
+            rssTotal: 0,
+            total: twitterInserted,
+            errors: {
+                twitter: twitterErrors,
+                rss: [],
+            },
         });
-
     } catch (error: any) {
-        console.error("Seed error:", error);
         return NextResponse.json({
             success: false,
             error: error.message,
-            stack: error.stack
+            stack: error.stack,
         }, { status: 500 });
     }
 }

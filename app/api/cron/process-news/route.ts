@@ -13,8 +13,11 @@ export async function GET(req: NextRequest) {
 
     try {
         // Process up to 10 articles per run
-        await processLatestNews(10);
-        return NextResponse.json({ message: "Reading and processing completed." });
+        const result = await processLatestNews(10);
+        return NextResponse.json({
+            message: "Reading and processing completed.",
+            ...result,
+        });
     } catch (error: any) {
         console.error("News processing failed:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });

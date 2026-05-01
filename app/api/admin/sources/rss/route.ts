@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rssSources } from "@/lib/db/schema";
-import { eq, like } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,9 @@ export async function GET(request: Request) {
             conditions.push(eq(rssSources.is_active, active === 'true'));
         }
 
-        const sources = await query.$dynamic();
+        const sources = await query
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .$dynamic();
 
         return NextResponse.json({
             success: true,
@@ -39,7 +41,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { url, name, category, fetch_interval, notes } = body;
+        const { url, name, category, priority, trust_score, is_official, fetch_interval, notes } = body;
 
         if (!url || !name) {
             return NextResponse.json({ success: false, error: 'URL and name required' }, { status: 400 });
@@ -49,6 +51,9 @@ export async function POST(request: Request) {
             url,
             name,
             category: category || "gundem",
+            priority: priority || 3,
+            trust_score: trust_score || 3,
+            is_official: is_official !== undefined ? is_official : false,
             fetch_interval: fetch_interval || 240,
             notes,
             is_active: true,
@@ -68,7 +73,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, url, name, category, fetch_interval, is_active, notes } = body;
+        const { id, url, name, category, priority, trust_score, is_official, fetch_interval, is_active, notes } = body;
 
         if (!id) {
             return NextResponse.json({ success: false, error: 'ID required' }, { status: 400 });
@@ -81,6 +86,9 @@ export async function PUT(request: Request) {
         if (url !== undefined) updateData.url = url;
         if (name !== undefined) updateData.name = name;
         if (category !== undefined) updateData.category = category;
+        if (priority !== undefined) updateData.priority = priority;
+        if (trust_score !== undefined) updateData.trust_score = trust_score;
+        if (is_official !== undefined) updateData.is_official = is_official;
         if (fetch_interval !== undefined) updateData.fetch_interval = fetch_interval;
         if (is_active !== undefined) updateData.is_active = is_active;
         if (notes !== undefined) updateData.notes = notes;

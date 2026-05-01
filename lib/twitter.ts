@@ -21,11 +21,25 @@ export interface TwitterApiTweet {
     [key: string]: any;
 }
 
+export function getTwitterFetchLimit() {
+    const fetchLimit = Number.parseInt(process.env.TWITTER_FETCH_LIMIT || "50", 10);
+    return Number.isNaN(fetchLimit) ? 50 : Math.max(15, Math.min(fetchLimit, 100));
+}
+
+export function getTwitterApiTimeoutMs() {
+    const timeoutMs = Number.parseInt(process.env.TWITTER_API_TIMEOUT_MS || "15000", 10);
+    return Number.isNaN(timeoutMs) ? 15000 : Math.max(3000, timeoutMs);
+}
+
 // Helper to extract ID from URL
 function extractIdFromUrl(url?: string): string | undefined {
     if (!url) return undefined;
     const match = url.match(/status\/(\d+)/);
     return match ? match[1] : undefined;
+}
+
+export function getTweetId(tweet: any): string | undefined {
+    return tweet.id || tweet.tweetId || tweet.id_str || tweet.conversationId || tweet.rest_id || extractIdFromUrl(tweet.url) || extractIdFromUrl(tweet.twitterUrl);
 }
 
 export async function fetchUserTweets(username: string): Promise<TwitterApiTweet[]> {
@@ -35,17 +49,19 @@ export async function fetchUserTweets(username: string): Promise<TwitterApiTweet
     }
 
     const url = "https://api.twitterapi.io/twitter/user/last_tweets";
+    const fetchLimit = getTwitterFetchLimit();
 
     try {
         const response = await axios.get(url, {
             params: {
                 userName: username,
                 includeReplies: false,
-                limit: 15, // Reduced to 15 per user request (fast fetch)
+                limit: fetchLimit,
             },
             headers: {
                 "X-API-Key": apiKey,
             },
+            timeout: getTwitterApiTimeoutMs(),
         });
 
         let rawTweets: any[] = [];
@@ -69,7 +85,7 @@ export async function fetchUserTweets(username: string): Promise<TwitterApiTweet
 
         // Map, normalize AND filter for 24h
         return rawTweets.map(t => {
-            const id = t.id || t.tweetId || t.id_str || t.conversationId || t.rest_id || extractIdFromUrl(t.url) || extractIdFromUrl(t.twitterUrl);
+            const id = getTweetId(t);
             return {
                 ...t,
                 id: id,
@@ -90,7 +106,8 @@ export async function fetchUserTweets(username: string): Promise<TwitterApiTweet
             });
 
     } catch (error: any) {
-        console.error(`Error fetching tweets for ${username}:`, error.message);
-        return [];
+        const status = error.response?.status ? ` (${error.response.status})` : "";
+        const message = error.response?.data?.message || error.message;
+        throw new Error(`Twitter fetch failed for ${username}${status}: ${message}`);
     }
 }

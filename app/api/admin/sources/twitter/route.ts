@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { twitterAccounts } from "@/lib/db/schema";
-import { eq, like, or } from "drizzle-orm";
+import { and, eq, like, or } from "drizzle-orm";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +32,9 @@ export async function GET(request: Request) {
             );
         }
 
-        const accounts = await query.$dynamic();
+        const accounts = await query
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .$dynamic();
 
         return NextResponse.json({
             success: true,
@@ -49,7 +51,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { username, display_name, category, priority, notes, show_in_live_feed } = body;
+        const { username, display_name, category, priority, trust_score, is_official, fetch_interval, notes, show_in_live_feed } = body;
 
         if (!username) {
             return NextResponse.json({ success: false, error: 'Username required' }, { status: 400 });
@@ -59,7 +61,10 @@ export async function POST(request: Request) {
             username,
             display_name,
             category: category || "genel",
-            priority: priority || 5,
+            priority: priority || 3,
+            trust_score: trust_score || 3,
+            is_official: is_official !== undefined ? is_official : false,
+            fetch_interval: fetch_interval || 20,
             notes,
             show_in_live_feed: show_in_live_feed !== undefined ? show_in_live_feed : false,
             is_active: true,
@@ -79,7 +84,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, username, display_name, category, priority, is_active, notes, show_in_live_feed } = body;
+        const { id, username, display_name, category, priority, trust_score, is_official, fetch_interval, is_active, notes, show_in_live_feed } = body;
 
         if (!id) {
             return NextResponse.json({ success: false, error: 'ID required' }, { status: 400 });
@@ -93,6 +98,9 @@ export async function PUT(request: Request) {
         if (display_name !== undefined) updateData.display_name = display_name;
         if (category !== undefined) updateData.category = category;
         if (priority !== undefined) updateData.priority = priority;
+        if (trust_score !== undefined) updateData.trust_score = trust_score;
+        if (is_official !== undefined) updateData.is_official = is_official;
+        if (fetch_interval !== undefined) updateData.fetch_interval = fetch_interval;
         if (is_active !== undefined) updateData.is_active = is_active;
         if (notes !== undefined) updateData.notes = notes;
         if (show_in_live_feed !== undefined) updateData.show_in_live_feed = show_in_live_feed;

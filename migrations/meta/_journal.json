@@ -29,6 +29,13 @@
       "when": 1768718917341,
       "tag": "0003_noisy_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1777503600000,
+      "tag": "0004_source_scoring_fields",
+      "breakpoints": true
     }
   ]
 }

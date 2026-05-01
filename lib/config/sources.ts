@@ -35,7 +35,18 @@ export const PERSONAL_ACCOUNTS = [
     "yagosabuncuoglu", "ertemsener",
 
     // Hukuk & Diğer Kişiler
-    "metinfeyzioglu", "gonencgurkaynak", "istbassavcisi"
+    "metinfeyzioglu", "gonencgurkaynak", "istbassavcisi",
+
+    // Etki Sahibi Kişiler: bakanlar, milletvekilleri, belediye başkanları, STK ve kamu figürleri
+    "yilmaztunc", "OsmanAskinBak", "murat_kurum", "mevlutcavusoglu", "BekirBozdag",
+    "veliagbaba", "gokcegokcen", "sezgin_tanrikulu", "bulenttezcan", "enginozkoc",
+    "utku_cakirozer", "GulizarBicer", "sirrisureyya",
+    "memduhb", "mustafabozbey", "cemiltugay", "FatmaSahin",
+    "faikoztrak", "tuncayozkan", "aykuterdogdu", "selcukozdag", "yavuzyilmazd",
+    "onursaladiguzel", "gurseltekin34", "ekrem_erkek", "mustafasentop",
+    "nurettincanikli", "turanbulent", "MahirPolat", "EmrahSahan",
+    "Canan_Kaftanci", "caglarcilara", "sevilayyaziyor", "nevzatcicek",
+    "haluklevent", "OguzhanUgur"
 ];
 
 // --- Kurumsal Hesaplar (Sadece Digest İçin - Akışta Gizli) ---
@@ -52,7 +63,16 @@ export const CORPORATE_ACCOUNTS = [
 
     // Resmi Kurumlar & Parti Hesapları
     "TC_Icisleri", "adalet_bakanligi", "AFADBaskanlik", "HDPgenelmerkezi",
-    "herkesicinCHP"
+    "herkesicinCHP",
+    "Akparti", "iyiparti", "DEMGenelMerkezi", "SaadetPartisi", "GelecekPartiTR",
+    "devapartisi", "zaferpartisi", "tipgenelmerkez",
+
+    // STK, meslek örgütleri ve emek örgütleri
+    "TUSIAD", "TOBBiletisim", "MUSIAD", "diskinsesi", "KESK1995",
+    "turkiskonf", "TMMOB1954", "ttborgtr", "istbarosu", "TGC_TR",
+    "turkiyebarolar", "ihd_genelmerkez", "aforgutu", "Greenpeace_Med",
+    "WWF_TURKIYE", "TEMA_Vakfi", "Kizilay", "AKUT_Dernegi", "KADEMorgtr",
+    "MulteciDernegi", "Ahbap"
 ];
 
 export const TWITTER_USERS = [...PERSONAL_ACCOUNTS, ...CORPORATE_ACCOUNTS];
