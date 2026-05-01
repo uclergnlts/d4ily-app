@@ -108,6 +108,7 @@ export type AgendaTopic = {
     topTweets: AgendaRelatedTweet[]
     topArticles: AgendaRelatedArticle[]
   }
+  keywords: string[]
 }
 
 export type AgendaTopicDetail = AgendaTopic & {

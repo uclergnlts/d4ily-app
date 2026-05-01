@@ -37,6 +37,10 @@ Yeni istemci entegrasyonları için versiyonlu endpointler:
 - `GET /api/v1/signals/pending`
 - `GET /api/v1/alerts/missed`
 - `GET /api/v1/coverage`
+- `GET /api/v1/observability`
+- `GET /api/v1/ingestion/runs`
+- `GET|POST /api/v1/agenda/snapshots`
+- `GET|POST /api/v1/quality/evaluate`
 - `GET /api/v1/package`
 - `GET /api/v1/app-feed`
 

@@ -9,6 +9,7 @@ import { getRSSSourcesDueForFetch, getTwitterAccountsDueForFetch } from "@/lib/s
 import { fetchRssFeed } from "@/lib/rss";
 import { fetchUserTweets, getTwitterFetchLimit, getTwitterFreshWindowHours } from "@/lib/twitter";
 import { getMarketData } from "@/lib/services/market";
+import { finishIngestionRun, startIngestionRun } from "@/lib/api/observability";
 
 // --- Tweet Fetching Logic ---
 export async function runFetchTweets(options: {
@@ -22,6 +23,13 @@ export async function runFetchTweets(options: {
     const maxRuntimeMs = Number.parseInt(process.env.TWITTER_FETCH_BUDGET_MS || "240000", 10);
     const runtimeBudgetMs = Number.isNaN(maxRuntimeMs) ? 240000 : Math.max(30000, maxRuntimeMs);
     const freshWindowHours = getTwitterFreshWindowHours();
+    const ingestionRun = await startIngestionRun("fetch_tweets", {
+        force: options.force ?? false,
+        username: options.username ?? null,
+        requestedLimit: options.limit ?? null,
+        runtimeBudgetMs,
+        freshWindowHours,
+    });
 
     let totalFetched = 0;
     let totalInserted = 0;
@@ -188,7 +196,7 @@ export async function runFetchTweets(options: {
         }
     }
 
-    return {
+    const result = {
         success: true,
         message: `Fetched ${totalFetched} tweets, inserted ${totalInserted} new ones.`,
         force: options.force ?? false,
@@ -223,6 +231,24 @@ export async function runFetchTweets(options: {
         },
         errors: errors.length > 0 ? errors : undefined,
         timestamp: new Date().toISOString()
+    };
+
+    await finishIngestionRun(ingestionRun.id, {
+        status: errors.length > 0 || stoppedEarly ? "partial" : "success",
+        durationMs: Date.now() - runStartedAt,
+        processedCount: accountResults.length,
+        fetchedCount: totalFetched,
+        insertedCount: totalInserted,
+        errorCount: errors.length,
+        skippedCount: Math.max(0, usersToProcess.length - accountResults.length),
+        freshnessWindowHours: freshWindowHours,
+        stoppedEarly,
+        details: result,
+    });
+
+    return {
+        ...result,
+        ingestion_run_id: ingestionRun.id,
     };
 }
 

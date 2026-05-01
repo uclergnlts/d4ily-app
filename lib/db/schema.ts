@@ -289,3 +289,60 @@ export const contactMessages = sqliteTable("contact_messages", {
     is_read: integer("is_read", { mode: "boolean" }).default(false).notNull(),
     created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
+
+export const ingestionRuns = sqliteTable("ingestion_runs", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    run_type: text("run_type").notNull(),
+    status: text("status").default("running").notNull(),
+    started_at: text("started_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    completed_at: text("completed_at"),
+    duration_ms: integer("duration_ms"),
+    processed_count: integer("processed_count").default(0).notNull(),
+    fetched_count: integer("fetched_count").default(0).notNull(),
+    inserted_count: integer("inserted_count").default(0).notNull(),
+    error_count: integer("error_count").default(0).notNull(),
+    skipped_count: integer("skipped_count").default(0).notNull(),
+    freshness_window_hours: integer("freshness_window_hours").default(24).notNull(),
+    stopped_early: integer("stopped_early", { mode: "boolean" }).default(false).notNull(),
+    details: text("details", { mode: "json" }),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => {
+    return {
+        runTypeIdx: index("ingestion_runs_run_type_idx").on(table.run_type),
+        startedAtIdx: index("ingestion_runs_started_at_idx").on(table.started_at),
+        statusIdx: index("ingestion_runs_status_idx").on(table.status),
+    };
+});
+
+export const agendaSnapshots = sqliteTable("agenda_snapshots", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    snapshot_key: text("snapshot_key").notNull().unique(),
+    window_hours: integer("window_hours").default(24).notNull(),
+    topic_count: integer("topic_count").default(0).notNull(),
+    lead_count: integer("lead_count").default(0).notNull(),
+    missed_alert_count: integer("missed_alert_count").default(0).notNull(),
+    source_coverage_score: integer("source_coverage_score"),
+    payload: text("payload", { mode: "json" }).notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => {
+    return {
+        createdAtIdx: index("agenda_snapshots_created_at_idx").on(table.created_at),
+    };
+});
+
+export const qualityEvaluations = sqliteTable("quality_evaluations", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    evaluation_date: text("evaluation_date").notNull(),
+    expected_items: text("expected_items", { mode: "json" }).notNull(),
+    matched_items: text("matched_items", { mode: "json" }).notNull(),
+    missed_items: text("missed_items", { mode: "json" }).notNull(),
+    extra_items: text("extra_items", { mode: "json" }),
+    recall_score: integer("recall_score").default(0).notNull(),
+    precision_hint_score: integer("precision_hint_score").default(0).notNull(),
+    created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+}, (table) => {
+    return {
+        evaluationDateIdx: index("quality_evaluations_date_idx").on(table.evaluation_date),
+        createdAtIdx: index("quality_evaluations_created_at_idx").on(table.created_at),
+    };
+});
