@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { dailyDigests, blogGenerationLogs, blogPosts } from "@/lib/db/schema";
-import { desc, sql, inArray, eq, and, gt } from "drizzle-orm";
+import { desc, sql, eq, and, gt } from "drizzle-orm";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateBlogPostFromTopic } from "@/lib/services/blog-generator";
 import path from "path";
@@ -33,6 +33,20 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
             }
         }
+
+        // Ensure the log table exists (protects against missing migration on prod)
+        await db.run(sql`
+            CREATE TABLE IF NOT EXISTS blog_generation_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_date TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                selected_topic TEXT NOT NULL,
+                cluster TEXT,
+                evergreen_score INTEGER,
+                result TEXT NOT NULL,
+                reason TEXT,
+                generated_post_id INTEGER
+            );
+        `);
 
         // 1. Fetch Agenda Data (Last 7 days)
         const recentDigests = await db.select()
