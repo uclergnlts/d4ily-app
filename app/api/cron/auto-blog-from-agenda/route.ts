@@ -95,14 +95,11 @@ export async function POST(request: Request) {
         }
 
         // 4. Verification Check
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
         const duplicateCheck = await db.select()
             .from(blogGenerationLogs)
             .where(and(
                 eq(blogGenerationLogs.selected_topic, candidate.topic_title),
-                gt(blogGenerationLogs.run_date, thirtyDaysAgo.toISOString())
+                gt(blogGenerationLogs.run_date, sql`datetime('now', '-30 day')`)
             ))
             .limit(1);
 
