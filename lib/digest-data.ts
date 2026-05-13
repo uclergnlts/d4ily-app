@@ -234,8 +234,11 @@ export async function getDigestsByCategory(category: string, limit = 30): Promis
 
 export async function getArchiveDigestsByMonth(year: string, month: string): Promise<Digest[]> {
   try {
-    const startDate = `${year}-${month.padStart(2, "0")}-01`
-    const endDate = `${year}-${month.padStart(2, "0")}-31`
+    const paddedMonth = month.padStart(2, "0")
+    const startDate = `${year}-${paddedMonth}-01`
+    const endDate = new Date(Number(year), Number(paddedMonth), 0)
+      .toISOString()
+      .slice(0, 10)
 
     // Note: SQLite string comparison works for ISO dates
     const data = await db
